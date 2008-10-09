@@ -13,9 +13,6 @@
 #               die als Argumente zwei Zeilen von dataset hat und TRUE zurückgibt,
 #               falls diese als Paar in die Vergleichsmuster übernommen werden
 #               sollen, ansonsten FALSE.
-#  ids          TRUE, falls die erste Spalte ids enthält oder ein Vektor der Länge
-#               nrow(dataset) mit ids. Standardmäßig werden die 
-#               Zeilen durchnummeriert.                                     
 #  phonetic     Entweder ein Vektor mit Indizes von Spalten, die vor der Bildung der 
 #               Vergleichsmuster in einen phonetischen Code transformiert werden
 #               sollen, oder TRUE, falls dies für alle Felder geschehen soll, oder
@@ -26,7 +23,19 @@
 #
 #  strcmpfun    Funktion, die als Argumente zwei Strings hat und einen 
 #               Vergleichswert im Interval [0,1] zurückgibt. Standard: Jaro-Winkler
-
+#  phonfun      Funktion, die für einen String einen phonetischen Code berechnet
+#               Standard: "Hannoveraner" Phonetik
+#
+#               strcmpfun und phonfun müssen vektorisierbar sein. 
+#
+#  exclude      Vektor mit Indizes von Spalten, die von Paarbildung und Matching
+#               ausgenommen sind. Erlaubt zum Beispiel, externe identifier zu
+#               verwenden.
+#
+#               Indizes, die in exclude erscheinen, sollten nicht in 
+#               phonetic, strcmp und blockfld verwendet werden. Für strcmp
+#               und blockfld werden solche Indizes stillschweigend entfernt,
+#               in blockfld verursachen sie einen Fehler.
 
 # Rückgabe: Stringvergleich gibt bei "NA" 0 zurück!
 
@@ -35,18 +44,11 @@
 # Binär und Fuzzy in Ergebnisliste? (auf Wunsch)
 
 
-# externe IDs gehen noch nicht! (Es wird mit id indiziert)
 
 
 
 
 # Weitere mögliche Parameter:
-#  keep            Vektor von Feldern, die unverändert in die Paare übernommen werden
-#                  sollen, oder TRUE, falls dies für alle geschehen soll (damit können
-#                  Paare gebildet werden, für die erst später Vergleichsmuster erstellt
-#                  werden sollen)
-#  strcmpfun       Funktion, die als Argumente zwei Strings hat und einen
-#                  Vergleichswert im Intervall [0,1] zurückgibt. Default: jarowinkler
 #  phonfun         Funktion, die als Argument eine String hat und dessen phonetische
 #                  Codierung zurückgibt.
 
@@ -56,34 +58,72 @@
 
 
 
-
-compare <- function(dataset, blockfld=FALSE, blockfun=NULL,ids=1:nrow(dataset),phonetic=FALSE,strcmp=FALSE,strcmpfun=F)
+compare <- function(dataset, blockfld=FALSE, phonetic=FALSE,
+                    phonfun=F, strcmp=FALSE,strcmpfun=FALSE, exclude=F)
 {
-    ndata=nrow(dataset)
-    if (isTRUE(ids))
-    {
-        # ids in Tabelle gegeben: Nehme erste Spalte aus den Daten heraus
-        ext_ids=dataset[,1]
-        ids=1:ndata
-        dataset=as.matrix(dataset[,-1])
-        if (!isFALSE(blockfld))
-            blockfld=lapply(blockfld,"-",1)
-        if (is.numeric(phonetic))
-            phonetic=phonetic-1
-        if (!isFALSE(strcmp))
-            strcmp=strcmp-1
-    } else if (length(ids)==ndata) # use external ids via argument
-    {
-        ext_ids=ids
-        ids=1:ndata    
-    } else 
-    {
-        ext_ids=1:ndata
-        ids=ext_ids
-    }
+    # various catching of erronous input
+    if (!is.data.frame(dataset) && !is.matrix(dataset))
+        stop ("Illegal format of dataset")
+    ndata=nrow(dataset) # number of records
+    nfields=ncol(dataset)
+    if (ndata<2) 
+        stop ("dataset must contain at least two records")
+    if (!is.numeric(strcmp) && !is.logical(strcmp))
+        stop ("strcmp must be numeric or a single logical value")
+    if (!is.numeric(phonetic) && !is.logical(phonetic))
+        stop ("phonetic must be numeric or a single logical value")
+    if (max(strcmp)>nfields|| any(is.na(strcmp)))
+        stop ("strcmp contains out of bounds index")
+    if (max(phonetic)>nfields || any(is.na(phonetic)))
+        stop ("phonetic contains out of bounds index")
+    if (!is.numeric(exclude) && !isFALSE(exclude))
+        stop ("exclude must be numeric or FALSE")
+    if (max(exclude)>nfields)
+        stop ("exclude contains out of bounds index")
+    
+    ret=list()  # return object
+    # rownames(ret$data)=1:ndata
+    # handle excluded columns
+    full_data=as.matrix(dataset)
 
-    dataset[dataset==""]=NA
-        
+
+    # keep phonetics for blocking fields
+    if (is.numeric(phonetic))
+    {
+        phonetic_block=intersect(phonetic,unlist(blockfld))
+    }
+    if (is.numeric(exclude))
+    {        
+        dataset=dataset[,-exclude]  # remove excluded columns
+        # adjust indices to list of included fields
+        if (is.numeric(phonetic)) 
+        {
+            phonetic=setdiff(phonetic,exclude)
+            phonetic=sapply(phonetic,function(x) return (x-length(which(exclude<x))))
+        }
+        if (is.numeric(strcmp))
+        {
+            strcmp=setdiff(strcmp,exclude)
+            strcmp=sapply(strcmp,function(x) return (x-length(which(exclude<x))))       
+        }
+        # no longer neccessary:
+        #blockfld=lapply(blockfld,function(x) return (x-length(which(exclude<x))))
+    }
+    # issue a warning if both phonetics and string metric are used on one field
+    if ((length(intersect(phonetic,strcmp))>0 && !isFALSE(strcmp) && !isFALSE(phonetic)) ||
+         (isTRUE(strcmp) && !isFALSE(phonetic)) ||
+         (isTRUE(phonetic) && !isFALSE(strcmp)))
+    {
+        warning(sprintf("Both phonetics and string metric are used on some fields",length(intersect(phonetic,strcmp))))
+    }
+    dataset[dataset==""]=NA # label missing values
+    full_data[full_data==""]=NA # label missing values
+    dataset=as.matrix(dataset)        
+
+
+    if (!is.function(phonfun))
+        phonfun=pho_h
+
     if (!isFALSE(phonetic)) # true, if phonetic is T or not a logical value
     {
         if (isTRUE(phonetic)) # true, if phonetic is a logical value and T
@@ -95,71 +135,72 @@ compare <- function(dataset, blockfld=FALSE, blockfun=NULL,ids=1:nrow(dataset),p
     
     if (!is.function(strcmpfun))
         strcmpfun=jarowinkler
-    
-    if (!isFALSE(blockfld))
-    {
-        keys=ids   # ist das überhaupt nötig ?
-        pairs=list()
-        if (!is.list(blockfld))
-            blockfld=list(blockfld)
-        
-        for (blockelem in blockfld)
-        {
-#           blockstr=apply(dataset[,blockelem,drop=F],1,paste,collapse="")
-#           names(keys)=blockstr
-          
-          blocktable=list() # Liste: Blockingstring -> Vektor von Indizes mit
-                            # diesem Blockingstring
-          
-          for (i in 1:ndata)
-          { 
-              blockstr=paste(dataset[i,blockelem],collapse="")
-              x=blocktable[[blockstr,exact=T]]
-              blocktable[[blockstr]]=c(x,keys[i])
-          }
-         # blocktable ist jetzt gefüllt
-                  
-          for (e in blocktable)
-          {
-              if (length(e) > 1)
-              {
-                  pairs[[length(pairs)+1]]=ordered_pairs(e)    
-              }
-          }  
-        }
-        if (length(pairs)==0)
-            return (NULL)
-        pairs=unlist(pairs)
-        dim(pairs)=c(2,length(pairs)/2)  
-        pairs=t(pairs)
-    } else # blockfld==FALSE
-    {
-        pairs=t(ordered_pairs(ids))
-    }    
 
-    if (isTRUE(strcmp))
-    {
-       patterns=unique(cbind(pairs,strcmpfun(dataset[pairs[,1],,drop=F],
-                                               dataset[pairs[,2],,drop=F])))
-    } else 
-    {
-        patterns=unique(cbind(pairs,dataset[pairs[,1],,drop=F]==dataset[pairs[,2],,drop=F]))
-        if (!identical(strcmp,F))
-            patterns[,strcmp+2]=strcmpfun(dataset[pairs[,1],strcmp,drop=F],
-                                               dataset[pairs[,2],strcmp,drop=F])
-    }                    
+        
     
-    if (nrow(patterns)>1)
-        patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
-    patterns=as.data.frame(patterns)
-        patterns[,1:2]=cbind(ext_ids[patterns[,1]],ext_ids[patterns[,2]])
-    colnames(patterns)=c("id1","id2",colnames(dataset))
-    rownames(patterns)=NULL
-    # berechne Häufigkeiten für die Ausgabe
+    pair_ids=matrix(0,nrow=0,ncol=2) # each row holds indices of one record pair
+    if (!is.list(blockfld)) blockfld=list(blockfld)
+    for (blockelem in blockfld) # loop over blocking definitions
+    {
+      if (isTRUE(phonetic))
+      {
+        block_data=phonfun(full_data)
+      } else if (is.numeric(phonetic))
+      {
+        block_data=full_data
+        block_data[,phonetic_block]=phonfun(full_data[,phonetic_block])
+      } else
+      {
+        block_data=full_data
+      }
+      # for each record, concatenate values in blocking fields
+      blockstr=apply(block_data,1,function(x) paste(x[blockelem],collapse=" "))
+      # delete.NULLs(tapply(...)) gives for each value of the blocking string
+      # indices of matching records. From these lapply builds record pairs via
+      # unordered_pairs (defined in tool.r). unlist makes a vector from the
+      # resulting list which is reshaped as a matrix in the following line
+      id_vec=unlist(lapply(delete.NULLs(tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))),unordered_pairs))
+      # reshape vector and attach to matrix of record pairs
+      if (!is.null(id_vec))
+        pair_ids=rbind(pair_ids,t(matrix(id_vec,ncol=length(id_vec)/2,nrow=2)))
+    }
+    # return empty data frame if no pairs are obtained
+    if (length(pair_ids)==0)
+    {
+        ret$pairs=data.frame() 
+    } else
+    {
+      pair_ids=unique(matrix(as.integer(pair_ids),ncol=ncol(pair_ids),nrow=nrow(pair_ids)))
+      pair_ids=cbind(1:nrow(pair_ids),pair_ids) # add index for each pair
+      colnames(pair_ids)=c("pair_id","id_1","id_2")
+      
+      # get data for left hand side of record pairs    
+      left=merge(pair_ids[,c(1,2),drop=F],cbind(1:nrow(dataset),dataset),by.x=2,by.y=1,sort=F)
+      left=left[order(left[,"pair_id"]),] # merge scrambles rows, reorder
+      # get data for right hand side of record pairs
+      right=merge(pair_ids[,c(1,3),drop=F],cbind(1:nrow(dataset),dataset),by.x=2,by.y=1,sort=F)
+      right=right[order(right[,"pair_id"]),] # merge scrambles rows, reorder
+      # matrix to hold comparison patterns
+      patterns=matrix(0,ncol=ncol(left)-2,nrow=nrow(left)) 
+      if (isTRUE(strcmp))
+      {
+          patterns=strcmpfun(as.matrix(left[,-(1:2)]),as.matrix(right[,-(1:2)]))
+      } else if (is.numeric(strcmp)) 
+      {
+          patterns[,-strcmp]=(as.matrix(left[,-c(1,2,strcmp+2)])==as.matrix(right[,-c(1,2,strcmp+2)]))*1
+          patterns[,strcmp]=strcmpfun(as.matrix(left[,strcmp+2]),as.matrix(right[,strcmp+2])) #*1
+      } else
+      {
+          patterns=(as.matrix(left[,-c(1,2)])==as.matrix(right[,-c(1,2)]))*1    
+      }                    
+      patterns=cbind(pair_ids[,-1,drop=F],as.data.frame(patterns))
+      patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
+      colnames(patterns)=c("id1","id2",colnames(dataset))
+      rownames(patterns)=NULL
+      ret$pairs=patterns
+    }
+    ret$data=as.data.frame(full_data)
     frequencies=apply(dataset,2,function(x) 1/length(unique(x)))
-    ret=list()
-    ret$data=cbind(ids,dataset)
-    ret$pairs=patterns
     ret$frequencies=frequencies
     class(ret)="RecLinkPairs"
     return(ret)
