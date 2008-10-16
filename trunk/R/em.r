@@ -11,6 +11,9 @@ emWeights <- function (rpairs, m=0.97)
     # ids rausnehmen
     pairs=pairs[,-c(1:2)]
     pairs[is.na(pairs)]=0
+    pairs=as.integer(pairs>=0.95)
+
+
     n_data=nrow(pairs)
     observed_count=countpattern(pairs)
     n_attr=ncol(pairs)
@@ -22,8 +25,8 @@ emWeights <- function (rpairs, m=0.97)
 
     u=rpairs$frequencies    
     m=0.97
-    # Ad-hoc-Schätzung für Anteil an Matchen
-    prob_M=0.00001
+    # Ad-hoc-Schätzung für Anteil an Matchen (Faktor 0.1 relativ beliebig)
+    prob_M=1/sqrt(n_data)*0.1
     # Anzahl schätzen für Matche
     init_M=apply(patterns,1,function(a) prod(a*m+(1-a)*(1-m))*n_data*prob_M)
     init_U=apply(patterns,1,function(a) prod(a*u+(1-a)*(1-u))*n_data*(1-prob_M))
