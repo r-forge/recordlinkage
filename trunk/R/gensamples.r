@@ -40,7 +40,7 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10)
     nlink <- des_prop*(num_non) #+cler_review)
     ngesamt <- num_non+nlink # +cler_review
     if (ngesamt > ndata){stop("Inconsistent values for training data!")}
-    if (des_prob<0 || des_prob >=1){stop("Inconsistent value for link proportion!")}
+    if (des_prop<0 || des_prop >=1){stop("Inconsistent value for link proportion!")}
     # run clustering algorithm?
     # res_clust <- bclust(x=ddmat, centers=3,base.center=2, base.method="kmeans", iter.base=100, verbose=T)
     # kmendundet<-kmeans(x=ddmat, centers=nclasses); pairs$pairs[kclusr$cluster==2,]
@@ -105,8 +105,7 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10)
 #   ret$evalids=comptrainhelp
 #   ret$linkids=linkhelp
 #   ret$nonlinkids=nonlinkhelp
-    
-# Usage: gensamples(pairs, 100000)
+#   Usage: gensamples(pairs, 100000)
 
     
   
