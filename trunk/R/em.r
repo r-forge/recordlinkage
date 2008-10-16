@@ -11,7 +11,7 @@ emWeights <- function (rpairs, m=0.97)
     # ids rausnehmen
     pairs=pairs[,-c(1:2)]
     pairs[is.na(pairs)]=0
-    pairs=as.integer(pairs>=0.95)
+    pairs=array(as.integer(pairs>=0.95),dim=dim(pairs))
 
 
     n_data=nrow(pairs)
