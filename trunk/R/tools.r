@@ -1,6 +1,6 @@
 # varios utility functions
 
-ordered_pairs <- function (x) 
+unordered_pairs <- function (x) 
 {
     if (length(x)==1)
         return (array(unlist(lapply(1:(x-1),function (k) rbind(k,(k+1):x))),dim=c(2,x*(x-1)/2)))
@@ -9,3 +9,6 @@ ordered_pairs <- function (x)
 }
 
 isFALSE <- function(x) identical(x,F)
+
+delete.NULLs  <-  function(x.list)
+    x.list[unlist(lapply(x.list, length) != 0)]
