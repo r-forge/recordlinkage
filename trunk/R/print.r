@@ -27,7 +27,8 @@ nonlinks.RecLinkResult <- function(x)
     return  (cbind(x$data[(x$pairs[which(!x$prediction),,drop=F])[,1],,drop=F],x$data[(x$pairs[which(!x$prediction),,drop=F])[,2],,drop=F]))
 }
 
-nonlinks.RecLinkResult <- function(x)
+possiblelinks.RecLinkResult <- function(x)
 {
     return  (cbind(x$data[(x$pairs[which(is.na(x$prediction)),,drop=F])[,1],,drop=F],x$data[(x$pairs[which(is.na(x$prediction)),,drop=F])[,2],,drop=F]))
 }
+
