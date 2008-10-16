@@ -106,8 +106,6 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10)
 #   ret$linkids=linkhelp
 #   ret$nonlinkids=nonlinkhelp
     
-
-}
 # Usage: gensamples(pairs, 100000)
 
     
