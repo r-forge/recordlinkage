@@ -59,7 +59,8 @@
 
 
 compare <- function(dataset, blockfld=FALSE, phonetic=FALSE,
-                    phonfun=F, strcmp=FALSE,strcmpfun=FALSE, exclude=F)
+                    phonfun=F, strcmp=FALSE,strcmpfun=FALSE, exclude=F, 
+                    identity=NA)
 {
     # various catching of erronous input
     if (!is.data.frame(dataset) && !is.matrix(dataset))
@@ -202,6 +203,7 @@ compare <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     ret$data=as.data.frame(full_data)
     frequencies=apply(dataset,2,function(x) 1/length(unique(x)))
     ret$frequencies=frequencies
+    ret$identity=identity
     class(ret)="RecLinkPairs"
     return(ret)
 }
