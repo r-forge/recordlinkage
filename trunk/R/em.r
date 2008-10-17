@@ -1,3 +1,10 @@
+classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf)
+{
+    w=emWeights(rpairs=rpairs, m=m)
+    return (emClassify(rpairs=w, my=my, ny=ny))
+}
+
+
 # Arguments:
 #
 #   rpairs  data pairs (class RecLinkPairs)
@@ -45,9 +52,7 @@ emWeights <- function (rpairs, m=0.97)
     U=res[1:n_patterns]/n_nonmatches
     M=res[(n_patterns+1):(2*n_patterns)]/n_matches
     W=log(M/U, base=2)
-    ret=list()
-    ret$data=rpairs$data
-    ret$pairs=rpairs$pairs
+    ret=rpairs # keeps all components of rpairs
     ret$M=M
     ret$U=U
     ret$W=log(M/U, base=2)
@@ -120,9 +125,7 @@ emClassify <- function (rpairs, my=Inf, ny=Inf)
     prediction=as.logical(rep(NA,nrow(rpairs$pairs)))
     prediction[which(is.element(indices,L_ind))]=T
     prediction[which(is.element(indices,U_ind))]=F
-    ret=list()
-    ret$data=rpairs$data
-    ret$pairs=rpairs$pairs
+    ret=rpairs # keeps all components of rpairs
     ret$prediction=prediction
     class(ret)="RecLinkResult"
     return(ret)

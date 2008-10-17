@@ -22,7 +22,7 @@ classify.svm = function (train, valid)
     model=svm(y ~ x, kernel="radial",type="C-classification")
     x=as.matrix(valid$pairs[,-(1:2)])
     predict=predict(model, newdata=x)       
-    table=table(is_match_valid,predict)
-    print(table)
+    valid$prediction=predict
+    return(valid)
 }
 

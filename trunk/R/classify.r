@@ -22,15 +22,26 @@ classify = function (rpairs, method)
     
     # Methode aufrufen
 
-    classfun=switch(method,epilink=classify.epilink,svm=classify.svm) # ergänzen!    
-    if (is.null(classfun)) stop ("Illegal method")
     if (method!="em")
     {
-        train=gensamples(rpairs,num_non=nrow(rpairs$data)/10,des_prop=0.1)
-        trainpairs=train
-        trainpairs$pairs=rbind(train$slinks,train$snonlinks)
-        trainpairs$is_match=c(rep(1,nrow(train$slinks)),rep(0,nrow(train$snonlinks)))
-        classfun(train=trainpairs,valid=rpairs)
+#         train=gensamples(rpairs,num_non=nrow(rpairs$data)/10,des_prop=0.1)
+#         trainpairs=train
+#         trainpairs$pairs=rbind(train$slinks,train$snonlinks)
+#         trainpairs$is_match=c(rep(1,nrow(train$slinks)),rep(0,nrow(train$snonlinks)))
+#         res=classfun(train=trainpairs,valid=rpairs)
+        classfun=switch(method,epilink=classify.epilink,svm=classify.svm) # ergänzen!    
+        if (is.null(classfun)) stop ("Illegal method")
+        rpairs=gensamples(rpairs,num_non=nrow(rpairs$data)/10,des_prop=0.1)
+        train=rpairs
+        train$pairs=rbind(rpairs$slinks,rpairs$snonlinks)
+        train$is_match=c(rep(1,nrow(rpairs$slinks)),rep(0,nrow(rpairs$snonlinks)))
+        valid=rpairs
+        valid$pairs=rpairs$evals
+        res=classfun(train=train,valid=valid)
+        rpairs$prediction=res$prediction
+    } else # method=="em"
+    {
+        return (classify.em(rpairs))
     }
 
 }

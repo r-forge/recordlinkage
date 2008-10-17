@@ -1,21 +1,23 @@
 # Print functions for Record Linkage Objects
 
-print.RecLinkPairs <- function(x)
-{
-    cat("Record Linkage Comparision Object\n") 
-    cat(sprintf("%d records",nrow(x$data)),"\n")
-    cat(sprintf("%d record pairs",nrow(x$pairs)),"\n")
-}
-
-print.RecLinkResult <- function(x)
-{
-    cat("Record Linkage Result Object\n") 
-    cat(sprintf("%d records",nrow(x$data)),"\n")
-    cat(sprintf("%d record pairs",nrow(x$pairs)),"\n")  
-    cat(sprintf("%d links detected",length(which(x$prediction==T))),"\n")
-    cat(sprintf("%d possible links detected",length(which(is.na(x$prediction)))),"\n")
-    cat(sprintf("%d non-links detected",length(which(x$prediction==F))),"\n")
-}
+# Verschoben in die summary-Funktion (vorgesehene Semantik passt besser)
+ 
+# print.RecLinkPairs <- function(x)
+# {
+#     cat("Record Linkage Comparision Object\n") 
+#     cat(sprintf("%d records",nrow(x$data)),"\n")
+#     cat(sprintf("%d record pairs",nrow(x$pairs)),"\n")
+# }
+# 
+# print.RecLinkResult <- function(x)
+# {
+#     cat("Record Linkage Result Object\n") 
+#     cat(sprintf("%d records",nrow(x$data)),"\n")
+#     cat(sprintf("%d record pairs",nrow(x$pairs)),"\n")  
+#     cat(sprintf("%d links detected",length(which(x$prediction==T))),"\n")
+#     cat(sprintf("%d possible links detected",length(which(is.na(x$prediction)))),"\n")
+#     cat(sprintf("%d non-links detected",length(which(x$prediction==F))),"\n")
+# }
 
 links.RecLinkResult <- function(x)
 {

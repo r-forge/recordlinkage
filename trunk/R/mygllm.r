@@ -5,6 +5,6 @@ mygllm <- function(y,s,X,maxit=1000, tol=0.00001, E=rep(1,length(s)),dec_int_tol
              as.integer(maxit), as.double(tol), estimate=as.double(E),
              length(s),length(y),ncol(X),as.logical(dec_int_tol),
              as.logical(std_min_C),    
-             PACKAGE="mygllm")
+             PACKAGE="RecordLinkage")
    return(out$estimate)
 }
