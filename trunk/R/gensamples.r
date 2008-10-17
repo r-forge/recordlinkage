@@ -25,7 +25,6 @@
 #   model_sel:      nn clustering, em or deterministic clustering => NO
 
 library(e1071)
-library(mygllm)
 # library(RecordLinkage) necessary for procedures involved
 gensamples = function (datapairs, num_non, des_prop=0.1, seed=10)
 {   

@@ -5,8 +5,7 @@
 #           all attributes or a vector with distinct values
 emWeights <- function (rpairs, m=0.97)
 {
-library(e1071)
-library(mygllm)
+    library(e1071)
     pairs=rpairs$pairs
     # ids rausnehmen
     pairs=pairs[,-c(1:2)]
