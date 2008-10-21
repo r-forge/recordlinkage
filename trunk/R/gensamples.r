@@ -16,6 +16,8 @@
 #
 #   rseed:          random seed
 #
+#   adjust:         Boolean for adjusting numbers for Links, Nonlinks to parameters
+#
 #   cler_review:    Number of data pairs for clerical review => NO  
 #
 #   ids:            2-column identificator matrix of data pairs => NO
@@ -26,7 +28,7 @@
 
 library(e1071)
 # library(RecordLinkage) necessary for procedures involved
-gensamples = function (datapairs, num_non, des_prop=0.1, seed=10)
+gensamples = function (datapairs, num_non, des_prop=0.1, seed=10, adjust=F)
 {   
     set.seed(seed)
     ret <- datapairs   
@@ -36,7 +38,7 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10)
     #  number of classes is 3, when undetermindes cases are allowed
     # if (undet) nclasses=nclasses+1
     #  consistence checking
-    nlink <- des_prop*(num_non) #+cler_review)
+    nlink <- round(des_prop*(num_non)) #+cler_review)
     ngesamt <- num_non+nlink # +cler_review
     if (ngesamt > ndata){stop("Inconsistent values for training data!")}
     if (des_prop<0 || des_prop >=1){stop("Inconsistent value for link proportion!")}
@@ -56,9 +58,12 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10)
     alidn <- length(linksid)
     anolidn <- length(nonlinksid)
 
+    nmark=F; mmark=F;
     # sample is fast enough for not including it in the if-clauses
-    if(nlink > alidn) { warning("Only ", alidn, " Links!"); nlink=alidn }
-    if(num_non > anolidn) { warning("Only ", anolidn, " Non-Links!"); num_non=anolidn }
+    if(nlink > alidn) { warning("Only ", alidn, " Links!"); nlink=alidn; nmark=T }
+    if(num_non > anolidn) { warning("Only ", anolidn, " Non-Links!"); num_non=anolidn; mmark=T }
+    if (adjust==T && nmark==T ) {num_non=round(nlink/des_prop)}
+    if (adjust==T && mmark==T ) {nlink=round(des_prop*num_non)}
     # Assumption: only two classes, then draw samples
     salid <- sample(linksid, size=nlink)
     sanolid <- sample(nonlinksid, size=num_non)
