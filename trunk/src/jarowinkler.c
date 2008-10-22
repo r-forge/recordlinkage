@@ -31,7 +31,7 @@ void jarowinkler(char ** strvec_1, char ** strvec_2,
              double * r, double * ans)
 {
   //Rprintf("Einstieg in Funktion\n"); // Debug-Ausgabe
-  int * use_transpos_radius=(int) R_alloc(1,sizeof(int));
+  int * use_transpos_radius=(int *) R_alloc(1,sizeof(int));
   *use_transpos_radius=0;
   int max_length= *length_1 > *length_2 ? *length_1 : *length_2;  
   for (int str_ind=0; str_ind < max_length; str_ind++)
