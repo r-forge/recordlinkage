@@ -60,7 +60,7 @@
 
 compare <- function(dataset, blockfld=FALSE, phonetic=FALSE,
                     phonfun=F, strcmp=FALSE,strcmpfun=FALSE, exclude=F, 
-                    identity=NA)
+                    identity=NA,num_non=0, des_prop=0.05, adjust=F)
 {
     # various catching of erronous input
     if (!is.data.frame(dataset) && !is.matrix(dataset))
@@ -81,6 +81,13 @@ compare <- function(dataset, blockfld=FALSE, phonetic=FALSE,
         stop ("exclude must be numeric or FALSE")
     if (max(exclude)>nfields)
         stop ("exclude contains out of bounds index")
+
+    n_matches <- max(round(des_prop*(num_non)),1)
+    n_train <- num_non+n_matches 
+    if (n_train > ndata)
+        stop("Inconsistent values for training data!")
+    if (des_prop<0 || des_prop >=1)
+        stop("Inconsistent value for link proportion!")
     
     ret=list()  # return object
     # rownames(ret$data)=1:ndata
@@ -198,13 +205,38 @@ compare <- function(dataset, blockfld=FALSE, phonetic=FALSE,
       patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
       colnames(patterns)=c("id1","id2",colnames(dataset))
       rownames(patterns)=NULL
-      ret$pairs=patterns
     }
+    
+    # Trainingsdaten ziehen
+    is_match=identity[patterns[,1]]==identity[patterns[,2]] # Matchingstatus der Paare
+    match_ids=which(is_match) # Indizes von Matchen
+    non_match_ids=which(!is_match) # Indizes von Non-Matchen
+    if (length(match_ids) < n_matches)
+        warning("Only ", length(match_ids), " Links!")
+    if (length(non_match_ids) < num_non)
+        warning("Only ", length(non_match_ids), " Non-Links!")
+#     print(match_ids)
+#     print(non_match_ids)
+    # resample: safe for vector of length 1
+    train_ids_match=resample(match_ids,min(n_matches,length(match_ids)))
+    train_ids_non_match=resample(non_match_ids,min(num_non,length(non_match_ids)))
+#     print(train_ids_match)
+#     print(train_ids_non_match)
+    if (length(train_ids_match)==0)
+        stop ("No matches in training set!")
+    if (length(train_ids_non_match)==0)
+        stop ("No non-matches in training set!")
+    train=rbind(cbind(patterns[train_ids_match,,drop=F],is_match=T), # Matche
+                cbind(patterns[train_ids_non_match,,drop=F],is_match=F)) # Non-Matche
+    valid_ids=-c(train_ids_match,train_ids_non_match)
+    valid=rbind(cbind(patterns[valid_ids,,drop=F],is_match[valid_ids]))                                         
     ret$data=as.data.frame(full_data)
     frequencies=apply(dataset,2,function(x) 1/length(unique(x)))
+    ret$train=train
+    ret$valid=valid
     ret$frequencies=frequencies
-    ret$identity=identity
-    class(ret)="RecLinkPairs"
+    #ret$identity=identity
+    class(ret)="RecLinkData"
     return(ret)
 }
 
