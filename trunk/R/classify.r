@@ -39,6 +39,8 @@ classify = function (rpairs, method)
         valid$pairs=rpairs$evals
         res=classfun(train=train,valid=valid)
         rpairs$prediction=res$prediction
+        class(rpairs)="RecLinkResult"
+        return (rpairs)
     } else # method=="em"
     {
         return (classify.em(rpairs))

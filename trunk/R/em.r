@@ -13,9 +13,10 @@ classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf)
 emWeights <- function (rpairs, m=0.97)
 {
     library(e1071)
-    pairs=rpairs$pairs
-    # ids rausnehmen
-    pairs=pairs[,-c(1:2)]
+    pairs=rpairs$valid
+    # ids und Matchingstatus rausnehmen
+    pairs=pairs[,-c(1,2,ncol(pairs))]
+    # is_match rausnehmen
     pairs[is.na(pairs)]=0
     pairs=array(as.integer(pairs>=0.95),dim=dim(pairs))
 
@@ -68,12 +69,14 @@ emWeights <- function (rpairs, m=0.97)
 #       "possible link" will not be assigned
 emClassify <- function (rpairs, my=Inf, ny=Inf)
 {    
-    rpairs$pairs[is.na(rpairs$pairs)]=0 # convert NAs to 0
+    pairs=rpairs$valid
+    pairs=pairs[,-c(1,2,ncol(pairs))] # delete ids and is_match
+    pairs[is.na(pairs)]=0 # convert NAs to 0
     o=order(rpairs$W,decreasing=T) # order Weights decreasing
-    n_attr=ncol(rpairs$pairs)-2 # number of attributes
+    n_attr=ncol(pairs) # number of attributes
     # For each record pair, compute index of corresponding pattern in the
     # table of binary combinations
-    indices=colSums(t(rpairs$pairs[,-(1:2)])*(2^(n_attr:1-1)))+1    
+    indices=colSums(t(pairs)*(2^(n_attr:1-1)))+1    
 
     # FN[k]: Ratio of false non-matches if patterns FN[k..] are considered
     # as non-matches.
@@ -120,9 +123,9 @@ emClassify <- function (rpairs, my=Inf, ny=Inf)
     } 
     
     L_ind=o[1:cutoff_upper] # indices of detected links
-    U_ind=o[cutoff_lower:length(o)] # indices of detected non-links
+    U_ind=o[(cutoff_lower+1):length(o)] # indices of detected non-links
     # links get result TRUE, non-links FALSE, possible links NA
-    prediction=as.logical(rep(NA,nrow(rpairs$pairs)))
+    prediction=as.logical(rep(NA,nrow(pairs)))
     prediction[which(is.element(indices,L_ind))]=T
     prediction[which(is.element(indices,U_ind))]=F
     ret=rpairs # keeps all components of rpairs
@@ -130,3 +133,105 @@ emClassify <- function (rpairs, my=Inf, ny=Inf)
     class(ret)="RecLinkResult"
     return(ret)
 }
+
+# EM mit externen Trainingsdaten ist erst mal auf Eis gelegt!
+
+# supervised learning with EM
+# emClassify2 <- function (rpairs, my=Inf, ny=Inf)
+# {    
+#     train=rpairs$train
+#     train=train[,-c(1,2,ncol(train))] # delete ids and is_match
+#     train[is.na(train)]=0 # convert NAs to 0
+#     #o=order(rpairs$W,decreasing=T) # order Weights decreasing
+#     n_attr=ncol(train) # number of attributes
+#     # For each record pair, compute index of corresponding pattern in the
+#     # table of binary combinations
+#     indices=colSums(t(train)*(2^(n_attr:1-1)))+1    
+#     train_weights=rpairs$W[indices]
+# 
+#     valid=rpairs$valid
+#     valid=valid[,-c(1,2,ncol(valid))] # delete ids and is_match
+#     valid[is.na(valid)]=0 # convert NAs to 0
+#     #o=order(rpairs$W,decreasing=T) # order Weights decreasing
+#     n_attr=ncol(valid) # number of attributes
+#     # For each record pair, compute index of corresponding pattern in the
+#     # table of binary combinations
+#     indices=colSums(t(valid)*(2^(n_attr:1-1)))+1    
+#     valid_weights=rpairs$W[indices]
+# 
+#     o=order(train_weights,decreasing=T)
+#     threshold=getThresholdMinAll(train_weights[o],rpairs$train$is_match[o])
+#     prediction=valid_weights>=threshold
+# #     
+# #     L_ind=o[1:cutoff_upper] # indices of detected links
+# #     U_ind=o[(cutoff_lower+1):length(o)] # indices of detected non-links
+# #     # links get result TRUE, non-links FALSE, possible links NA
+# #     prediction=as.logical(rep(NA,nrow(pairs)))
+# #     prediction[which(is.element(indices,L_ind))]=T
+# #     prediction[which(is.element(indices,U_ind))]=F
+# 
+#     ret=rpairs # keeps all components of rpairs
+#     ret$prediction=prediction
+#     class(ret)="RecLinkResult"
+#     return(ret)
+# }
+# 
+# getThreshold <- function (weights, is_match, max_fehler=0.01)
+# {
+#   #return (getThresholdMaxFP(weights, is_match, max_fehler))
+#   return (getThresholdMinAll(weights, is_match))
+# }
+# 
+# getThresholdMinAll <- function (weights, is_match)
+# {
+# 	n_data=length(is_match)
+# 	if (n_data!=length(weights))
+# 	{
+# 		stop("Argumente weights und is_match haben unterschiedliche Länge")
+# 	}
+# 	# Zwei Fehlerraten werden gebildet: der erste die Fehlerrate für falsch
+# 	# positive, die zweite für falsch negative; für jedes Datenpaar werden die
+# 	# Fehler berechnet, die entstehen, wenn an diesem Datenpaar der Threshold
+# 	# gesetzt wird. Die Summe der beiden Fehler ergibt den zu minimierenden
+# 	# Gesamtfehler.
+#         # no error bound given: minimize overall error
+#         
+#     fehlerrate_1=cumsum(is_match!=1)/as.numeric(1:n_data) # false positive
+#     fehlerrate_2=rev(cumsum(rev(is_match==1)/as.numeric(1:n_data))) # false negative
+#     fehlerrate=c(0,fehlerrate_1)+c(fehlerrate_2,0)
+#     return(weights[which.min(fehlerrate)])
+# 
+#     # nun baue Tabelle, in der Gewicht (unique) und Fehlerrate gegenübergestellt
+#     # sind. Die Fehlerrate eines Gewichts ist in der sortierten Tabelle gleich
+#     # der Fehlerrate für den letzten Datensatz des Blocks
+#     # tapply() sortiert aufsteigend, das rev() stellt 
+#     # die absteigende Reihenfolge wieder her
+# 
+#     fehlerrate_unique=rev(tapply(fehlerrate,c(weights,-Inf),tail,1))
+# #     weights_unique=unique(weights)
+# # 
+# #     # Bestimme Gewicht des Datensatzes mit minimalem Fehler.
+# #     threshold=as.numeric(weights_unique[which.min(fehlerrate_unique)])
+# # 	return (threshold)
+# }
+# 
+# getThresholdMaxFP <- function (weights, is_match, max_fehler=0.01)
+# {
+# 	n_data=length(is_match)
+# 	if (n_data!=length(weights))
+# 	{
+# 		stop("Argumente weights und is_match haben unterschiedliche Länge")
+# 	}
+#     fehlerrate=cumsum(is_match==0)/as.numeric(1:n_data)
+#     # nehme den minimalen Threshold, für den die Fehlerschranke noch eingehalten
+#     # wird
+#     threshold=as.numeric(tail(weights[fehlerrate<max_fehler],1))
+#     # Abfangen des Falls, dass nur Nicht-Matche in Stichprobe sind: setze
+#     # Threshold auf Maximum der Gewichte
+#     if(identical(threshold,numeric(0)))
+#     {
+#      threshold=max(weights)
+#     }
+# 	return (threshold)
+# }
+# 

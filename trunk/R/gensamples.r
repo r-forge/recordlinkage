@@ -31,8 +31,13 @@ library(e1071)
 gensamples = function (datapairs, num_non, des_prop=0.1, seed=10, adjust=F)
 {   
     set.seed(seed)
-    ret <- datapairs   
-    ndata <- nrow(ret$pairs)
+    ret <- datapairs
+    if (nrow(datapairs$train)!=0)
+        stop("Training set already initialized!")
+    pairs=ret$valid
+    # delete existing is_match column
+    pairs$is_match=NULL
+    ndata <- nrow(pairs)
     #ids=as.matrix(ret$pairs[,c(1:2)]) # any filters will be set
     ids <- seq(from=1,to=ndata)
     #  number of classes is 3, when undetermindes cases are allowed
@@ -65,9 +70,12 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10, adjust=F)
     if (adjust==T && nmark==T ) {num_non=round(nlink/des_prop)}
     if (adjust==T && mmark==T ) {nlink=round(des_prop*num_non)}
     # Assumption: only two classes, then draw samples
-    salid <- sample(linksid, size=nlink)
-    sanolid <- sample(nonlinksid, size=num_non)
-
+#     print(linksid)
+#     print(nonlinksid)
+    salid <- resample(linksid, size=nlink)
+    sanolid <- resample(nonlinksid, size=num_non)
+#     print(salid)
+#     print(sanolid)
     # salid <- sample(x=1:alidn, size=nlink)
     # sanolid <- sample(x=1:anolidn, size=num_non)
     
@@ -75,11 +83,13 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10, adjust=F)
     trainhelp <- ids %in% trainid
     linkhelp <- ids %in% salid
     nonlinkhelp <- ids %in% sanolid
-    ret$evals <- ret$pairs[!trainhelp,]
-    ret$slinks <- ret$pairs[linkhelp,]
-    ret$snonlinks <- ret$pairs[nonlinkhelp,]
+    ret$valid <- cbind(pairs[!trainhelp,],is_match=datapairs$valid$is_match[!trainhelp])
+    ret$train <- rbind(cbind(pairs[linkhelp,],is_match=ddclass$prediction[linkhelp]),
+                       cbind(pairs[nonlinkhelp,],is_match=ddclass$prediction[nonlinkhelp]))
+#     ret$slinks <- ret$pairs[linkhelp,]
+#     ret$snonlinks <- ret$pairs[nonlinkhelp,]
     
-    class(ret)="RecLinkPairs"
+    class(ret)="RecLinkData"
     return(ret)
 }
     

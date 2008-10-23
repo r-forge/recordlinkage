@@ -12,3 +12,7 @@ isFALSE <- function(x) identical(x,F)
 
 delete.NULLs  <-  function(x.list)
     x.list[unlist(lapply(x.list, length) != 0)]
+
+resample <- function(x, size, ...)
+     if(length(x) <= 1) { if(!missing(size) && size == 0) x[FALSE] else x
+     } else sample(x, size, ...)
