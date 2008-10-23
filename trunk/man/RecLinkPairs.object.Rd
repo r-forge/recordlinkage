@@ -1,5 +1,5 @@
 \name{RecLinkPairs.object}
-\alias{RecLinkPairs.object}
+\alias{RecLinkPairs}
 \title{
   Record Linkage Data Pairs Object 
 }
