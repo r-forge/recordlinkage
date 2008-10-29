@@ -31,17 +31,29 @@
 #     return (classify.single.svm(rpairs,gamma=fitted$g,epsilon=fitted$e,cost=fitted$c))
 # }
 
-classify.svm = function(rpairs,...)
+classify.svm = function(rpairs,model=NULL,...)
 {
+    library(e1071)
     ret=rpairs
     rpairs$train[is.na(rpairs$train)]=0
     rpairs$valid[is.na(rpairs$valid)]=0
-    x=as.matrix(rpairs$train[,-c(1,2,ncol(rpairs$train))])
-    y=as.matrix(as.integer(rpairs$train$is_match))
-    model=svm(y ~ x, kernel="radial",type="C-classification",...)
+# funktioniert nicht, prediction-Vektor hat Länge der
+# ersten Validierungsdaten 
+#     if (missing(model))
+#     {
+        if (nrow(rpairs$train)==0)
+            stop("No training set in rpairs!")      
+        x=as.matrix(rpairs$train[,-c(1,2,ncol(rpairs$train))])
+        y=as.matrix(as.integer(rpairs$train$is_match))
+        model=svm(y ~ x,type="C-classification",...)
+#     } else if (all(class(model) != "svm"))
+#         stop ("model must be of class 'svm'")
+
     x=as.matrix(rpairs$valid[,-c(1,2,ncol(rpairs$valid))])
     predict=predict(model, newdata=x)       
     ret$prediction=predict
+    ret$model=model
+    class(ret)="RecLinkResult"
     return(ret)
 
 }
