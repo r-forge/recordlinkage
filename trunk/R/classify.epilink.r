@@ -6,28 +6,26 @@
 #   - Fehlerrate
 #   - Anz. Kreuzvalidierungen
 
-classify.epilink = function (train, valid)
+classify.epilink = function (rpairs, threshold=NULL,...)
 {
-    train$pairs[is.na(train$pairs)]=0
-    valid$pairs[is.na(valid$pairs)]=0
-    if (is.null(train$is_match))
-    {
-        is_match_train=train$identity[train$pairs$id1]==train$identity[train$pairs$id2]
-    } else is_match_train=train$is_match
-    weights_train=epiWeights(train$pairs, is_match_train, train$frequencies)
-    weights_train=weights_train[order(weights_train$Weight, decreasing=TRUE),]
-    if (is.null(valid$is_match))
-    {    
-        is_match_valid=valid$identity[valid$pairs$id1]==valid$identity[valid$pairs$id2]
-    } else is_match_valid=valid$is_match
-#    weights_valid=epiWeights(valid$pairs, is_match_valid, train$frequencies)
-#    weights_valid=epiWeights(valid$pairs, is_match_valid, valid$frequencies)
-    f=c( 0.000186,0.000843, 0.0000376, 0.00232,0.033,0.083,0.014)
-    weights_valid=epiWeights(valid$pairs, is_match_valid, f)
-    weights_valid=weights_valid[order(weights_valid$Weight, decreasing=TRUE),]
-	threshold=getThreshold(weights_train$Weight,weights_train$is_match)
-    table=table(is_match_valid,weights_valid$Weight>threshold)
-    print(table)
+    ret=rpairs
+    n_attr=ncol(rpairs$train)
+    rpairs$valid[is.na(rpairs$valid)]=0
+    f=rpairs$frequencies
+
+    if (missing(threshold))
+    { 
+        rpairs$train[is.na(rpairs$train)]=0
+        weights_train=epiWeights(rpairs$train[,-c(1,2,n_attr)], rpairs$train$is_match, f)
+        weights_train=weights_train[order(weights_train$Weight, decreasing=TRUE),]
+        weights_valid=epiWeights(rpairs$valid[,-c(1,2,n_attr)], rpairs$valid$is_match, f)
+    	threshold=getThreshold(weights_train$Weight,weights_train$is_match)
+    } else if (!is.numeric(threshold))
+        stop("threshold must be numeric")
+    ret$prediction=weights_valid$Weight>=threshold
+    ret$model=threshold
+    class(ret)="RecLinkResult"
+    return(ret)
 }
 
 
@@ -48,9 +46,11 @@ epiWeights <- function(data, is_match, f)
  {
   return(sum(as.numeric(r)*w))
  }
- S=apply(data[,-(1:2)],1,row_sum,w)/sum(w)
- o=order(S, decreasing=TRUE)
- ret_mat=cbind(data[o,],is_match[o], S[o])
+# S=apply(data,1,row_sum,w)/sum(w)
+ S=colSums(w*t(data))/sum(w)
+# o=order(S, decreasing=TRUE)
+# ret_mat=cbind(data[o,],is_match[o], S[o])
+ ret_mat=cbind(data,is_match, S)
  colnames(ret_mat)[ncol(ret_mat)]="Weight"
  colnames(ret_mat)[ncol(ret_mat)-1]="is_match"
  return(as.data.frame(ret_mat))
