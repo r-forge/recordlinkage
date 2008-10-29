@@ -1,6 +1,6 @@
-classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf)
+classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf,...)
 {
-    w=emWeights(rpairs=rpairs, m=m)
+    w=emWeights(rpairs=rpairs, m=m,...)
     return (emClassify(rpairs=w, my=my, ny=ny))
 }
 
@@ -10,7 +10,7 @@ classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf)
 #   rpairs  data pairs (class RecLinkPairs)
 #   m       probability for an error (m-probability), either one value for
 #           all attributes or a vector with distinct values
-emWeights <- function (rpairs, m=0.97)
+emWeights <- function (rpairs, m=0.97,...)
 {
     library(e1071)
     pairs=rpairs$valid
@@ -18,6 +18,7 @@ emWeights <- function (rpairs, m=0.97)
     pairs=pairs[,-c(1,2,ncol(pairs))]
     # is_match rausnehmen
     pairs[is.na(pairs)]=0
+    pairs_fuzzy=pairs
     pairs=array(as.integer(pairs>=0.95),dim=dim(pairs))
 
 
@@ -72,6 +73,8 @@ emClassify <- function (rpairs, my=Inf, ny=Inf)
     pairs=rpairs$valid
     pairs=pairs[,-c(1,2,ncol(pairs))] # delete ids and is_match
     pairs[is.na(pairs)]=0 # convert NAs to 0
+    pairs_fuzzy=pairs
+    pairs=array(as.integer(pairs>=0.95),dim=dim(pairs))
     o=order(rpairs$W,decreasing=T) # order Weights decreasing
     n_attr=ncol(pairs) # number of attributes
     # For each record pair, compute index of corresponding pattern in the
@@ -121,13 +124,23 @@ emClassify <- function (rpairs, my=Inf, ny=Inf)
             cutoff_lower=cutoff_upper
         }
     } 
-    
-    L_ind=o[1:cutoff_upper] # indices of detected links
-    U_ind=o[(cutoff_lower+1):length(o)] # indices of detected non-links
-    # links get result TRUE, non-links FALSE, possible links NA
+
+    threshold_upper=rpairs$W[o][cutoff_upper]
+    threshold_lower=rpairs$W[o][cutoff_lower]
+    str_weights=apply(pairs_fuzzy^pairs,1,prod)
+    data_weights=rpairs$W[indices]
+    data_weights=data_weights+log(str_weights, base=2)
     prediction=as.logical(rep(NA,nrow(pairs)))
-    prediction[which(is.element(indices,L_ind))]=T
-    prediction[which(is.element(indices,U_ind))]=F
+    prediction[data_weights>=threshold_upper]=T
+    prediction[data_weights<threshold_lower]=F
+    
+# alter Code ohne Fuzzyfizierung
+#     L_ind=o[1:cutoff_upper] # indices of detected links
+#     U_ind=o[(cutoff_lower+1):length(o)] # indices of detected non-links
+#     # links get result TRUE, non-links FALSE, possible links NA
+#     prediction=as.logical(rep(NA,nrow(pairs)))
+#     prediction[which(is.element(indices,L_ind))]=T
+#     prediction[which(is.element(indices,U_ind))]=F
     ret=rpairs # keeps all components of rpairs
     ret$prediction=prediction
     class(ret)="RecLinkResult"
