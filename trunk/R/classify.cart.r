@@ -5,33 +5,37 @@
 #   method: rpart, bagging, boosting
 
 
-classify.rpart = function (rpairs,...)
+classify.rpart = function (rpairs,model=NULL,...)
 {
     library(rpart)
     library(ada)
     library(ipred)
     
-    if (nrow(rpairs$train)==0)
-        stop("No training set in rpairs!")
-        
     train=rpairs$train[,-c(1,2)]
     train$is_match=factor(train$is_match)
     valid=rpairs$valid[,-c(1,2)]
-    model=rpart(is_match ~ ., data=train,method="class",...)
+    if (missing(model))
+    {
+        if (nrow(rpairs$train)==0)
+            stop("No training set in rpairs!")
+        
+        model=rpart(is_match ~ ., data=train,method="class",...)
+    } else if (class(model) != "rpart")
+        stop ("model must be of class 'rpart'")
     pred=predict(model, newdata=valid)
     ret=rpairs
 #    ret$prediction=pred
     ret$prediction=pred[,"TRUE"]>pred[,"FALSE"]
+    ret$model=model
+    class(ret)="RecLinkResult"
     return(ret)
 }
 
-classify.bagging = function (rpairs,...)
+classify.bagging = function (rpairs,model=NULL,...)
 {
     library(ipred)
     
-    if (nrow(rpairs$train)==0)
-        stop("No training set in rpairs!")
-        
+       
     # the columns of train and valid have to be coerced to factors with
     # same levels, NA being a factor
     train=rpairs$train[,-c(1,2)]
@@ -39,22 +43,26 @@ classify.bagging = function (rpairs,...)
     # for bagging, all data has to be converted to factors with equal levels
     # for train and valid, NA being a level
     levels=mapply(function(x,y) union(x,y),train,valid)
-    train=as.data.frame(mapply(function(x,y) list(factor(x,levels=y,exclude=NULL)),train,levels))
+    train=as.data.frame(mapply(function(x,y) list(factor(x,levels=y,exclude=NULL)),train,levels))     
     valid=as.data.frame(mapply(function(x,y) list(factor(x,levels=y,exclude=NULL)),valid,levels))
-    model=bagging(is_match ~ ., data=train,method="class",...)
-    pred=predict(model, newdata=valid)
+    if (missing(model))
+    {
+        if (nrow(rpairs$train)==0)
+            stop("No training set in rpairs!")      
+        model=bagging(is_match ~ ., data=train,method="class",...)
+    } else if (class(model) != "classbagg")
+        stop ("model must be of class 'classbag'")
+    pred=as.logical(predict(model, newdata=valid))
     ret=rpairs
+    ret$model=model
     ret$prediction=pred
+    class(ret)="RecLinkResult"
     return(ret)
 }
 
-classify.ada = function (rpairs,...)
+classify.ada = function (rpairs,model=NULL,...)
 {
     library(ada)
-    
-    if (nrow(rpairs$train)==0)
-        stop("No training set in rpairs!")
-        
     train=rpairs$train[,-c(1,2)]
     train$is_match=factor(train$is_match)
     valid=rpairs$valid[,-c(1,2)]
@@ -63,9 +71,17 @@ classify.ada = function (rpairs,...)
     levels=mapply(function(x,y) union(x,y),train,valid)
     train=as.data.frame(mapply(function(x,y) list(factor(x,levels=y,exclude=NULL)),train,levels))
     valid=as.data.frame(mapply(function(x,y) list(factor(x,levels=y,exclude=NULL)),valid,levels))
-    model=ada(is_match ~ ., data=train,...)
+    if (missing(model))
+    {
+        if (nrow(rpairs$train)==0)
+            stop("No training set in rpairs!")      
+        model=ada(is_match ~ ., data=train,...)
+    } else if (class(model) != "ada")
+        stop ("model must be of class 'ada'")
     pred=predict(model, newdata=valid)
     ret=rpairs
     ret$prediction=pred
+    ret$model=model
+    class(ret)="RecLinkResult"
     return(ret)
 }
