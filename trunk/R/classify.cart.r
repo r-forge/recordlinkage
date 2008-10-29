@@ -80,7 +80,7 @@ classify.ada = function (rpairs,model=NULL,...)
         stop ("model must be of class 'ada'")
     pred=predict(model, newdata=valid)
     ret=rpairs
-    ret$prediction=pred
+    ret$prediction=as.logical(pred)
     ret$model=model
     class(ret)="RecLinkResult"
     return(ret)
