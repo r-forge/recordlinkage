@@ -76,6 +76,8 @@ summary.RecLinkResult <- function (object, ...)
     cat(sprintf("accuracy: %f\n",accuracy))
     cat("\n\n")
     cat("Classification table:\n\n")
-    print(table(as.logical(object$valid$is_match),as.logical(object$prediction),
+#     print(table(as.logical(object$valid$is_match),as.logical(object$prediction),
+#           dnn=list("true status","prediction"),exclude=NULL))
+    print(table(object$valid$is_match,object$prediction,
           dnn=list("true status","prediction"),exclude=NULL))
 }

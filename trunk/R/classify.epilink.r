@@ -38,8 +38,6 @@ epiWeights <- function(data, is_match, f)
  e=0.01
  # durchschnittliche Häufigkeiten
  
- # aus Datenbank berechnet
- # aname bleibt draußen
  w=log((1-e)/f, base=2)
  # Gewichtsberechnung
  row_sum <- function(r,w)
