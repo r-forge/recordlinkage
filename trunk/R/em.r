@@ -10,19 +10,30 @@ classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf,...)
 #   rpairs  data pairs (class RecLinkPairs)
 #   m       probability for an error (m-probability), either one value for
 #           all attributes or a vector with distinct values
-emWeights <- function (rpairs, m=0.97,...)
+emWeights <- function (rpairs, m=0.97,cutoff=0.95,...)
 {
     library(e1071)
+t0=proc.time()
+print("Datenvorbereitung")
     pairs=rpairs$valid
     # ids und Matchingstatus rausnehmen
     pairs=pairs[,-c(1,2,ncol(pairs))]
-    # is_match rausnehmen
+print(proc.time()-t0)
+t0=proc.time()
+    pairs=as.matrix(pairs)
     pairs[is.na(pairs)]=0
-    pairs_fuzzy=pairs
-    pairs=array(as.integer(pairs>=0.95),dim=dim(pairs))
+print("Fuzzy umrechnen")
+    is_fuzzy=!all(is.element(pairs,0:1))
+    if (is_fuzzy)
+    {
+        pairs_fuzzy=pairs
+        pairs=as.array((pairs>=cutoff)*1)
+    }
+print(proc.time()-t0)
+t0=proc.time()
 
-
-    n_data=nrow(pairs)
+print("Patterns zählen, em vorbereiten")
+    n_data=nrow(pairs)  
     observed_count=countpattern(pairs)
     n_attr=ncol(pairs)
     patterns=bincombinations(n_attr)  # Liste der Patterns
@@ -30,7 +41,10 @@ emWeights <- function (rpairs, m=0.97,...)
     s=c(1:length(observed_count), 1:length(observed_count))
     i=rep(1,nrow(patterns)) # Intercept
     X=cbind(i,x,rbind(patterns,patterns),rbind(patterns,patterns)*x) # Design Matrix
+print(proc.time()-t0)
+t0=proc.time()
 
+print("Häufigkeiten schätzen")
     u=rpairs$frequencies    
     m=0.97
     # Ad-hoc-Schätzung für Anteil an Matchen (Faktor 0.1 relativ beliebig)
@@ -39,28 +53,44 @@ emWeights <- function (rpairs, m=0.97,...)
     init_M=apply(patterns,1,function(a) prod(a*m+(1-a)*(1-m))*n_data*prob_M)
     init_U=apply(patterns,1,function(a) prod(a*u+(1-a)*(1-u))*n_data*(1-prob_M))
     expected_count=c(init_U,init_M)
-   
-    res=mygllm(observed_count,s,X,E=expected_count)
+print(proc.time()-t0)
+t0=proc.time()
 
+print("EM ausführen")   
+    res=mygllm(observed_count,s,X,E=expected_count)
+print(proc.time()-t0)
+t0=proc.time()
+
+print("Der Rest")
     n_patterns=length(res)/2
 
     # Anteil Matche/Non_Matche in einem Pattern
     matchrate=res[(n_patterns+1):(2*n_patterns)]/res[1:n_patterns]
     #matchrate=round(res[(n_patterns+1):(2*n_patterns)])/round(res[1:n_patterns])
-    o=order(matchrate,res[(n_patterns+1):(2*n_patterns)],decreasing=T)
+#    o=order(matchrate,res[(n_patterns+1):(2*n_patterns)],decreasing=T)
 
     n_matches=sum(res[(n_patterns+1):(2*n_patterns)])
     n_nonmatches=sum(res[1:n_patterns])
     U=res[1:n_patterns]/n_nonmatches
     M=res[(n_patterns+1):(2*n_patterns)]/n_matches
     W=log(M/U, base=2)
+    indices=colSums(t(pairs)*(2^(n_attr:1-1)))+1    
     ret=rpairs # keeps all components of rpairs
     ret$M=M
     ret$U=U
-    ret$W=log(M/U, base=2)
+    ret$W=W
+    ret$Wdata=W[indices]
+    if (is_fuzzy)
+    {
+        str_weights=apply(pairs_fuzzy^pairs,1,prod)
+        ret$Wdata=ret$Wdata+log(str_weights, base=2)
+    } 
     class(ret)="RecLinkResult"
+print(proc.time()-t0)
+cat("\n")
     return(ret)
 }
+
 
 # Arguments:
 #   rpairs      weighted record pairs (output of emWeights)
@@ -68,79 +98,61 @@ emWeights <- function (rpairs, m=0.97,...)
 #   ny      error bound  # False Non-Matches / # Found Non-Matches
 #       If an error bound is Inf, it will not be considered, meaning that
 #       "possible link" will not be assigned
-emClassify <- function (rpairs, my=Inf, ny=Inf)
+emClassify <- function (rpairs, my=Inf, ny=Inf,threshold_upper=Inf, 
+                        threshold_lower=threshold_upper)
 {    
-    pairs=rpairs$valid
-    pairs=pairs[,-c(1,2,ncol(pairs))] # delete ids and is_match
-    pairs[is.na(pairs)]=0 # convert NAs to 0
-    pairs_fuzzy=pairs
-    pairs=array(as.integer(pairs>=0.95),dim=dim(pairs))
     o=order(rpairs$W,decreasing=T) # order Weights decreasing
-    n_attr=ncol(pairs) # number of attributes
-    # For each record pair, compute index of corresponding pattern in the
-    # table of binary combinations
-    indices=colSums(t(pairs)*(2^(n_attr:1-1)))+1    
 
-    # FN[k]: Ratio of false non-matches if patterns FN[k..] are considered
-    # as non-matches.
-    # FP[k]: Ratio of false matches if patterns FN[1..k] are considered
-    # as matches.  
-    FN=rev(cumsum(rev(rpairs$M[o]))) 
-    FP=cumsum(rpairs$U[o])
-    
-    if (my==Inf && ny==Inf)
+    # if no threshold was given, compute them according to the error bounds
+    if (missing(threshold_upper) && missing(threshold_lower))
     {
-        # no error bound given: minimize overall error
-        cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
-        if (length(cutoff_upper)==0)
-            cutoff_upper=0
-        cutoff_lower=cutoff_upper
-        
-    } else if (my==Inf)
-    {  
-        # only rate of false matches relevant
-        cutoff_lower=head(which(FN<=ny),1)
-        if (length(cutoff_lower)==0)
-            cutoff_lower=length(o)
-        cutoff_upper=cutoff_lower
+      FN=rev(cumsum(rev(rpairs$M[o]))) 
+      FP=cumsum(rpairs$U[o])
+      if (my==Inf && ny==Inf)
+      {
+          # no error bound given: minimize overall error
+          cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
+          if (length(cutoff_upper)==0)
+              cutoff_upper=0
+          cutoff_lower=cutoff_upper
+          
+      } else if (my==Inf)
+      {  
+          # only rate of false matches relevant
+          cutoff_lower=head(which(FN<=ny),1)
+          if (length(cutoff_lower)==0)
+              cutoff_lower=length(o)
+          cutoff_upper=cutoff_lower
+      
+      } else if (ny==Inf)
+      {
+          # only rate of false non-matches relevant
+          cutoff_upper=tail(which(FP<=my),1)
+          cutoff_lower=cutoff_upper
+      } else
+      {
+          # both error bounds relevant
+          cutoff_upper=tail(which(FP<=my),1)
+          cutoff_lower=head(which(FN<=ny),1)
+          if (length(cutoff_upper)==0)
+              cutoff_upper=0
+          if (length(cutoff_lower)==0)
+              cutoff_lower=length(o)
+          if (cutoff_lower<cutoff_upper)
+          {
+              cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
+              cutoff_lower=cutoff_upper
+          }
+      } 
+      print("Threshold berechnen und Klassifikation zuweisen")
+      threshold_upper=rpairs$W[o][cutoff_upper]
+      threshold_lower=rpairs$W[o][cutoff_lower]
+    } # end if
+     
+    prediction=as.logical(rep(NA,nrow(rpairs$valid)))
+    prediction[rpairs$Wdata>=threshold_upper]=T
+    prediction[rpairs$Wdata<threshold_lower]=F
     
-    } else if (ny==Inf)
-    {
-        # only rate of false non-matches relevant
-        cutoff_upper=tail(which(FP<=my),1)
-        cutoff_lower=cutoff_upper
-    } else
-    {
-        # both error bounds relevant
-        cutoff_upper=tail(which(FP<=my),1)
-        cutoff_lower=head(which(FN<=ny),1)
-        if (length(cutoff_upper)==0)
-            cutoff_upper=0
-        if (length(cutoff_lower)==0)
-            cutoff_lower=length(o)
-        if (cutoff_lower<cutoff_upper)
-        {
-            cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
-            cutoff_lower=cutoff_upper
-        }
-    } 
-
-    threshold_upper=rpairs$W[o][cutoff_upper]
-    threshold_lower=rpairs$W[o][cutoff_lower]
-    str_weights=apply(pairs_fuzzy^pairs,1,prod)
-    data_weights=rpairs$W[indices]
-    data_weights=data_weights+log(str_weights, base=2)
-    prediction=as.logical(rep(NA,nrow(pairs)))
-    prediction[data_weights>=threshold_upper]=T
-    prediction[data_weights<threshold_lower]=F
-    
-# alter Code ohne Fuzzyfizierung
-#     L_ind=o[1:cutoff_upper] # indices of detected links
-#     U_ind=o[(cutoff_lower+1):length(o)] # indices of detected non-links
-#     # links get result TRUE, non-links FALSE, possible links NA
-#     prediction=as.logical(rep(NA,nrow(pairs)))
-#     prediction[which(is.element(indices,L_ind))]=T
-#     prediction[which(is.element(indices,U_ind))]=F
     ret=rpairs # keeps all components of rpairs
     ret$prediction=prediction
     class(ret)="RecLinkResult"

@@ -1,7 +1,18 @@
 summary.RecLinkData <- function(object,...)
 {
 #    cat("Record Linkage Data Object\n\n") 
-    cat(sprintf("%d records",nrow(object$data)),"\n")
+    if (object$type=="linkage")
+    {
+        cat("Linkage Project\n")
+        cat(sprintf("%d records in data set 1",nrow(object$data1)),"\n")
+        cat(sprintf("%d records in data set 2",nrow(object$data2)),"\n")
+    }
+    else
+    {
+        cat("Deduplication Project\n")
+        cat(sprintf("%d records",nrow(object$data)),"\n")
+    }
+
     cat(sprintf("%d training pairs",nrow(object$train)),"\n")
     cat(sprintf("%d validation pairs",nrow(object$valid)),"\n")
     cat("\n")

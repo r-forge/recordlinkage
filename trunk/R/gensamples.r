@@ -4,7 +4,7 @@
 # membership by means of nearest neighbor clustering, fellegi-sunter modelling
 # on the base of function emgllm or deterministic clustering
 #
-# Requires packages e1071 and mygllm
+# Requires package e1071
 #
 # parameter:
 #
@@ -27,7 +27,6 @@
 #   model_sel:      nn clustering, em or deterministic clustering => NO
 
 library(e1071)
-# library(RecordLinkage) necessary for procedures involved
 gensamples = function (datapairs, num_non, des_prop=0.1, seed=10, adjust=F)
 {   
     set.seed(seed)
