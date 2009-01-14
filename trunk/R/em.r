@@ -57,7 +57,7 @@ print(proc.time()-t0)
 t0=proc.time()
 
 print("EM ausführen")   
-    res=mygllm(observed_count,s,X,E=expected_count)
+    res=mygllm(observed_count,s,X,E=expected_count,...)
 print(proc.time()-t0)
 t0=proc.time()
 

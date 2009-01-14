@@ -1,3 +1,4 @@
+
 print.results <- function (object, show="all", show_prediction=T, sort="prediction",num=nrow(object$valid),skip=0)
 {
     ids=switch(show,links=which(object$prediction),nonlinks=which(!object$prediction),
@@ -19,9 +20,16 @@ print.results <- function (object, show="all", show_prediction=T, sort="predicti
                      data2[object$valid[ids,2],])
         o=order(result$Weight,decreasing=T)
         ind=o[(skip+1):min(skip+num,length(o))]
-        return(result[ind,])
 #        if (show_prediction)
 #            result$prediction=object$prediction[ind]
+      printfun=function(x)
+      {
+          c(x[1:((length(x)+1)/2)],c("",x[((length(x)+3)/2):length(x)]))
+          
+      }
+      m=apply(result[ind,],1,printfun)
+      
+      return(as.data.frame(matrix(m[T],nrow=ncol(m)*2,ncol=nrow(m)/2,byrow=T)))
     } else
     {
         result=cbind(data1[object$valid[,1],],
@@ -40,19 +48,31 @@ print.results <- function (object, show="all", show_prediction=T, sort="predicti
 #    return(result[do.call(order,sort_cols),])
     return(result[ids,])
 }
-
         
+
 
 print.range <- function(object,threshold_upper=Inf,threshold_lower=0)
 {
-    o=order(object$Wdata,decreasing=T)
-		first=head(which(object$Wdata[o]<threshold_upper),1)
-		last=tail(which(object$Wdata[o]>=threshold_lower),1)
-    pairs=cbind(W=object$Wdata[o[first:last]],print.results(object,skip=first-1,num=last-first+1))
+    if (object$type=="deduplication")
+    {   
+        data1=object$data
+        data2=data1
+    } else
+    {
+        data1=object$data1
+        data2=object$data2
+    }
+	ind=which(object$Wdata<threshold_upper & object$Wdata>=threshold_lower)
+    pairs=cbind(Weight=object$Wdata[ind],
+                    data1[object$valid[ind,1],],
+                    data2[object$valid[ind,2],])
+    o=order(pairs$Weight,decreasing=T)
+    pairs=pairs[o,]
     printfun=function(x)
     {
-        as.data.frame(rbind(x[1:((length(x)+1)/2)],c("",x[((length(x)+3)/2):length(x)])))
+        c(x[1:((length(x)+1)/2)],c("",x[((length(x)+3)/2):length(x)]))
         
     }
-    apply(pairs,1,printfun)
+    m=apply(pairs,1,printfun)
+    as.data.frame(matrix(m[T],nrow=ncol(m)*2,ncol=nrow(m)/2,byrow=T))
 }

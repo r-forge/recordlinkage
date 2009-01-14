@@ -145,7 +145,7 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
         strcmpfun=jarowinkler
 
         
-print("blocking beginnt")
+# print("blocking beginnt")
    pair_ids=matrix(as.integer(0),nrow=0,ncol=2) # each row holds indices of one record pair
    if (!is.list(blockfld)) blockfld=list(blockfld)
     for (blockelem in blockfld) # loop over blocking definitions
@@ -162,7 +162,7 @@ print("blocking beginnt")
         block_data=full_data
       }
       # for each record, concatenate values in blocking fields
-      print("blockstr")
+#       print("blockstr")
       blockstr=apply(block_data,1,function(x) paste(x[blockelem],collapse=" "))
       rm(block_data)
       # delete.NULLs(tapply(...)) gives for each value of the blocking string
@@ -181,13 +181,13 @@ print("blocking beginnt")
 
 #    browser()
 
-     print ("tapply")
+#      print ("tapply")
      id_vec=tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))
-     print("delete.NULLs")
+#      print("delete.NULLs")
      id_vec=delete.NULLs(id_vec)
-     print("lapply")
+#      print("lapply")
      id_vec=lapply(id_vec,unordered_pairs)
-     print("unlist")
+#      print("unlist")
      id_vec=unlist(id_vec)
 #     id_vec=unlist(lapply(delete.NULLs(tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))),unordered_pairs))
 
@@ -202,13 +202,13 @@ print("blocking beginnt")
      
       rm(blockstr)
       # reshape vector and attach to matrix of record pairs
-      print("pair_ids")
+#       print("pair_ids")
       if (!is.null(id_vec))
        pair_ids=rbind(pair_ids,matrix(id_vec,nrow=length(id_vec)/2,ncol=2,byrow=T))
        rm(id_vec)
     }
     
-  print("blocking beendet")
+#   print("blocking beendet")
   ret$data=as.data.frame(full_data)
   rm(full_data)
   # return empty data frame if no pairs are obtained
@@ -217,16 +217,16 @@ print("blocking beginnt")
       stop("No pairs generated. Check blocking criteria.")
   }
   
-    print("vor unique")
+#     print("vor unique")
     pair_ids=unique(as.data.frame(pair_ids))  # runs faster with data frame
-    print("nach unique")
-    print(nrow(pair_ids))
-    print("merge")
+#     print("nach unique")
+#     print(nrow(pair_ids))
+#     print("merge")
     left=dataset[pair_ids[,1],]
     right=dataset[pair_ids[,2],]
-    print("nach merge")
+#     print("nach merge")
 
-    print("Vergleich")
+#     print("Vergleich")
     # matrix to hold comparison patterns
     patterns=matrix(0,ncol=ncol(left)-2,nrow=nrow(left)) 
     if (isTRUE(strcmp))
@@ -248,7 +248,7 @@ print("blocking beginnt")
     #p=as.data.frame(pair_ids)
     #rm(pair_ids)
 
-    print("Trainingsdaten ziehen")
+#     print("Trainingsdaten ziehen")
     # Trainingsdaten ziehen
     is_match=identity[pair_ids[,1]]==identity[pair_ids[,2]] # Matchingstatus der Paare
     match_ids=which(is_match) # Indizes von Matchen
@@ -274,7 +274,7 @@ print("blocking beginnt")
 #    rm(p)
 #      patterns=cbind(as.data.frame(pair_ids[,-1,drop=F]),as.data.frame(patterns))
 #      patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
-    print("Daten zusammenführen")
+#     print("Daten zusammenführen")
     train_ids=c(train_ids_match,train_ids_non_match)
     ret$train=cbind(pair_ids[train_ids,,drop=F],
                     patterns[train_ids,,drop=F],
@@ -410,7 +410,7 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
         strcmpfun=jarowinkler
 
         
-print("blocking beginnt")
+# print("blocking beginnt")
    pair_ids=matrix(as.integer(0),nrow=0,ncol=2) # each row holds indices of one record pair
    if (!is.list(blockfld)) blockfld=list(blockfld)
     for (blockelem in blockfld) # loop over blocking definitions
@@ -431,7 +431,7 @@ print("blocking beginnt")
         block_data2=full_data2
       }
       # for each record, concatenate values in blocking fields
-      print("blockstr")
+#       print("blockstr")
       blockstr1=apply(block_data1,1,function(x) paste(x[blockelem],collapse=" "))
       blockstr2=apply(block_data2,1,function(x) paste(x[blockelem],collapse=" "))
       rm(block_data1)
@@ -441,13 +441,13 @@ print("blocking beginnt")
       rm(blockstr1)
       rm(blockstr2)
       # reshape vector and attach to matrix of record pairs
-      print("pair_ids")
+#       print("pair_ids")
       if (!is.null(id_vec))
         pair_ids=rbind(pair_ids,id_vec)
       rm(id_vec)
     }
     
-  print("blocking beendet")
+#   print("blocking beendet")
   ret$data1=as.data.frame(full_data1)
   ret$data2=as.data.frame(full_data2)
   rm(full_data1,full_data2)
@@ -457,16 +457,16 @@ print("blocking beginnt")
       stop("No pairs generated. Check blocking criteria.")
   }
   
-    print("vor unique")
+#     print("vor unique")
     pair_ids=unique(as.data.frame(pair_ids))  # runs faster with data frame
-    print("nach unique")
-    print(nrow(pair_ids))
-    print("merge")
+#     print("nach unique")
+#     print(nrow(pair_ids))
+#     print("merge")
     left=dataset1[pair_ids[,1],]
     right=dataset2[pair_ids[,2],]
-    print("nach merge")
+#     print("nach merge")
 
-    print("Vergleich")
+#     print("Vergleich")
     # matrix to hold comparison patterns
     patterns=matrix(0,ncol=ncol(left)-2,nrow=nrow(left)) 
     if (isTRUE(strcmp))
@@ -488,7 +488,7 @@ print("blocking beginnt")
     #p=as.data.frame(pair_ids)
     #rm(pair_ids)
 
-    print("Trainingsdaten ziehen")
+#     print("Trainingsdaten ziehen")
     # Trainingsdaten ziehen
     is_match=identity1[pair_ids[,1]]==identity2[pair_ids[,2]] # Matchingstatus der Paare
     match_ids=which(is_match) # Indizes von Matchen
@@ -514,7 +514,7 @@ print("blocking beginnt")
 #    rm(p)
 #      patterns=cbind(as.data.frame(pair_ids[,-1,drop=F]),as.data.frame(patterns))
 #      patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
-    print("Daten zusammenführen")
+#     print("Daten zusammenführen")
     train_ids=c(train_ids_match,train_ids_non_match)
     ret$train=cbind(pair_ids[train_ids,,drop=F],
                     patterns[train_ids,,drop=F],
