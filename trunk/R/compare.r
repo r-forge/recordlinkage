@@ -218,7 +218,7 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
   }
   
 #     print("vor unique")
-    pair_ids=unique(as.data.frame(pair_ids))  # runs faster with data frame
+    pair_ids=as.matrix(unique(as.data.frame(pair_ids)))  # runs faster with data frame
 #     print("nach unique")
 #     print(nrow(pair_ids))
 #     print("merge")
@@ -228,7 +228,7 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 
 #     print("Vergleich")
     # matrix to hold comparison patterns
-    patterns=matrix(0,ncol=ncol(left)-2,nrow=nrow(left)) 
+    patterns=matrix(0,ncol=ncol(left),nrow=nrow(left)) 
     if (isTRUE(strcmp))
     {
         patterns=strcmpfun(as.matrix(left),as.matrix(right))
@@ -276,15 +276,17 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 #      patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
 #     print("Daten zusammenführen")
     train_ids=c(train_ids_match,train_ids_non_match)
-    ret$train=cbind(pair_ids[train_ids,,drop=F],
+    ret$train=as.data.frame(
+					cbind(pair_ids[train_ids,,drop=F],
                     patterns[train_ids,,drop=F],
-                    is_match[train_ids]) # Matche
+                    is_match[train_ids])) # Matche
 
 #     print(valid_ids)
     
-    ret$valid=cbind(pair_ids[valid_ids,,drop=F],
+    ret$valid=as.data.frame(
+					cbind(pair_ids[valid_ids,,drop=F],
                     patterns[valid_ids,,drop=F],
-                    is_match[valid_ids])
+                    is_match[valid_ids]))
 
 
 
@@ -436,8 +438,10 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
       blockstr2=apply(block_data2,1,function(x) paste(x[blockelem],collapse=" "))
       rm(block_data1)
       rm(block_data2)
-      id_vec=merge(cbind(id1=1:ndata1,blockstr=blockstr1),
-                   cbind(id2=1:ndata2,blockstr=blockstr2))[,-1]
+#	browser()
+      id_vec=merge(data.frame(id1=1:ndata1,blockstr=blockstr1),
+                   data.frame(id2=1:ndata2,blockstr=blockstr2))[,-1]
+
       rm(blockstr1)
       rm(blockstr2)
       # reshape vector and attach to matrix of record pairs
@@ -462,13 +466,13 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
 #     print("nach unique")
 #     print(nrow(pair_ids))
 #     print("merge")
-    left=dataset1[pair_ids[,1],]
-    right=dataset2[pair_ids[,2],]
+    left=dataset1[pair_ids[,1],,drop=F]
+    right=dataset2[pair_ids[,2],,drop=F]
 #     print("nach merge")
 
 #     print("Vergleich")
     # matrix to hold comparison patterns
-    patterns=matrix(0,ncol=ncol(left)-2,nrow=nrow(left)) 
+    patterns=matrix(0,ncol=ncol(left),nrow=nrow(left)) 
     if (isTRUE(strcmp))
     {
         patterns=strcmpfun(as.matrix(left),as.matrix(right))
@@ -498,9 +502,9 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
     if (length(non_match_ids) < num_non)
         warning("Only ", length(non_match_ids), " Non-Links!")
     # sample training data
-    train_ids_match=resample(match_ids,min(n_matches,length(match_ids)))
-    train_ids_non_match=resample(non_match_ids,min(num_non,length(non_match_ids)))
-    valid_ids=setdiff(1:nrow(patterns), c(train_ids_match,train_ids_non_match))
+	    train_ids_match=resample(match_ids,min(n_matches,length(match_ids)))
+	    train_ids_non_match=resample(non_match_ids,min(num_non,length(non_match_ids)))
+	    valid_ids=setdiff(1:nrow(patterns), c(train_ids_match,train_ids_non_match))
 #     if (length(train_ids_match)+length(train_ids_non_match)!=0)
 #     {
 #         valid_ids=1:nrow(patterns)[-c(train_ids_match,train_ids_non_match)]
@@ -516,15 +520,17 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
 #      patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
 #     print("Daten zusammenführen")
     train_ids=c(train_ids_match,train_ids_non_match)
-    ret$train=cbind(pair_ids[train_ids,,drop=F],
+    ret$train=as.data.frame(
+					cbind(pair_ids[train_ids,,drop=F],
                     patterns[train_ids,,drop=F],
-                    is_match[train_ids]) # Matche
+                    is_match[train_ids])) # Matche
 
 #     print(valid_ids)
     
-    ret$valid=cbind(pair_ids[valid_ids,,drop=F],
+    ret$valid=as.data.frame(
+					cbind(pair_ids[valid_ids,,drop=F],
                     patterns[valid_ids,,drop=F],
-                    is_match[valid_ids])
+                    is_match[valid_ids]))
 
 
 

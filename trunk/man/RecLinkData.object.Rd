@@ -35,4 +35,6 @@
 \seealso{
 \code{\link{compare}}.
 }
+
+\author{Andreas Borg}
 \keyword{classif}

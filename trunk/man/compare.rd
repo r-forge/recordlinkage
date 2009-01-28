@@ -105,5 +105,9 @@ compare_linkage (dataset1, dataset2, blockfld = FALSE, phonetic = FALSE,
 
 \seealso{
   \code{\link{RecLinkData}} for the format of returned objects,
-  \code{\l{gen_samples}} for automatic generation of training data.
+  \code{\link{gen_samples}} for automatic generation of training data.
 }
+
+\author{Andreas Borg}
+
+\keyword{classif}

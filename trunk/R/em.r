@@ -13,26 +13,26 @@ classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf,...)
 emWeights <- function (rpairs, m=0.97,cutoff=0.95,...)
 {
     library(e1071)
-t0=proc.time()
-print("Datenvorbereitung")
+# t0=proc.time()
+# print("Datenvorbereitung")
     pairs=rpairs$valid
     # ids und Matchingstatus rausnehmen
     pairs=pairs[,-c(1,2,ncol(pairs))]
-print(proc.time()-t0)
-t0=proc.time()
+# print(proc.time()-t0)
+# t0=proc.time()
     pairs=as.matrix(pairs)
     pairs[is.na(pairs)]=0
-print("Fuzzy umrechnen")
+# print("Fuzzy umrechnen")
     is_fuzzy=!all(is.element(pairs,0:1))
     if (is_fuzzy)
     {
         pairs_fuzzy=pairs
         pairs=as.array((pairs>=cutoff)*1)
     }
-print(proc.time()-t0)
-t0=proc.time()
+# print(proc.time()-t0)
+# t0=proc.time()
 
-print("Patterns zählen, em vorbereiten")
+# print("Patterns zählen, em vorbereiten")
     n_data=nrow(pairs)  
     observed_count=countpattern(pairs)
     n_attr=ncol(pairs)
@@ -41,10 +41,10 @@ print("Patterns zählen, em vorbereiten")
     s=c(1:length(observed_count), 1:length(observed_count))
     i=rep(1,nrow(patterns)) # Intercept
     X=cbind(i,x,rbind(patterns,patterns),rbind(patterns,patterns)*x) # Design Matrix
-print(proc.time()-t0)
-t0=proc.time()
+# print(proc.time()-t0)
+# t0=proc.time()
 
-print("Häufigkeiten schätzen")
+# print("Häufigkeiten schätzen")
     u=rpairs$frequencies    
     m=0.97
     # Ad-hoc-Schätzung für Anteil an Matchen (Faktor 0.1 relativ beliebig)
@@ -53,15 +53,15 @@ print("Häufigkeiten schätzen")
     init_M=apply(patterns,1,function(a) prod(a*m+(1-a)*(1-m))*n_data*prob_M)
     init_U=apply(patterns,1,function(a) prod(a*u+(1-a)*(1-u))*n_data*(1-prob_M))
     expected_count=c(init_U,init_M)
-print(proc.time()-t0)
-t0=proc.time()
+# print(proc.time()-t0)
+# t0=proc.time()
 
-print("EM ausführen")   
+# print("EM ausführen")   
     res=mygllm(observed_count,s,X,E=expected_count,...)
-print(proc.time()-t0)
-t0=proc.time()
+# print(proc.time()-t0)
+# t0=proc.time()
 
-print("Der Rest")
+# print("Der Rest")
     n_patterns=length(res)/2
 
     # Anteil Matche/Non_Matche in einem Pattern
@@ -80,13 +80,15 @@ print("Der Rest")
     ret$U=U
     ret$W=W
     ret$Wdata=W[indices]
+    ret$PM=n_matches/n_data
+    ret$res=res
     if (is_fuzzy)
     {
         str_weights=apply(pairs_fuzzy^pairs,1,prod)
         ret$Wdata=ret$Wdata+log(str_weights, base=2)
     } 
     class(ret)="RecLinkResult"
-print(proc.time()-t0)
+# print(proc.time()-t0)
 cat("\n")
     return(ret)
 }
@@ -155,6 +157,7 @@ emClassify <- function (rpairs, my=Inf, ny=Inf,threshold_upper=Inf,
     
     ret=rpairs # keeps all components of rpairs
     ret$prediction=prediction
+	ret$threshold=threshold_upper
     class(ret)="RecLinkResult"
     return(ret)
 }

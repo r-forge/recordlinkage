@@ -36,3 +36,6 @@
   \item{frequencies}{For each column included in \code{pairs}, the average
     frequency of values (reciprocal of number of distinct values).}   
 }
+
+\author{Andreas Borg}
+\keyword{classif}

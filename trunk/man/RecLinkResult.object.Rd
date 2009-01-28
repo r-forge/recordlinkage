@@ -25,6 +25,7 @@
   
 }
 
+\author{Andreas Borg}
 
 \seealso{
 \code{\link{classify}}.

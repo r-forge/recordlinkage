@@ -3,13 +3,13 @@ summary.RecLinkData <- function(object,...)
 #    cat("Record Linkage Data Object\n\n") 
     if (object$type=="linkage")
     {
-        cat("Linkage Project\n")
+        cat("\nLinkage Project\n\n")
         cat(sprintf("%d records in data set 1",nrow(object$data1)),"\n")
         cat(sprintf("%d records in data set 2",nrow(object$data2)),"\n")
     }
     else
     {
-        cat("Deduplication Project\n")
+        cat("\nDeduplication Project\n\n")
         cat(sprintf("%d records",nrow(object$data)),"\n")
     }
 
@@ -17,18 +17,24 @@ summary.RecLinkData <- function(object,...)
     cat(sprintf("%d validation pairs",nrow(object$valid)),"\n")
     cat("\n")
     # the expression "length(which(..." is needed to eliminate NAs
-    cat(sprintf("%d matches in training set\n",
-        length(which(object$train$is_match==T))))
-    cat(sprintf("%d non-matches in training set\n",
-        length(which(object$train$is_match==F))))
-    cat("\n")
-    cat(sprintf("%d matches in validation set\n",
-        length(which(object$valid$is_match==T))))
-    cat(sprintf("%d non-matches in validation set\n",
-        length(which(object$valid$is_match==F))))
-    if (any(is.na(object$valid$is_match)))
-        cat(sprintf("%d pairs with unknown status in validation set\n",
-            sum(is.na(object$valid$is_match))))
+    if (nrow(object$train) > 0)
+	{
+		cat(sprintf("%d matches in training set\n",
+	        length(which(object$train$is_match==T))))
+	    cat(sprintf("%d non-matches in training set\n",
+	        length(which(object$train$is_match==F))))
+	    cat("\n")
+	}
+	if (nrow(object$valid) > 0)
+	{
+	    cat(sprintf("%d matches in validation set\n",
+	        length(which(object$valid$is_match==T))))
+	    cat(sprintf("%d non-matches in validation set\n",
+	        length(which(object$valid$is_match==F))))
+	    if (any(is.na(object$valid$is_match)))
+	        cat(sprintf("%d pairs with unknown status in validation set\n",
+	            sum(is.na(object$valid$is_match))))
+	}
 }
 
 
