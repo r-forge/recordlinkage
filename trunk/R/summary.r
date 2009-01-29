@@ -35,6 +35,14 @@ summary.RecLinkData <- function(object,...)
 	        cat(sprintf("%d pairs with unknown status in validation set\n",
 	            sum(is.na(object$valid$is_match))))
 	}
+	if (!is.null(object$Wdata))
+	{
+		cat("\n")
+		cat("Weight distribution:\n\n")
+		h=hist(object$Wdata,plot=F)
+		print(h$breaks)
+		print(h$counts)
+	}
 }
 
 
@@ -96,5 +104,5 @@ summary.RecLinkResult <- function (object, ...)
 #     print(table(as.logical(object$valid$is_match),as.logical(object$prediction),
 #           dnn=list("true status","prediction"),exclude=NULL))
     print(table(object$valid$is_match,object$prediction,
-          dnn=list("true status","prediction"),exclude=NULL))
+          dnn=list("true status","prediction"),useNA="ifany"))
 }
