@@ -148,8 +148,13 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 # print("blocking beginnt")
    pair_ids=matrix(as.integer(0),nrow=0,ncol=2) # each row holds indices of one record pair
    if (!is.list(blockfld)) blockfld=list(blockfld)
-    for (blockelem in blockfld) # loop over blocking definitions
-    {
+   if (isFALSE(blockfld))
+   {
+   	pairs_ids=t(unordered_pairs(nrow(dataset)))
+   } else
+   { 
+     for (blockelem in blockfld) # loop over blocking definitions
+     {
       if (isTRUE(phonetic))
       {
         block_data=phonfun(full_data)
@@ -219,6 +224,8 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
   
 #     print("vor unique")
     pair_ids=as.matrix(unique(as.data.frame(pair_ids)))  # runs faster with data frame
+   } # end else
+   
 #     print("nach unique")
 #     print(nrow(pair_ids))
 #     print("merge")
@@ -415,6 +422,11 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
 # print("blocking beginnt")
    pair_ids=matrix(as.integer(0),nrow=0,ncol=2) # each row holds indices of one record pair
    if (!is.list(blockfld)) blockfld=list(blockfld)
+   if (isFALSE(blockfld))
+   {  # full outer join
+  	 pairs_ids=merge(1:nrow(dataset1),1:nrow(dataset2),all=T)
+   } else
+   {
     for (blockelem in blockfld) # loop over blocking definitions
     {
       if (isTRUE(phonetic))
@@ -463,6 +475,7 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
   
 #     print("vor unique")
     pair_ids=unique(as.data.frame(pair_ids))  # runs faster with data frame
+  } # end else
 #     print("nach unique")
 #     print(nrow(pair_ids))
 #     print("merge")
