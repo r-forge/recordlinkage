@@ -87,7 +87,7 @@ emWeights <- function (rpairs, m=0.97,cutoff=0.95,...)
         str_weights=apply(pairs_fuzzy^pairs,1,prod)
         ret$Wdata=ret$Wdata+log(str_weights, base=2)
     } 
-    class(ret)="RecLinkResult"
+#    class(ret)="RecLinkResult"
 # print(proc.time()-t0)
 cat("\n")
     return(ret)
