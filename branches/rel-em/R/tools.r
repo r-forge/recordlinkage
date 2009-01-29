@@ -1,6 +1,6 @@
 # varios utility functions
 
-unordered_pairs <- function (x) 
+unorderedPairs <- function (x) 
 {
     if (length(x)==1)
         return (array(unlist(lapply(1:(x-1),function (k) rbind(k,(k+1):x))),dim=c(2,x*(x-1)/2)))

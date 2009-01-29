@@ -1,14 +1,15 @@
 \name{emClassify}
 \alias{emClassify}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+
+\title{Classification of weighted pairs}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Classifies data pairs weighted by \code{\link{emWeights}} based on
+  user-defined thresholds or estimated error rates.
 }
 \usage{
-emClassify(rpairs, my = Inf, ny = Inf, threshold_upper = Inf, threshold_lower = threshold_upper)
+emClassify(rpairs, threshold_upper = Inf, threshold_lower = threshold_upper, my = Inf, ny = Inf)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{rpairs}{ ~~Describe \code{rpairs} here~~ }
   \item{my}{ ~~Describe \code{my} here~~ }

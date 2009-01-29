@@ -20,7 +20,7 @@
   comparator. For the meaning of \code{W_1}, \code{W_2}, \code{W_3} and 
   \code{r} see the referenced article. For most applications, the default 
   values are okay.}
-\value{A real number in the interval \eqn{[0,1]}{[0,1]}
+\value{A real number in the interval \eqn{[0,1]}{[0,1]} }
 \references{Winkler, W.E.: String Comparator Metrics and Enhanced Decision
 Rules in the Fellegi-Sunter Model of Record Linkage. In: Proceedings
 of the Section on Survey Research Methods, American Statistical Association

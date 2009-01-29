@@ -5,12 +5,13 @@
 }
 \description{
   An object representing information about compared records for Record
-  Linkage, as returned by function \code{compare}. 
+  Linkage, as returned by functions \code{\link{compare.dedup}} and
+  \code{\link{compare.linkage}}. 
 }
 
 \value{
   \item{data}{
-    Data frame of original records as given as input to \code{compare}.
+    Data frame of original records.
   }
   \item{pairs}{
     Data frame of data pairs. Each row represents the comparison of two records, 
@@ -33,7 +34,7 @@
 }
 
 \seealso{
-\code{\link{compare}}.
+\code{\link{compare.dedup}}, \code{\link{compare.linkage}}
 }
 
 \author{Andreas Borg}

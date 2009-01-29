@@ -1,4 +1,4 @@
-# function gensamples 
+# function genSamples 
 #
 # generates training data pairs from data items with no specified class
 # membership by means of nearest neighbor clustering, fellegi-sunter modelling
@@ -10,9 +10,9 @@
 #
 #   datapairs:      data pairs as input without known duplicate status, from compare.r
 #
-#   des_prop:       desired proportion of duplicates to non-duplicates
+#   des.prop:       desired proportion of duplicates to non-duplicates
 # 
-#   num_non:        Number of desired non-matches of data pairs 
+#   num.non:        Number of desired non-matches of data pairs 
 #
 #   rseed:          random seed
 #
@@ -27,7 +27,7 @@
 #   model_sel:      nn clustering, em or deterministic clustering => NO
 
 library(e1071)
-gensamples = function (datapairs, num_non, des_prop=0.1, seed=10, adjust=F)
+genSamples = function (datapairs, num.non, des.prop=0.1, seed=10, adjust=F)
 {   
     set.seed(seed)
     ret <- datapairs
@@ -42,10 +42,10 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10, adjust=F)
     #  number of classes is 3, when undetermindes cases are allowed
     # if (undet) nclasses=nclasses+1
     #  consistence checking
-    nlink <- round(des_prop*(num_non)) #+cler_review)
-    ngesamt <- num_non+nlink # +cler_review
+    nlink <- round(des.prop*(num.non)) #+cler_review)
+    ngesamt <- num.non+nlink # +cler_review
     if (ngesamt > ndata){stop("Inconsistent values for training data!")}
-    if (des_prop<0 || des_prop >=1){stop("Inconsistent value for link proportion!")}
+    if (des.prop<0 || des.prop >=1){stop("Inconsistent value for link proportion!")}
     # run clustering algorithm?
     # res_clust <- bclust(x=ddmat, centers=3,base.center=2, base.method="kmeans", iter.base=100, verbose=T)
     # kmendundet<-kmeans(x=ddmat, centers=nclasses); pairs$pairs[kclusr$cluster==2,]
@@ -65,18 +65,18 @@ gensamples = function (datapairs, num_non, des_prop=0.1, seed=10, adjust=F)
     nmark=F; mmark=F;
     # sample is fast enough for not including it in the if-clauses
     if(nlink > alidn) { warning("Only ", alidn, " Links!"); nlink=alidn; nmark=T }
-    if(num_non > anolidn) { warning("Only ", anolidn, " Non-Links!"); num_non=anolidn; mmark=T }
-    if (adjust==T && nmark==T ) {num_non=round(nlink/des_prop)}
-    if (adjust==T && mmark==T ) {nlink=round(des_prop*num_non)}
+    if(num.non > anolidn) { warning("Only ", anolidn, " Non-Links!"); num.non=anolidn; mmark=T }
+    if (adjust==T && nmark==T ) {num.non=round(nlink/des.prop)}
+    if (adjust==T && mmark==T ) {nlink=round(des.prop*num.non)}
     # Assumption: only two classes, then draw samples
 #     print(linksid)
 #     print(nonlinksid)
     salid <- resample(linksid, size=nlink)
-    sanolid <- resample(nonlinksid, size=num_non)
+    sanolid <- resample(nonlinksid, size=num.non)
 #     print(salid)
 #     print(sanolid)
     # salid <- sample(x=1:alidn, size=nlink)
-    # sanolid <- sample(x=1:anolidn, size=num_non)
+    # sanolid <- sample(x=1:anolidn, size=num.non)
     
     trainid <- c(salid,sanolid)
     trainhelp <- ids %in% trainid

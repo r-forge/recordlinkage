@@ -1,5 +1,5 @@
 
-print.results <- function (object, show="all", show_prediction=T, sort="prediction",num=nrow(object$valid),skip=0)
+getPairs <- function (object, show="all", show_prediction=T, sort="prediction",num=nrow(object$valid),skip=0)
 {
     ids=switch(show,links=which(object$prediction),nonlinks=which(!object$prediction),
                possible=which(is.na(object$prediction)),TRUE)
@@ -51,7 +51,7 @@ print.results <- function (object, show="all", show_prediction=T, sort="predicti
         
 
 
-print.range <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
+getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
 					single.rows=F, show="all",
 					sort=T)
 {

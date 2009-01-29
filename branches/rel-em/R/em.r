@@ -1,9 +1,3 @@
-classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf,...)
-{
-    w=emWeights(rpairs=rpairs, m=m,...)
-    return (emClassify(rpairs=w, my=my, ny=ny))
-}
-
 
 # Arguments:
 #
@@ -100,8 +94,8 @@ cat("\n")
 #   ny      error bound  # False Non-Matches / # Found Non-Matches
 #       If an error bound is Inf, it will not be considered, meaning that
 #       "possible link" will not be assigned
-emClassify <- function (rpairs, my=Inf, ny=Inf,threshold_upper=Inf, 
-                        threshold_lower=threshold_upper)
+emClassify <- function (rpairs,threshold_upper=Inf, 
+                        threshold_lower=threshold_upper,my=Inf, ny=Inf)
 {    
     o=order(rpairs$W,decreasing=T) # order Weights decreasing
 

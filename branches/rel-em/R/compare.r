@@ -58,9 +58,9 @@
 
 
 
-compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
+compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
                     phonfun=F, strcmp=FALSE,strcmpfun=FALSE, exclude=F, 
-                    identity=NA ,num_non=0, des_prop=0.05, adjust=F)
+                    identity=NA ,num.non=0, des.prop=0.05, adjust=F)
 {
     # various catching of erronous input
     if (!is.data.frame(dataset) && !is.matrix(dataset))
@@ -82,11 +82,11 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     if (max(exclude)>nfields)
         stop ("exclude contains out of bounds index")
 
-    n_matches <- round(des_prop*(num_non))
-    n_train <- num_non+n_matches 
+    n_matches <- round(des.prop*(num.non))
+    n_train <- num.non+n_matches 
     if (n_train > ndata)
         stop("Inconsistent values for training data!")
-    if (des_prop<0 || des_prop >=1)
+    if (des.prop<0 || des.prop >=1)
         stop("Inconsistent value for link proportion!")
     
     ret=list()  # return object
@@ -150,7 +150,7 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
    if (!is.list(blockfld)) blockfld=list(blockfld)
    if (isFALSE(blockfld))
    {
-   	pairs_ids=t(unordered_pairs(nrow(dataset)))
+   	pairs_ids=t(unorderedPairs(nrow(dataset)))
    } else
    { 
      for (blockelem in blockfld) # loop over blocking definitions
@@ -172,14 +172,14 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
       rm(block_data)
       # delete.NULLs(tapply(...)) gives for each value of the blocking string
       # indices of matching records. From these lapply builds record pairs via
-      # unordered_pairs (defined in tools.r). unlist makes a vector from the
+      # unorderedPairs (defined in tools.r). unlist makes a vector from the
       # resulting list which is reshaped as a matrix in the following line
 #       print("tapply")
 #       ta_res=tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))
 #       print("delete.NULLs")
 #       del_res=delete.NULLs(ta_res)
 #       print("lapply")
-#       la_res=lapply(del_res,unordered_pairs)
+#       la_res=lapply(del_res,unorderedPairs)
 #       print("unlist")
 #       id_vec=unlist(la_res)
 #    browser()
@@ -191,17 +191,17 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 #      print("delete.NULLs")
      id_vec=delete.NULLs(id_vec)
 #      print("lapply")
-     id_vec=lapply(id_vec,unordered_pairs)
+     id_vec=lapply(id_vec,unorderedPairs)
 #      print("unlist")
      id_vec=unlist(id_vec)
-#     id_vec=unlist(lapply(delete.NULLs(tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))),unordered_pairs))
+#     id_vec=unlist(lapply(delete.NULLs(tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))),unorderedPairs))
 
 # alternativ: eine Klammer weniger, spart aber keine Zeit
 #      f=function(x)
 #      {
 #         l=length(x)
 #         if(l>1)
-#             return (unordered_pairs(x))
+#             return (unorderedPairs(x))
 #      }
 #      id_vec=unlist(delete.NULLs(tapply(1:ndata,blockstr,f)))
      
@@ -262,11 +262,11 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     non_match_ids=which(!is_match) # Indizes von Non-Matchen
     if (length(match_ids) < n_matches)
         warning("Only ", length(match_ids), " Links!")
-    if (length(non_match_ids) < num_non)
+    if (length(non_match_ids) < num.non)
         warning("Only ", length(non_match_ids), " Non-Links!")
     # sample training data
     train_ids_match=resample(match_ids,min(n_matches,length(match_ids)))
-    train_ids_non_match=resample(non_match_ids,min(num_non,length(non_match_ids)))
+    train_ids_non_match=resample(non_match_ids,min(num.non,length(non_match_ids)))
     valid_ids=setdiff(1:nrow(patterns), c(train_ids_match,train_ids_non_match))
 #     if (length(train_ids_match)+length(train_ids_non_match)!=0)
 #     {
@@ -320,9 +320,9 @@ compare_dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 # einfache Belegung für identity zum Beispiel: ersten Datensatz durchnummerieren,
 # zweiter kriegt Index des passenden Datums oder 0
 
-compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
+compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
                     phonfun=F, strcmp=FALSE,strcmpfun=FALSE, exclude=F, 
-                    identity1=NA, identity2=NA, num_non=0, des_prop=0.05, adjust=F)
+                    identity1=NA, identity2=NA, num.non=0, des.prop=0.05, adjust=F)
 {
     # various catching of erronous input
     if (!is.data.frame(dataset1) && !is.matrix(dataset1))
@@ -349,11 +349,11 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
     if (max(exclude)>nfields)
         stop ("exclude contains out of bounds index")
 
-    n_matches <- round(des_prop*(num_non))
-    n_train <- num_non+n_matches 
+    n_matches <- round(des.prop*(num.non))
+    n_train <- num.non+n_matches 
 #     if (n_train > ndata)
 #         stop("Inconsistent values for training data!")
-    if (des_prop<0 || des_prop >=1)
+    if (des.prop<0 || des.prop >=1)
         stop("Inconsistent value for link proportion!")
     
     ret=list()  # return object
@@ -408,8 +408,8 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
     {
         if (isTRUE(phonetic)) # true, if phonetic is a logical value and T
         {    
-            dataset1=pho_h(dataset)
-            dataset2=pho_h(dataset)
+            dataset1=pho_h(dataset1)
+            dataset2=pho_h(dataset2)
         } else # phonetic is not a logical value
         dataset1[,phonetic]=pho_h(dataset1[,phonetic])
         dataset2[,phonetic]=pho_h(dataset2[,phonetic])
@@ -512,11 +512,11 @@ compare_linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
     non_match_ids=which(!is_match) # Indizes von Non-Matchen
     if (length(match_ids) < n_matches)
         warning("Only ", length(match_ids), " Links!")
-    if (length(non_match_ids) < num_non)
+    if (length(non_match_ids) < num.non)
         warning("Only ", length(non_match_ids), " Non-Links!")
     # sample training data
 	    train_ids_match=resample(match_ids,min(n_matches,length(match_ids)))
-	    train_ids_non_match=resample(non_match_ids,min(num_non,length(non_match_ids)))
+	    train_ids_non_match=resample(non_match_ids,min(num.non,length(non_match_ids)))
 	    valid_ids=setdiff(1:nrow(patterns), c(train_ids_match,train_ids_non_match))
 #     if (length(train_ids_match)+length(train_ids_non_match)!=0)
 #     {

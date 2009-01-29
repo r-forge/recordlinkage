@@ -28,7 +28,7 @@
 \author{Andreas Borg}
 
 \seealso{
-\code{\link{classify}}.
+\code{\link{emClassify}}.
 \code{\link{RecLinkData}}.
 }
 
