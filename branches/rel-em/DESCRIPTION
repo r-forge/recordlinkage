@@ -1,0 +1,7 @@
+Package: RecordLinkage
+Version: 0.1-0
+Title: Jaro-Winkler string metric
+Author: Murat Sariyar <sariyar@imbei.uni-mainz.de>, Andreas Borg <borg@imbei.uni-mainz.de> 
+Maintainer: Andreas Borg <borg@imbei.uni-mainz.de>
+Description: Record Linkage in R
+License: GPL (version 2 or later)
