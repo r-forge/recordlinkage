@@ -1,25 +1,58 @@
 \name{summary}
-\alias{summary.RecLinkPairs}
+
+\alias{summary.RecLinkData}
 \alias{summary.RecLinkResult}
-\title{Print summary of Record Linkage data}
-\description{Provides statistical information on Record Linkage objects 
-             defined in package \code{RecordLinkage}}
+
+\title{Print Summary of Record Linkage Data}
+
+\description{Prints information on \code{\link{RecLinkData}} and
+  \code{\link{RecLinkResult}} objects.}
+
 \usage{
-summary.RecLinkPairs(object,...)
+summary.RecLinkData(object,...)
 
 summary.RecLinkResult(object,...)                    
 }
+
 \arguments{
   \item{object}{The object for which to print a summary.} 
+  \item{...}{Additional arguments from the generic, silently ignored.}
 }                  
 
-\details{The printed information always includes the number of records and record 
-       pairs, for RecLinkResult objects also the number of detected matches, 
-       non-matches and possible matches. If the true match status for record 
-       pairs is given, additional information on such as number of matches and 
-       classification errors is given.
-       NAs in the classification table stand for unknown matching status
-       or possible matches in the prediction.
+\details{
+
+       The printed information for \code{\link{RecLinkData}} objects
+       includes:
+      
+       \itemize{
+        \item The number of records.
+        \item The number of training and validation pairs.
+        \item The number of true matches, true non-matches and pairs with unknown
+          status in the validation and training set.
+       }
+       Information on \code{\link{RecLinkResult}} objects includes all of the
+       above and the following:
+       \itemize{
+          \item The weight distribution, represented by the \code{breaks}
+            and \code{counts} vectors returned by \code{\link{hist}(object$Wdata}.
+            
+          \item The number of detected links, non-links and possible links.
+          
+          \item Error rates, where alpha error is the ratio of false links
+            to matches, beta error is the ratio of false non-links to
+            non-matches and accuracy the ratio of correctly classified
+            pairs to the total number of pairs.
+            
+          \item A contingency table counting true matching status against
+            classification, in which \code{NA} represents unknown
+            matching status or classification as possible link.
+       }
 }
 
 \value{Used for its side effect.}
+
+\author{Andreas Borg}
+
+\seealso{\code{\link{RecLinkData}},\code{\link{RecLinkResult}}}
+
+\keyword{classif}

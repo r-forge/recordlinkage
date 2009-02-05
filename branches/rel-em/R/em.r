@@ -4,7 +4,7 @@
 #   rpairs  data pairs (class RecLinkPairs)
 #   m       probability for an error (m-probability), either one value for
 #           all attributes or a vector with distinct values
-emWeights <- function (rpairs, m=0.97,cutoff=0.95,...)
+emWeights <- function (rpairs, cutoff=0.95,...)
 {
     library(e1071)
 # t0=proc.time()
@@ -94,13 +94,13 @@ cat("\n")
 #   ny      error bound  # False Non-Matches / # Found Non-Matches
 #       If an error bound is Inf, it will not be considered, meaning that
 #       "possible link" will not be assigned
-emClassify <- function (rpairs,threshold_upper=Inf, 
-                        threshold_lower=threshold_upper,my=Inf, ny=Inf)
+emClassify <- function (rpairs,threshold.upper=Inf, 
+                        threshold.lower=threshold.upper,my=Inf, ny=Inf)
 {    
     o=order(rpairs$W,decreasing=T) # order Weights decreasing
 
     # if no threshold was given, compute them according to the error bounds
-    if (missing(threshold_upper) && missing(threshold_lower))
+    if (missing(threshold.upper) && missing(threshold.lower))
     {
       FN=rev(cumsum(rev(rpairs$M[o]))) 
       FP=cumsum(rpairs$U[o])
@@ -141,17 +141,17 @@ emClassify <- function (rpairs,threshold_upper=Inf,
           }
       } 
       print("Threshold berechnen und Klassifikation zuweisen")
-      threshold_upper=rpairs$W[o][cutoff_upper]
-      threshold_lower=rpairs$W[o][cutoff_lower]
+      threshold.upper=rpairs$W[o][cutoff_upper]
+      threshold.lower=rpairs$W[o][cutoff_lower]
     } # end if
      
     prediction=as.logical(rep(NA,nrow(rpairs$valid)))
-    prediction[rpairs$Wdata>=threshold_upper]=T
-    prediction[rpairs$Wdata<threshold_lower]=F
+    prediction[rpairs$Wdata>=threshold.upper]=T
+    prediction[rpairs$Wdata<threshold.lower]=F
     
     ret=rpairs # keeps all components of rpairs
     ret$prediction=prediction
-	ret$threshold=threshold_upper
+	ret$threshold=threshold.upper
     class(ret)="RecLinkResult"
     return(ret)
 }

@@ -7,6 +7,10 @@
 /*   nach: Michael Haber, Algorithm AS 207: Fitting a General Log-Linear      */
 /*         Model, in: Applied Statistics 33 Vol. 33 No. 3 (1984),             */
 /*         S. 358-362                                                         */
+/*																																						*/
+/*   Erweiterung um maximale Anzahl an Iterationen übernommen von:						*/
+/*	 David Duffy (2006). gllm: Generalised log-linear model. R package				*/
+/*   version 0.31.																														*/
 /*                                                                            */
 /* ========================================================================== */
 
@@ -15,17 +19,6 @@
 #include <math.h>
 #include <R.h>
 
-void print2Ddoublearray(double * data, int nrow, int ncol)
-{
-  int i;
-  int j;
-  for (i=0;i<nrow;i++)
-  {
-    for (j=0;j<ncol;j++)
-      printf("%f, ", data[i+j*nrow]);
-    printf("\n");
-  }
-}
 
 /**
  * Fit Log-Linear Model to observed contingency table y.
@@ -44,6 +37,7 @@ void print2Ddoublearray(double * data, int nrow, int ncol)
  * @param dec_int_tol Chooses convergence parameter for inner loop (IPF 
  *        algorithm). If value is 0, tol is used, otherwise a decreasing value: 
  *        max(tol,1/(number of iterations)^2).
+ * @param std_min_C currently not used        
  * @return Fitted full contingency table in E.
  */                                    
 void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E, 

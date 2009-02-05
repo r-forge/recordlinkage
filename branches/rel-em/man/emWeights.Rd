@@ -1,127 +1,56 @@
 \name{emWeights}
 \alias{emWeights}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+
+\title{Calculate weights}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Calculates weights for Record Linkage based on the EM algorithm.
 }
 \usage{
-emWeights(rpairs, m = 0.97, cutoff = 0.95, ...)
+emWeights(rpairs, cutoff = 0.95, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{rpairs}{ ~~Describe \code{rpairs} here~~ }
-  \item{m}{ ~~Describe \code{m} here~~ }
-  \item{cutoff}{ ~~Describe \code{cutoff} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
+  \item{rpairs}{Record pairs as \code{\link{RecLinkData}} object}
+  \item{cutoff}{cutoff value for string comparator}
+  \item{\dots}{additional arguments for \code{\link{mygllm}}}
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
+  The weight of a record pair is calculated by \eqn{\log_{2}\frac{M}{U}}{
+  \code{log(M/U,base=2)}}, where M and U are estimated m- and u-probabilities
+  for the present comparison pattern. If a string comparator is used, weights
+  are first calculated based on a binary table where all comparison 
+  values greater or equal \code{cutoff} are set to one, all other to zero.
+  The resulting weight is adjusted by adding for every pair
+  \eqn{\log_{2}\left(\prod_{j:s^{i}_{j}\geq {cutoff}}s^{i}_{j}\right)}{
+  log(prod(s[i,s[i,]>=cutoff]), base = 2)}, where
+  \eqn{s^{i}_{j}}{s[i,j]} is the value of the string metric for attribute j in 
+  data pair i.
+  
+  Estimation of \code{M} and \code{U} are done by \code{link{mygllm}},
+  an adaption of the EM algorithm in package \code{gllm}. For every comparison
+  pattern, the estimated numbers of matches and non-matches are used to compute
+  the corresponding probabilities. An estimation based on the average 
+  frequencies of values and fixed error rates is taken as initial values.
+  Our experience has shown that this increases stability and performance of the
+  EM algorithm while the results are more or less independent of the chosen
+  values.
 }
+
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  A \code{\link{RecLinkResult}} object containing all fields of \code{rpairs}
+  plus the following:
+  \item{M}{Estimated m-probabilities}
+  \item{U}{Estimated u-probabilities}
+  \item{W,Wdata}{Calculated weights}
+  
+  \code{M}, \code{U} and \code{W} correspond to a list of all binary comparision
+  patterns, sorted ascending from all zeroes to all ones. \code{Wdata} 
+  corresponds directly to the record pairs in \code{rpairs$valid}.  
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
+\references{William E. Winkler: Using the EM Algorithm for Weight Computation 
+  in the Fellegi-Sunter Model of Record Linkage, in: Proceedings of the Section 
+  on Survey Research Methods, American Statistical Association 1988, 
+  pp. 667--671}
+\author{Andreas Borg}
+\seealso{\code{\link{emClassify}} for classification of weighted pairs.}
 
- ~Make other sections like Warning with \section{Warning }{....} ~
-}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (rpairs, m=0.97,cutoff=0.95,...)
-{
-    library(e1071)
-# t0=proc.time()
-# print("Datenvorbereitung")
-    pairs=rpairs$valid
-    # ids und Matchingstatus rausnehmen
-    pairs=pairs[,-c(1,2,ncol(pairs))]
-# print(proc.time()-t0)
-# t0=proc.time()
-    pairs=as.matrix(pairs)
-    pairs[is.na(pairs)]=0
-# print("Fuzzy umrechnen")
-    is_fuzzy=!all(is.element(pairs,0:1))
-    if (is_fuzzy)
-    {
-        pairs_fuzzy=pairs
-        pairs=as.array((pairs>=cutoff)*1)
-    }
-# print(proc.time()-t0)
-# t0=proc.time()
-
-# print("Patterns zählen, em vorbereiten")
-    n_data=nrow(pairs)  
-    observed_count=countpattern(pairs)
-    n_attr=ncol(pairs)
-    patterns=bincombinations(n_attr)  # Liste der Patterns
-    x=c(rep(0,nrow(patterns)),rep(1,nrow(patterns)))
-    s=c(1:length(observed_count), 1:length(observed_count))
-    i=rep(1,nrow(patterns)) # Intercept
-    X=cbind(i,x,rbind(patterns,patterns),rbind(patterns,patterns)*x) # Design Matrix
-# print(proc.time()-t0)
-# t0=proc.time()
-
-# print("Häufigkeiten schätzen")
-    u=rpairs$frequencies    
-    m=0.97
-    # Ad-hoc-Schätzung für Anteil an Matchen (Faktor 0.1 relativ beliebig)
-    prob_M=1/sqrt(n_data)*0.1
-    # Anzahl schätzen für Matche
-    init_M=apply(patterns,1,function(a) prod(a*m+(1-a)*(1-m))*n_data*prob_M)
-    init_U=apply(patterns,1,function(a) prod(a*u+(1-a)*(1-u))*n_data*(1-prob_M))
-    expected_count=c(init_U,init_M)
-# print(proc.time()-t0)
-# t0=proc.time()
-
-# print("EM ausführen")   
-    res=mygllm(observed_count,s,X,E=expected_count,...)
-# print(proc.time()-t0)
-# t0=proc.time()
-
-# print("Der Rest")
-    n_patterns=length(res)/2
-
-    # Anteil Matche/Non_Matche in einem Pattern
-    matchrate=res[(n_patterns+1):(2*n_patterns)]/res[1:n_patterns]
-    #matchrate=round(res[(n_patterns+1):(2*n_patterns)])/round(res[1:n_patterns])
-#    o=order(matchrate,res[(n_patterns+1):(2*n_patterns)],decreasing=T)
-
-    n_matches=sum(res[(n_patterns+1):(2*n_patterns)])
-    n_nonmatches=sum(res[1:n_patterns])
-    U=res[1:n_patterns]/n_nonmatches
-    M=res[(n_patterns+1):(2*n_patterns)]/n_matches
-    W=log(M/U, base=2)
-    indices=colSums(t(pairs)*(2^(n_attr:1-1)))+1    
-    ret=rpairs # keeps all components of rpairs
-    ret$M=M
-    ret$U=U
-    ret$W=W
-    ret$Wdata=W[indices]
-    ret$PM=n_matches/n_data
-    ret$res=res
-    if (is_fuzzy)
-    {
-        str_weights=apply(pairs_fuzzy^pairs,1,prod)
-        ret$Wdata=ret$Wdata+log(str_weights, base=2)
-    } 
-#    class(ret)="RecLinkResult"
-# print(proc.time()-t0)
-cat("\n")
-    return(ret)
-  }
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{classif}

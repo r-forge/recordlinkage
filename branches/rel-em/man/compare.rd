@@ -42,9 +42,9 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE, phonetic = FALSE,
               \code{identity[i,]==identity[j,]}. In a linkage process, two 
               records \code{dataset1[i,]} and \code{dataset2[j,]} are a true 
               match if and only if \code{identity1[i,]==identity2[j,]}.}
-  \item{num_non}{Number of non-matches to generate for training set. See details
+  \item{num.non}{Number of non-matches to generate for training set. See details
               for information on training sets.}
-  \item{des_prop}{Desired proportion of matches to non-matches in generated
+  \item{des.prop}{Desired proportion of matches to non-matches in generated
             training set.}
   \item{adjust}{Currently not used.}
 }                  
