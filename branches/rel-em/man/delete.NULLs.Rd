@@ -21,7 +21,7 @@ delete.NULLs(x)
 
 \references{Taken from https://stat.ethz.ch/pipermail/r-help/2006-August/111896.html}
 
-\author{}
+
 \note{This function is internally used for simple lists and vectors. 
   The behaviour for nested lists and vectors embedded in lists is not 
   thorougly tested.

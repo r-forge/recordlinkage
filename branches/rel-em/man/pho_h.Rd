@@ -32,6 +32,5 @@ pho_h(str)
 
 \seealso{\code{\link{jarowinkler}} for string comparison.}
 
-}
 
 \keyword{misc}
