@@ -36,7 +36,7 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE, phonetic = FALSE,
   \item{exclude}{Columns to exclude. A numeric vector of indices of columns
                   which should be excluded from comparision. E.g. useful for
                   external identifiers.}                                                                                                            
-  \item{identity}{Optional logical vectors for identifying true matches and
+  \item{identity, identity1, identity2}{Optional logical vectors for identifying true matches and
               non-matches. In a deduplication process, two records \code{dataset[i,]}
                and \code{dataset[j,]} are a true match if and only if 
               \code{identity[i,]==identity[j,]}. In a linkage process, two 

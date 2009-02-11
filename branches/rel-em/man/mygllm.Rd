@@ -44,6 +44,6 @@ mygllm(y, s, X, maxit = 1000, tol = 1e-05, E = rep(1, length(s)), dec_int_tol = 
             David Duffy (2006). gllm: Generalised log-linear model. R package
             version 0.31.}
 
-\author{Andreas Borg}
+\author{Andreas Borg (R interface and translation to C)}
 
 \seealso{\code{\link[gllm]{emgllm}}}
