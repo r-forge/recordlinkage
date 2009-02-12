@@ -59,7 +59,7 @@
 
 
 compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
-                    phonfun=F, strcmp=FALSE,strcmpfun=FALSE, exclude=F, 
+                    phonfun=pho_h, strcmp=FALSE,strcmpfun=jarowinkler, exclude=F, 
                     identity=NA ,num.non=0, des.prop=0.05, adjust=F)
 {
     # various catching of erronous input
@@ -321,7 +321,7 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 # zweiter kriegt Index des passenden Datums oder 0
 
 compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
-                    phonfun=F, strcmp=FALSE,strcmpfun=FALSE, exclude=F, 
+                    phonfun=pho_h, strcmp=FALSE,strcmpfun=jarowinkler, exclude=F, 
                     identity1=NA, identity2=NA, num.non=0, des.prop=0.05, adjust=F)
 {
     # various catching of erronous input
