@@ -7,11 +7,12 @@
   user-defined thresholds or estimated error rates.
 }
 \usage{
-emClassify(rpairs, threshold.upper = Inf, threshold.lower = threshold.upper, my = Inf, ny = Inf)
+emClassify(rpairs, threshold.upper = Inf, 
+  threshold.lower = threshold.upper, my = Inf, ny = Inf)
 }
 
 \arguments{
-  \item{rpairs}{RecLinkData object with weight information}
+  \item{rpairs}{\code{\link{RecLinkData}} object with weight information}
   \item{my}{error bound for false positives}
   \item{ny}{error bound for false negatives}
   \item{threshold.upper}{threshold for links}
@@ -25,22 +26,26 @@ emClassify(rpairs, threshold.upper = Inf, threshold.lower = threshold.upper, my 
   
   The second approach requires thresholds for links and possible links to be set
   by the user. A pair with weight \eqn{w} is classified as a link if 
-  \eqn{w\geq threshold.upper}{w>=threshold.upper}, as a possible link if 
-  \eqn{threshold.upper\geq w\leq threshold.lower}{threshold.upper>=w>=
-  treshold.lower} and as a non-link if \eqn{w<threshold.lower}{w<threshold.lower}.
+  \eqn{w\geq \textit{threshold.upper}}{w>=\textit{threshold.upper}}, as a possible link if 
+  \eqn{\textit{threshold.upper}\geq w\geq \textit{threshold.lower}}{threshold.upper>=w>=
+  treshold.lower} and as a non-link if \eqn{w<\textit{threshold.lower}}{w<threshold.lower}.
   
   If \code{threshold.upper} or \code{threshold.lower} is given, the 
   threshold-based approach is used, otherwise, if one of the error bounds is
   given, the Fellegi-Sunter model. If only \code{my} is supplied, links are
   chosen to meet the error bound and all other pairs are classified as non-links
   (the equivalent case holds if only \code{ny} is specified). If no further arguments
-  than \code{rpairs} are given, a classification in links and non-links which
-  minimizes the overall error is performed based on the estimated probabilities.
+  than \code{rpairs} are given, a single threshold of 0 is used.
+  
+%- alter Text:  
+%-  , which 
+%-  a classification in links and non-links which
+%-  minimizes the overall error is performed based on the estimated probabilities.
   
 }
 
-\note{While the Fellegi-Sunter method and minimization of the overall error
-  work unsupervised, their quality of classification relies strongly on a good 
+\note{While the Fellegi-Sunter method 
+  works unsupervised, its quality of classification relies strongly on a good 
   estimation of m- and u-probabilities. The results should be evaluated 
   critically.
 }
@@ -59,6 +64,7 @@ emClassify(rpairs, threshold.upper = Inf, threshold.lower = threshold.upper, my 
 \author{Andreas Borg}
 
 \seealso{\code{\link{getPairs}} to produce output from which thresholds can
-  be determined conviniently.}
+  be determined conveniently.}
+  
 \keyword{classif}
 

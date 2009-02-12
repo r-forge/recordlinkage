@@ -9,7 +9,7 @@
 }
 
 \value{
-  \item{data, train, valid, frequencies,identity}{
+  \item{data, train, valid, frequencies}{
     Inherited from \link{RecLinkData}.
   }
 
@@ -18,10 +18,10 @@
     pair in \code{valid}
   }
   
-  \item{model}{The trained classification model. In the case of rpart, bagging,
-    ada and svm this is the predictor returned by the corresponding function, 
-    in the case of epilink, the determined threshold.
-  }
+%-  \item{model}{The trained classification model. In the case of rpart, bagging,
+%-    ada and svm this is the predictor returned by the corresponding function, 
+%-    in the case of epilink, the determined threshold.
+%-  }
   
 }
 

@@ -18,12 +18,12 @@ getPairs(object, threshold_upper = Inf, threshold_lower = -Inf,
   \item{single.rows}{Print record pairs in one row instead of two consecutive.}
   \item{show}{Selects which records to show, one of "links", 
     "nonlinks", "possible", "all".}
-  \item{sort}{Logical. Wether to sort descending by weight.}
+  \item{sort}{Logical. Whether to sort descending by weight.}
 }
 
 \details{
   Input is a \code{\link{RecLinkData}} object for which weights were assigned with 
-  \code{\link{emWeights}}. They are sorted by weight and those for which
+  \code{\link{emWeights}}. Records are sorted by weight and those for which
   the weigth \code{object$Wdata} holds the condition 
   \code{object$Wdata < threshold_upper && object$Wdata >= threshold_lower}
   are returned. 

@@ -8,7 +8,7 @@
 \title{Test data for Record Linkage}
 
 \description{
-  These tables contain artificial personal data of for the 
+  These tables contain artificial personal data for the 
   evaluation of Record Linkage procedures. Some records have been duplicated
   with randomly generated errors. \code{RLdata500} contains 50 duplicates,
   \code{RLdata10000} 1000 duplicates.

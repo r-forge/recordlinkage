@@ -3,7 +3,7 @@
 
 \title{Create Unordered Pairs}
 \description{
-  Creates all unordered pairs of some objects vector or of the first
+  Creates all unordered pairs of some objects or of the first
   \code{x} natural numbers.  
 }
 \usage{

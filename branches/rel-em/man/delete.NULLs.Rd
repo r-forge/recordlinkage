@@ -13,18 +13,19 @@ delete.NULLs(x)
   \item{x}{A vector or list}
 }
 \details{
-  Removes all \code{NULL} elements.
+  Removes all \code{NULL} elements from x.
 }
 \value{
   The returned object has the same type as \code{x}.
 }
 
-\references{Taken from https://stat.ethz.ch/pipermail/r-help/2006-August/111896.html}
+\references{Taken from a posting by Jim Holtman on the R-help mailing list,
+  https://stat.ethz.ch/pipermail/r-help/2006-August/111896.html}
 
 
 \note{This function is internally used for simple lists and vectors. 
   The behaviour for nested lists and vectors embedded in lists is not 
-  thorougly tested.
+  thoroughly tested.
 }
 
 \keyword{misc}

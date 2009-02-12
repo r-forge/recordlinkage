@@ -9,9 +9,9 @@
   \code{\link{RecLinkResult}} objects.}
 
 \usage{
-summary.RecLinkData(object,...)
+\method{summary}{RecLinkData}(object,...)
 
-summary.RecLinkResult(object,...)                    
+\method{summary}{RecLinkResult}(object,...)                    
 }
 
 \arguments{
@@ -29,16 +29,18 @@ summary.RecLinkResult(object,...)
         \item The number of training and validation pairs.
         \item The number of true matches, true non-matches and pairs with unknown
           status in the validation and training set.
+        \item If weights have been calculated for this object, the weight distribution, 
+          represented by the \code{breaks} and \code{counts} vectors 
+          returned by \code{\link{hist}(object$Wdata)}.
+            
        }
        Information on \code{\link{RecLinkResult}} objects includes all of the
        above and the following:
        \itemize{
-          \item The weight distribution, represented by the \code{breaks}
-            and \code{counts} vectors returned by \code{\link{hist}(object$Wdata}.
-            
           \item The number of detected links, non-links and possible links.
           
-          \item Error rates, where alpha error is the ratio of false links
+          \item Error rates, if the true matching status of all record pairs is
+            known.Alpha error is the ratio of false links
             to matches, beta error is the ratio of false non-links to
             non-matches and accuracy the ratio of correctly classified
             pairs to the total number of pairs.
