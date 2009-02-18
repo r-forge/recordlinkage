@@ -1,10 +1,10 @@
 \name{emClassify}
 \alias{emClassify}
 
-\title{Classification of weighted pairs}
+\title{Weight-based Classification of Data Pairs}
 \description{
-  Classifies data pairs weighted by \code{\link{emWeights}} based on
-  user-defined thresholds or estimated error rates.
+  Classifies data pairs to which weights were assigned by \code{\link{emWeights}} 
+  based on user-defined thresholds or estimated error rates.
 }
 \usage{
 emClassify(rpairs, threshold.upper = Inf, 
@@ -20,7 +20,7 @@ emClassify(rpairs, threshold.upper = Inf,
 }
 \details{
   Two general approaches are implemented for classification. The classical procedure
-  by Fellegi and Sunter (see references) minimizes the possibility of
+  by Fellegi and Sunter (see references) minimizes the number of
   possible links with given error levels for false links (\code{my}) and
   false non-links (\code{ny}).
   
@@ -44,8 +44,8 @@ emClassify(rpairs, threshold.upper = Inf,
   
 }
 
-\note{While the Fellegi-Sunter method 
-  works unsupervised, its quality of classification relies strongly on a good 
+\note{The quality of classification of the Fellegi-Sunter method 
+  relies strongly on a good 
   estimation of m- and u-probabilities. The results should be evaluated 
   critically.
 }

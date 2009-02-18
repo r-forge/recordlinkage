@@ -3,7 +3,7 @@
 
 \title{Print a Range of Record Pairs}
 \description{
-  Prints weighted record pairs within a certain weight range for
+  Prints record pairs within a certain weight range for
   threshold assignment.
 }
 \usage{

@@ -8,12 +8,12 @@
    (see references).
 }
 \usage{
-mygllm(y, s, X, maxit = 1000, tol = 1e-05, E = rep(1, length(s)), dec_int_tol = F)
+mygllm(y, s, X, maxit = 1000, tol = 1e-05, E = rep(1, length(s)))
 }
 
 \arguments{
   See \code{\link[gllm]{emgllm}} in package \code{gllm} for detailed description.
- \item{y}{Vector of observed contingencies.}
+ \item{y}{Vector of observed cell frequencies.}
  \item{s}{Scatter matrix. s[i] is the cell in the observed array that
           corresponds to cell i in the full array.}
  \item{X}{Design matrix.}
@@ -21,17 +21,11 @@ mygllm(y, s, X, maxit = 1000, tol = 1e-05, E = rep(1, length(s)), dec_int_tol = 
  \item{tol}{Convergence parameter.}
  \item{E}{Full contingency table. Should be initialized with either ones or
           a priori estimates.}
- \item{dec_int_tol}{Chooses convergence parameter for inner loop (IPF 
-        algorithm), see details.}
 }
 
-\details{Works mostly like \code{\link[gllm]{emgllm}}, with two additions:
-        First, a priori estimates of the full contingencies can be given as
-        start values as argument \code{E}. Second, by specifying 
-        \code{dec_int_tol=TRUE}, a decreasing convergence parameter of value
-        \eqn{max(tol,1/(\textit{number of iterations})^2)}{max(tol,1/(number of iterations)^2)} 
-        can be used
-        for the IFP algorithm (inner loop in mygllm). Both extensions can 
+\details{Works mostly like \code{\link[gllm]{emgllm}}. In addition,
+        a priori estimates of the full contingenciy table can be given as
+        start values for argument \code{E}. This extension can 
         reduce execution time significantly.        
         }
 

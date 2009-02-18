@@ -45,7 +45,7 @@
             non-matches and accuracy the ratio of correctly classified
             pairs to the total number of pairs.
             
-          \item A contingency table counting true matching status against
+          \item A cross-classified table counting true matching status against
             classification, in which \code{NA} represents unknown
             matching status or classification as possible link.
        }

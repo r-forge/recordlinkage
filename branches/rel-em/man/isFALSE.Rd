@@ -3,7 +3,7 @@
 
 \title{Check for FALSE}
 \description{
-  Shortcut for \code{identical{x,FALSE}}
+  Shortcut for \code{identical(x,FALSE)}
 }
 \usage{
 isFALSE(x)

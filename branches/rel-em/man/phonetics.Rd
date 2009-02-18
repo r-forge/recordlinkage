@@ -1,26 +1,33 @@
 \encoding{latin1}
 
-\name{pho_h}
+\name{phonetic}
 \alias{pho_h}
+\alias{soundex}
 
 \title{Phonetic Code}
 \description{
-  Interface to the phonetic coding function by \enc{Jörg}{Joerg} Michael
+  Interface to the phonetic coding functions.
+  
+  
   (see references).
 }
 \usage{
 pho_h(str)
+soundex(str)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{str}{A character vector or matrix.}
 }
 \details{
-  Translates it argument to a phonetic coding. Intended for German language.
+  Translates it argument to a phonetic coding. \code{pho_h}
+  by \enc{Jörg}{Joerg} Michael (see references) is intended for German language,
+  \code{soundex} is a common algorithm for English.
 }
 
 \value{
-  A character vector or matrix with the same size and dimensions as \code{str}.
+  A character vector or matrix with the same size and dimensions as \code{str},
+  containing its phonetic encoding.
 }
 
 \references{\enc{Jörg}{Joerg} Michael, \enc{Doppelgänger}{Doppelgaenger} gesucht

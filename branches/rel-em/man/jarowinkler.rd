@@ -10,7 +10,7 @@
 
 \arguments{
    \item{str1,str2}{Two character vectors to compare.}
-   \item{W_1,W_2,W_3}{Adjustable weights. Default values are usually fine.}
+   \item{W_1,W_2,W_3}{Adjustable weights. See details.}
    \item{r}{Maximum radius of transpositions, as fraction of the length of the 
             shorter string.}
    }
@@ -22,9 +22,10 @@
   The function is vectorized and supports recycling. If both \code{str1} and
   \code{str2} are arrays, their dimensions must agree.}
 
-\value{A numeric vector of the same length and dimensions as the longer
-  one of \code{str1} and \code{str2} with comparison values in the 
-  interval \eqn{[0,1]}{[0,1]}}
+\value{A numeric vector with similarity values in the interval 
+  \eqn{[0,1]}{[0,1]}. The elements of the shorter vector are recycled as 
+  necessary.
+  }
 
 \references{Winkler, W.E.: String Comparator Metrics and Enhanced Decision
 Rules in the Fellegi-Sunter Model of Record Linkage. In: Proceedings
