@@ -23,8 +23,8 @@
   \code{str2} are arrays, their dimensions must agree.}
 
 \value{A numeric vector with similarity values in the interval 
-  \eqn{[0,1]}{[0,1]}. The elements of the shorter vector are recycled as 
-  necessary.
+  \eqn{[0,1]}{[0,1]}. The elements of the shorter vector of \code{str1} and
+  \code{str2} are recycled as necessary.
   }
 
 \references{Winkler, W.E.: String Comparator Metrics and Enhanced Decision

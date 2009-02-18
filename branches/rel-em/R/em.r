@@ -145,13 +145,13 @@ emClassify <- function (rpairs,threshold.upper=Inf,
       threshold.lower=rpairs$W[o][cutoff_lower]
     } # end if
      
-    prediction=as.logical(rep(NA,nrow(rpairs$valid)))
-    prediction[rpairs$Wdata>=threshold.upper]=T
-    prediction[rpairs$Wdata<threshold.lower]=F
+    prediction=rep("P",nrow(rpairs$valid))
+    prediction[rpairs$Wdata>=threshold.upper]="L"
+    prediction[rpairs$Wdata<threshold.lower]="N"
     
     ret=rpairs # keeps all components of rpairs
-    ret$prediction=prediction
-	ret$threshold=threshold.upper
+    ret$prediction=factor(prediction,levels=c("N","P","L"))
+  	ret$threshold=threshold.upper
     class(ret)="RecLinkResult"
     return(ret)
 }

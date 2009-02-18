@@ -20,7 +20,7 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
   \item{dataset}{Table of records to be deduplicated. Either a data frame or 
                  a matrix.} 
   \item{dataset1, dataset2}{Two data sets to be linked.}
-  \item{blockfld}{Blocking field definition. A list of integers vectors
+  \item{blockfld}{Blocking field definition. A list of integer vectors
       corresponding to column numbers. 
                   A record pair is included in the output if
                   and only if for one item of \code{blockfld}, the records
@@ -30,10 +30,9 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
                   phonetic code will be used; if \code{TRUE}, the phonetic code
                   will be used for all columns; if a numeric vector is given, the
                   phonetic code will be used for the specified columns.}
-  \item{phonfun}{Function for phonetic code.}
-  \item{strcmp}{Determines usage of a string metric.}
-  \item{strcmpfun}{User-defined function for string metric. The default function
-    \code{\link{jarowinkler}} is provided in the package.}
+  \item{phonfun}{Function for phonetic code. See details.}
+  \item{strcmp}{Determines usage of a string metric. See details}
+  \item{strcmpfun}{User-defined function for string metric. See details.}
   \item{exclude}{Columns to be excluded. A numeric vector of indices of columns
                   which should be excluded from comparision}                                                                                                            
   \item{identity, identity1, identity2}{Optional numerical vectors for identifying true matches and
@@ -84,8 +83,9 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
   comparison value, where 1 denotes equality of the generated phonetic code.
   A string comparator leads to a fuzzy similarity value in the range $[0,1]$.
   String comparison is not allowed on a field for which a phonetic code
-  is generated. Default functions are provided for German phonetic coding and 
-  Jaro-Winkler string comparison. Please note that phonetic code and string 
+  is generated. For phonetic encoding functions included in the package, 
+  see \link{phonetics}. For the included string comparator, see 
+  \code{\link{jarowinkler}}. Please note that phonetic code and string 
   metrics can slow down the generation of comparison patterns significantly.
   
   User-defined functions for phonetic code and string comparison can be supplied

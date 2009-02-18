@@ -69,9 +69,9 @@ summary.RecLinkResult <- function (object, ...)
 {
     summary.RecLinkData(object,...)
     cat("\n")
-    cat(sprintf("%d links detected",length(which(object$prediction==T))),"\n")
-    cat(sprintf("%d possible links detected",length(which(is.na(object$prediction)))),"\n")
-    cat(sprintf("%d non-links detected",length(which(object$prediction==F))),"\n")
+    cat(sprintf("%d links detected",length(which(object$prediction=="L"))),"\n")
+    cat(sprintf("%d possible links detected",length(which(object$prediction=="P"))),"\n")
+    cat(sprintf("%d non-links detected",length(which(object$prediction=="N"))),"\n")
  
 #     if (!is.null(object$is_match))
 #     {
@@ -88,10 +88,10 @@ summary.RecLinkResult <- function (object, ...)
 #     FP=sum(!is_match & object$prediction) # false positive
 #     TN=sum(!is_match & !object$prediction) # true negative
 #     FN=sum(is_match & !object$prediction) # false negative
-    TP=length(which(object$valid$is_match & object$prediction)) # true positive
-    FP=length(which(!object$valid$is_match & object$prediction)) # false positive
-    TN=length(which(!object$valid$is_match & !object$prediction)) # true negative
-    FN=length(which(object$valid$is_match & !object$prediction)) # false negative
+    TP=length(which(object$valid$is_match & object$prediction=="L")) # true positive
+    FP=length(which(!object$valid$is_match & object$prediction=="L")) # false positive
+    TN=length(which(!object$valid$is_match & object$prediction=="N")) # true negative
+    FN=length(which(object$valid$is_match & object$prediction=="N")) # false negative
     
     alpha=FN/(TP+FN)
     beta=FP/(TN+FP)
@@ -103,6 +103,6 @@ summary.RecLinkResult <- function (object, ...)
     cat("Classification table:\n\n")
 #     print(table(as.logical(object$valid$is_match),as.logical(object$prediction),
 #           dnn=list("true status","prediction"),exclude=NULL))
-    print(table(object$valid$is_match,object$prediction,
-          dnn=list("true status","prediction"),useNA="ifany"))
+    print(table(as.logical(object$valid$is_match),object$prediction,
+          dnn=list("true status","classification"),useNA="ifany"))
 }

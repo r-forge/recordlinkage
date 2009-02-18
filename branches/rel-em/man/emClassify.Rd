@@ -52,9 +52,9 @@ emClassify(rpairs, threshold.upper = Inf,
 
 \value{
   Returns a \code{RecLinkResult} object containing all fields of \code{rpairs}
-  and a logical vector \code{prediction} which contains predictions and corresponds
-  to \code{rpairs$valid}. \code{T} represents a link, \code{F} a non-link and
-  \code{NA} a possible link.
+  and a factor object \code{prediction} which contains predictions and corresponds
+  to \code{rpairs$valid}. \code{"L"} represents a link, \code{"N"} a non-link and
+  \code{"P"} a possible link.
 }
 
 \references{Ivan P. Fellegi, Alan B. Sunter: A Theory for Record Linkage,

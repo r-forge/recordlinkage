@@ -1,15 +1,13 @@
 \encoding{latin1}
 
-\name{phonetic}
+\name{phonetics}
+\alias{phonetics}
 \alias{pho_h}
 \alias{soundex}
 
 \title{Phonetic Code}
 \description{
-  Interface to the phonetic coding functions.
-  
-  
-  (see references).
+  Interface to phonetic coding functions.
 }
 \usage{
 pho_h(str)
@@ -20,9 +18,9 @@ soundex(str)
   \item{str}{A character vector or matrix.}
 }
 \details{
-  Translates it argument to a phonetic coding. \code{pho_h}
+  Translates its argument to a phonetic coding. \code{pho_h}
   by \enc{Jörg}{Joerg} Michael (see references) is intended for German language,
-  \code{soundex} is a common algorithm for English.
+  \code{soundex} is a common algorithm for English names.
 }
 
 \value{

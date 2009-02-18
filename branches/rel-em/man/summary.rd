@@ -46,9 +46,16 @@
             pairs to the total number of pairs.
             
           \item A cross-classified table counting true matching status against
-            classification, in which \code{NA} represents unknown
-            matching status or classification as possible link.
-       }
+            classification. The true matching status is represented as logical
+            values, possibly including \code{NA} for unknown status.
+            Classification results are represented by:
+            \describe{
+              \item{"L"}{for links,}
+              \item{"P"}{for possible links}
+              \item{"N"}{for non-links}
+            }
+
+      }
 }
 
 \value{Used for its side effect.}

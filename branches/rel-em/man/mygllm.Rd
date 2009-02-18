@@ -23,8 +23,8 @@ mygllm(y, s, X, maxit = 1000, tol = 1e-05, E = rep(1, length(s)))
           a priori estimates.}
 }
 
-\details{Works mostly like \code{\link[gllm]{emgllm}}. In addition,
-        a priori estimates of the full contingenciy table can be given as
+\details{Works like \code{\link[gllm]{emgllm}}. In addition,
+        a priori estimates of the full contingency table can be given as
         start values for argument \code{E}. This extension can 
         reduce execution time significantly.        
         }

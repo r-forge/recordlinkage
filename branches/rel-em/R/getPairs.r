@@ -14,9 +14,9 @@ getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
 	ind=which(object$Wdata<threshold_upper & object$Wdata>=threshold_lower)
 	if (!is.null(object$prediction))
 	{
-		show.ind=switch(show,links=which(object$prediction[ind]),
-						nonlinks=which(!object$prediction[ind]),
-               			possible=which(is.na(object$prediction[ind])),TRUE)
+		show.ind=switch(show,links=which(object$prediction[ind]=="L"),
+						nonlinks=which(object$prediction[ind]=="N"),
+               			possible=which(object$prediction[ind]=="P"),TRUE)
 		ind=ind[show.ind]		
 	} else if (!missing(show) && is.null(object$prediction))
 		warning("No prediction vector found, returning all data pairs!")

@@ -14,8 +14,13 @@
   }
 
   
-  \item{prediction}{Logical vector indicating the classification of each record
-    pair in \code{valid}
+  \item{prediction}{Factor object indicating the classification of each record
+    pair in \code{valid}. Levels are:
+    \describe{
+      \item{"L"}{for links,}
+      \item{"P"}{for possible links}
+      \item{"N"}{for non-links}
+    }
   }
   
 %-  \item{model}{The trained classification model. In the case of rpart, bagging,
