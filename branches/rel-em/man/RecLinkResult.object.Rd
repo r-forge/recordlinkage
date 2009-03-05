@@ -9,7 +9,7 @@
 }
 
 \value{
-  \item{data, train, valid, frequencies}{
+  \item{data, pairs, frequencies}{
     Inherited from \link{RecLinkData}.
   }
 
@@ -22,12 +22,7 @@
       \item{"N"}{for non-links}
     }
   }
-  
-%-  \item{model}{The trained classification model. In the case of rpart, bagging,
-%-    ada and svm this is the predictor returned by the corresponding function, 
-%-    in the case of epilink, the determined threshold.
-%-  }
-  
+    
 }
 
 \author{Andreas Borg}

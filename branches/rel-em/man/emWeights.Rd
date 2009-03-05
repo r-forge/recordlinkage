@@ -44,7 +44,7 @@ emWeights(rpairs, cutoff = 0.95, ...)
   
   \code{M}, \code{U} and \code{W} correspond to a list of all binary comparison
   patterns, sorted ascending from all zeroes to all ones. \code{Wdata} 
-  corresponds directly to the record pairs in \code{rpairs$valid}.  
+  corresponds directly to the record pairs in \code{rpairs$pairs}.  
 }
 \references{William E. Winkler: Using the EM Algorithm for Weight Computation 
   in the Fellegi-Sunter Model of Record Linkage, in: Proceedings of the Section 

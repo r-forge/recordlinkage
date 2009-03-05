@@ -8,7 +8,7 @@ unorderedPairs <- function (x)
     return (array(unlist(lapply(1:(n-1),function (k) rbind(x[k],x[(k+1):n]))),dim=c(2,n*(n-1)/2)))
 }
 
-isFALSE <- function(x) identical(x,F)
+isFALSE <- function(x) identical(x,FALSE)
 
 delete.NULLs  <-  function(x)
     x[unlist(lapply(x, length) != 0)]

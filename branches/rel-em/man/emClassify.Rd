@@ -3,7 +3,7 @@
 
 \title{Weight-based Classification of Data Pairs}
 \description{
-  Classifies data pairs to which weights were assigned by \code{\link{emWeights}} 
+  Classifies data pairs to which weights were assigned by \code{\link{emWeights}}
   based on user-defined thresholds or estimated error rates.
 }
 \usage{
@@ -53,7 +53,7 @@ emClassify(rpairs, threshold.upper = Inf,
 \value{
   Returns a \code{RecLinkResult} object containing all fields of \code{rpairs}
   and a factor object \code{prediction} which contains predictions and corresponds
-  to \code{rpairs$valid}. \code{"L"} represents a link, \code{"N"} a non-link and
+  to \code{rpairs$pairs}. \code{"L"} represents a link, \code{"N"} a non-link and
   \code{"P"} a possible link.
 }
 

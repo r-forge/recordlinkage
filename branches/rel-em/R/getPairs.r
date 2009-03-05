@@ -1,6 +1,6 @@
 getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
-					single.rows=F, show="all",
-					sort=T)
+					single.rows=FALSE, show="all",
+					sort=TRUE)
 {
     if (object$type=="deduplication")
     {   
@@ -23,11 +23,11 @@ getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
 
 
     pairs=cbind(Weight=object$Wdata[ind],
-                    data1[object$valid[ind,1],],
-                    data2[object$valid[ind,2],])
+                    data1[object$pairs[ind,1],],
+                    data2[object$pairs[ind,2],])
 	if (sort)
 	{
-    	o=order(pairs$Weight,decreasing=T)
+    	o=order(pairs$Weight,decreasing=TRUE)
     	pairs=pairs[o,]
     }
     
@@ -43,7 +43,7 @@ getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
         
     }
     m=apply(pairs,1,printfun)
-    m=as.data.frame(matrix(m[T],nrow=ncol(m)*2,ncol=nrow(m)/2,byrow=T))
+    m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*2,ncol=nrow(m)/2,byrow=TRUE))
     colnames(m)=c("Weight",colnames(data1))
     return(m)
 }

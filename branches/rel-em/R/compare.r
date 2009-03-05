@@ -1,66 +1,6 @@
-# Bildet Vergleichsmuster von Datensätzen
-# Argumente:
-#   dataset     data frame mit Datensätzen, zeilenweise
-#   blockfld    Liste von Vektor mit Feldern, die zum Blocking verwendet werden.
-#               Ein Vektor enthält jeweils eine Menge von Feldern, die 
-#               gleichzeitig übereinstimmen müssen (Und-Verknüpfung). Für mehrere
-#               Vektoren in der Liste wird das Blocking mehrmals mit den jeweiligen
-#               Kriterien durchgeführt und alle so erhaltenen Mengen von 
-#               Datensatzpaaren in die Ausgabe übernommen (Oder-Verknüpfung).
-#               Wird nur ein Vektor oder Wert eingegeben, so wird dieser in
-#               eine List mit einem Element (der Eingabe selbst) umgewandelt
-#   blockfun    Benutzerdefiniertes Blockingkriterium. Eine Funktion,
-#               die als Argumente zwei Zeilen von dataset hat und TRUE zurückgibt,
-#               falls diese als Paar in die Vergleichsmuster übernommen werden
-#               sollen, ansonsten FALSE.
-#  phonetic     Entweder ein Vektor mit Indizes von Spalten, die vor der Bildung der 
-#               Vergleichsmuster in einen phonetischen Code transformiert werden
-#               sollen, oder TRUE, falls dies für alle Felder geschehen soll, oder
-#               FALSE, falls keine Phonetik verwendet wird.
-#  strcmp       Entweder ein Vektor mit Indizes von Feldern, für die bei der
-#               Bildung der Vergleichsmuster eine Stringmetrik verwendet werden
-#               soll, oder TRUE, falls dies für alle Felder geschehen soll.
-#
-#  strcmpfun    Funktion, die als Argumente zwei Strings hat und einen 
-#               Vergleichswert im Interval [0,1] zurückgibt. Standard: Jaro-Winkler
-#  phonfun      Funktion, die für einen String einen phonetischen Code berechnet
-#               Standard: "Hannoveraner" Phonetik
-#
-#               strcmpfun und phonfun müssen vektorisierbar sein. 
-#
-#  exclude      Vektor mit Indizes von Spalten, die von Paarbildung und Matching
-#               ausgenommen sind. Erlaubt zum Beispiel, externe identifier zu
-#               verwenden.
-#
-#               Indizes, die in exclude erscheinen, sollten nicht in 
-#               phonetic, strcmp und blockfld verwendet werden. Für strcmp
-#               und blockfld werden solche Indizes stillschweigend entfernt,
-#               in blockfld verursachen sie einen Fehler.
-
-# Rückgabe: Stringvergleich gibt bei "NA" 0 zurück!
-
-# blockfun, phonetic: noch nicht implementiert 
-
-# Binär und Fuzzy in Ergebnisliste? (auf Wunsch)
-
-
-
-
-
-
-# Weitere mögliche Parameter:
-#  phonfun         Funktion, die als Argument eine String hat und dessen phonetische
-#                  Codierung zurückgibt.
-
-
-# Rückgabe: Liste mit Elementen patterns (Tabelle aus Vergleichsmustern), 
-# frequencies (durchschnittliche relative Häufigkeiten der Attribute)
-
-
-
 compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
-                    phonfun=pho_h, strcmp=FALSE,strcmpfun=jarowinkler, exclude=F, 
-                    identity=NA ,num.non=0, des.prop=0.05)
+                    phonfun=pho_h, strcmp=FALSE,strcmpfun=jarowinkler, exclude=FALSE, 
+                    identity=NA)
 {
     # various catching of erronous input
     if (!is.data.frame(dataset) && !is.matrix(dataset))
@@ -82,16 +22,7 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     if (max(exclude)>nfields)
         stop ("exclude contains out of bounds index")
 
-    n_matches <- round(des.prop*(num.non))
-    n_train <- num.non+n_matches 
-    if (n_train > ndata)
-        stop("Inconsistent values for training data!")
-    if (des.prop<0 || des.prop >=1)
-        stop("Inconsistent value for link proportion!")
-    
     ret=list()  # return object
-    # rownames(ret$data)=1:ndata
-    # handle excluded columns
     full_data=as.matrix(dataset)
 
 
@@ -115,8 +46,6 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
             strcmp=setdiff(strcmp,exclude)
             strcmp=sapply(strcmp,function(x) return (x-length(which(exclude<x))))       
         }
-        # no longer neccessary:
-        #blockfld=lapply(blockfld,function(x) return (x-length(which(exclude<x))))
     }
     # issue a warning if both phonetics and string metric are used on one field
     if ((length(intersect(phonetic,strcmp))>0 && !isFALSE(strcmp) && !isFALSE(phonetic)) ||
@@ -167,53 +96,21 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
         block_data=full_data
       }
       # for each record, concatenate values in blocking fields
-#       print("blockstr")
       blockstr=apply(block_data,1,function(x) paste(x[blockelem],collapse=" "))
       rm(block_data)
-      # delete.NULLs(tapply(...)) gives for each value of the blocking string
-      # indices of matching records. From these lapply builds record pairs via
-      # unorderedPairs (defined in tools.r). unlist makes a vector from the
-      # resulting list which is reshaped as a matrix in the following line
-#       print("tapply")
-#       ta_res=tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))
-#       print("delete.NULLs")
-#       del_res=delete.NULLs(ta_res)
-#       print("lapply")
-#       la_res=lapply(del_res,unorderedPairs)
-#       print("unlist")
-#       id_vec=unlist(la_res)
-#    browser()
-
-#    browser()
-
-#      print ("tapply")
      id_vec=tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))
-#      print("delete.NULLs")
      id_vec=delete.NULLs(id_vec)
-#      print("lapply")
      id_vec=lapply(id_vec,unorderedPairs)
-#      print("unlist")
      id_vec=unlist(id_vec)
 #     id_vec=unlist(lapply(delete.NULLs(tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))),unorderedPairs))
 
-# alternativ: eine Klammer weniger, spart aber keine Zeit
-#      f=function(x)
-#      {
-#         l=length(x)
-#         if(l>1)
-#             return (unorderedPairs(x))
-#      }
-#      id_vec=unlist(delete.NULLs(tapply(1:ndata,blockstr,f)))
-     
       rm(blockstr)
       # reshape vector and attach to matrix of record pairs
-#       print("pair_ids")
       if (!is.null(id_vec))
-       pair_ids=rbind(pair_ids,matrix(id_vec,nrow=length(id_vec)/2,ncol=2,byrow=T))
+       pair_ids=rbind(pair_ids,matrix(id_vec,nrow=length(id_vec)/2,ncol=2,byrow=TRUE))
        rm(id_vec)
     }
     
-#   print("blocking beendet")
   ret$data=as.data.frame(full_data)
   rm(full_data)
   # return empty data frame if no pairs are obtained
@@ -222,18 +119,11 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
       stop("No pairs generated. Check blocking criteria.")
   }
   
-#     print("vor unique")
     pair_ids=as.matrix(unique(as.data.frame(pair_ids)))  # runs faster with data frame
    } # end else
    
-#     print("nach unique")
-#     print(nrow(pair_ids))
-#     print("merge")
     left=dataset[pair_ids[,1],]
     right=dataset[pair_ids[,2],]
-#     print("nach merge")
-
-#     print("Vergleich")
     # matrix to hold comparison patterns
     patterns=matrix(0,ncol=ncol(left),nrow=nrow(left)) 
     if (isTRUE(strcmp))
@@ -246,67 +136,20 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     } else
     {
        patterns=(left==right)*1
-#          patterns=(as.matrix(left)==as.matrix(right))*1    
     }
     rm(left)
     rm(right)
-#      return(patterns)
-                        
-    #p=as.data.frame(pair_ids)
-    #rm(pair_ids)
 
-#     print("Trainingsdaten ziehen")
-    # Trainingsdaten ziehen
     is_match=identity[pair_ids[,1]]==identity[pair_ids[,2]] # Matchingstatus der Paare
-    match_ids=which(is_match) # Indizes von Matchen
-    non_match_ids=which(!is_match) # Indizes von Non-Matchen
-    if (length(match_ids) < n_matches)
-        warning("Only ", length(match_ids), " Links!")
-    if (length(non_match_ids) < num.non)
-        warning("Only ", length(non_match_ids), " Non-Links!")
-    # sample training data
-    train_ids_match=resample(match_ids,min(n_matches,length(match_ids)))
-    train_ids_non_match=resample(non_match_ids,min(num.non,length(non_match_ids)))
-    valid_ids=setdiff(1:nrow(patterns), c(train_ids_match,train_ids_non_match))
-#     if (length(train_ids_match)+length(train_ids_non_match)!=0)
-#     {
-#         valid_ids=1:nrow(patterns)[-c(train_ids_match,train_ids_non_match)]
-#     } else valid_ids=1:nrow(patterns)
+    ret$pairs=as.data.frame(
+					cbind(pair_ids,
+                    patterns,
+                    is_match)) # Matche
 
-#     p=as.data.frame(pair_ids)
-# 
-#     p[,3:(2+ncol(patterns))]=patterns
-#    patterns=p[order(p[,1],p[,2]),] # muss nicht unbedingt sein, evtl Argument
-#     patterns=p
-#    rm(p)
-#      patterns=cbind(as.data.frame(pair_ids[,-1,drop=F]),as.data.frame(patterns))
-#      patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
-#     print("Daten zusammenführen")
-    train_ids=c(train_ids_match,train_ids_non_match)
-    ret$train=as.data.frame(
-					cbind(pair_ids[train_ids,,drop=F],
-                    patterns[train_ids,,drop=F],
-                    is_match[train_ids])) # Matche
+    colnames(ret$pairs)=c("id1","id2",colnames(dataset),"is_match")
+    rownames(ret$pairs)=NULL
 
-#     print(valid_ids)
-    
-    ret$valid=as.data.frame(
-					cbind(pair_ids[valid_ids,,drop=F],
-                    patterns[valid_ids,,drop=F],
-                    is_match[valid_ids]))
-
-
-
-#     ret$valid=ret$valid[order(ret$valid[,1],ret$valid[,2]),]
-#     ret$train=ret$train[order(ret$train[,1],ret$train[,2]),]
-    colnames(ret$train)=c("id1","id2",colnames(dataset),"is_match")
-    colnames(ret$valid)=colnames(ret$train)
-    rownames(ret$train)=NULL
-    rownames(ret$valid)=NULL
-
-#    rm(patterns)                                         
     ret$frequencies=apply(dataset,2,function(x) 1/length(unique(x)))
-    #ret$identity=identity
     ret$type="deduplication"
     class(ret)="RecLinkData"
     return(ret)
@@ -321,8 +164,8 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 # zweiter kriegt Index des passenden Datums oder 0
 
 compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
-                    phonfun=pho_h, strcmp=FALSE,strcmpfun=jarowinkler, exclude=F, 
-                    identity1=NA, identity2=NA, num.non=0, des.prop=0.05)
+                    phonfun=pho_h, strcmp=FALSE,strcmpfun=jarowinkler, exclude=FALSE, 
+                    identity1=NA, identity2=NA)
 {
     # various catching of erronous input
     if (!is.data.frame(dataset1) && !is.matrix(dataset1))
@@ -349,16 +192,8 @@ compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
     if (max(exclude)>nfields)
         stop ("exclude contains out of bounds index")
 
-    n_matches <- round(des.prop*(num.non))
-    n_train <- num.non+n_matches 
-#     if (n_train > ndata)
-#         stop("Inconsistent values for training data!")
-    if (des.prop<0 || des.prop >=1)
-        stop("Inconsistent value for link proportion!")
     
     ret=list()  # return object
-    # rownames(ret$data)=1:ndata
-    # handle excluded columns
     full_data1=as.matrix(dataset1)
     full_data2=as.matrix(dataset2)
 
@@ -384,8 +219,6 @@ compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
             strcmp=setdiff(strcmp,exclude)
             strcmp=sapply(strcmp,function(x) return (x-length(which(exclude<x))))       
         }
-        # no longer neccessary:
-        #blockfld=lapply(blockfld,function(x) return (x-length(which(exclude<x))))
     }
     # issue a warning if both phonetics and string metric are used on one field
     if ((length(intersect(phonetic,strcmp))>0 && !isFALSE(strcmp) && !isFALSE(phonetic)) ||
@@ -419,12 +252,11 @@ compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
         strcmpfun=jarowinkler
 
         
-# print("blocking beginnt")
    pair_ids=matrix(as.integer(0),nrow=0,ncol=2) # each row holds indices of one record pair
    if (!is.list(blockfld)) blockfld=list(blockfld)
    if (isFALSE(blockfld))
    {  # full outer join
-  	 pairs_ids=merge(1:nrow(dataset1),1:nrow(dataset2),all=T)
+  	 pairs_ids=merge(1:nrow(dataset1),1:nrow(dataset2),all=TRUE)
    } else
    {
     for (blockelem in blockfld) # loop over blocking definitions
@@ -445,45 +277,33 @@ compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
         block_data2=full_data2
       }
       # for each record, concatenate values in blocking fields
-#       print("blockstr")
       blockstr1=apply(block_data1,1,function(x) paste(x[blockelem],collapse=" "))
       blockstr2=apply(block_data2,1,function(x) paste(x[blockelem],collapse=" "))
       rm(block_data1)
       rm(block_data2)
-#	browser()
       id_vec=merge(data.frame(id1=1:ndata1,blockstr=blockstr1),
                    data.frame(id2=1:ndata2,blockstr=blockstr2))[,-1]
 
       rm(blockstr1)
       rm(blockstr2)
       # reshape vector and attach to matrix of record pairs
-#       print("pair_ids")
       if (!is.null(id_vec))
         pair_ids=rbind(pair_ids,id_vec)
       rm(id_vec)
     }
     
-#   print("blocking beendet")
   ret$data1=as.data.frame(full_data1)
   ret$data2=as.data.frame(full_data2)
   rm(full_data1,full_data2)
-  # return empty data frame if no pairs are obtained
   if (length(pair_ids)==0)
   {
       stop("No pairs generated. Check blocking criteria.")
   }
   
-#     print("vor unique")
     pair_ids=unique(as.data.frame(pair_ids))  # runs faster with data frame
   } # end else
-#     print("nach unique")
-#     print(nrow(pair_ids))
-#     print("merge")
-    left=dataset1[pair_ids[,1],,drop=F]
-    right=dataset2[pair_ids[,2],,drop=F]
-#     print("nach merge")
-
-#     print("Vergleich")
+    left=dataset1[pair_ids[,1],,drop=FALSE]
+    right=dataset2[pair_ids[,2],,drop=FALSE]
     # matrix to hold comparison patterns
     patterns=matrix(0,ncol=ncol(left),nrow=nrow(left)) 
     if (isTRUE(strcmp))
@@ -496,67 +316,18 @@ compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
     } else
     {
        patterns=(left==right)*1
-#          patterns=(as.matrix(left)==as.matrix(right))*1    
     }
     rm(left)
     rm(right)
-#      return(patterns)
-                        
-    #p=as.data.frame(pair_ids)
-    #rm(pair_ids)
 
-#     print("Trainingsdaten ziehen")
-    # Trainingsdaten ziehen
     is_match=identity1[pair_ids[,1]]==identity2[pair_ids[,2]] # Matchingstatus der Paare
-    match_ids=which(is_match) # Indizes von Matchen
-    non_match_ids=which(!is_match) # Indizes von Non-Matchen
-    if (length(match_ids) < n_matches)
-        warning("Only ", length(match_ids), " Links!")
-    if (length(non_match_ids) < num.non)
-        warning("Only ", length(non_match_ids), " Non-Links!")
-    # sample training data
-	    train_ids_match=resample(match_ids,min(n_matches,length(match_ids)))
-	    train_ids_non_match=resample(non_match_ids,min(num.non,length(non_match_ids)))
-	    valid_ids=setdiff(1:nrow(patterns), c(train_ids_match,train_ids_non_match))
-#     if (length(train_ids_match)+length(train_ids_non_match)!=0)
-#     {
-#         valid_ids=1:nrow(patterns)[-c(train_ids_match,train_ids_non_match)]
-#     } else valid_ids=1:nrow(patterns)
-
-#     p=as.data.frame(pair_ids)
-# 
-#     p[,3:(2+ncol(patterns))]=patterns
-#    patterns=p[order(p[,1],p[,2]),] # muss nicht unbedingt sein, evtl Argument
-#     patterns=p
-#    rm(p)
-#      patterns=cbind(as.data.frame(pair_ids[,-1,drop=F]),as.data.frame(patterns))
-#      patterns=patterns[order(patterns[,1],patterns[,2]),] # muss nicht unbedingt sein, evtl Argument
-#     print("Daten zusammenführen")
-    train_ids=c(train_ids_match,train_ids_non_match)
-    ret$train=as.data.frame(
-					cbind(pair_ids[train_ids,,drop=F],
-                    patterns[train_ids,,drop=F],
-                    is_match[train_ids])) # Matche
-
-#     print(valid_ids)
-    
-    ret$valid=as.data.frame(
-					cbind(pair_ids[valid_ids,,drop=F],
-                    patterns[valid_ids,,drop=F],
-                    is_match[valid_ids]))
+    ret$pairs=as.data.frame(cbind(pair_ids, patterns, is_match)) # Matche
 
 
+    colnames(ret$pairs)=c("id1","id2",colnames(dataset1),"is_match")
+    rownames(ret$pairs)=NULL
 
-#     ret$valid=ret$valid[order(ret$valid[,1],ret$valid[,2]),]
-#     ret$train=ret$train[order(ret$train[,1],ret$train[,2]),]
-    colnames(ret$train)=c("id1","id2",colnames(dataset1),"is_match")
-    colnames(ret$valid)=colnames(ret$train)
-    rownames(ret$train)=NULL
-    rownames(ret$valid)=NULL
-
-#    rm(patterns)                                         
     ret$frequencies=apply(rbind(dataset1,dataset2),2,function(x) 1/length(unique(x)))
-    #ret$identity=identity
     ret$type="linkage"
     class(ret)="RecLinkData"
     return(ret)

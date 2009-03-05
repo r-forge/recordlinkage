@@ -9,7 +9,7 @@ emWeights <- function (rpairs, cutoff=0.95,...)
     library(e1071)
 # t0=proc.time()
 # print("Datenvorbereitung")
-    pairs=rpairs$valid
+    pairs=rpairs$pairs
     # ids und Matchingstatus rausnehmen
     pairs=pairs[,-c(1,2,ncol(pairs))]
 # print(proc.time()-t0)
@@ -74,8 +74,6 @@ emWeights <- function (rpairs, cutoff=0.95,...)
     ret$U=U
     ret$W=W
     ret$Wdata=W[indices]
-    ret$PM=n_matches/n_data
-    ret$res=res
     if (is_fuzzy)
     {
         str_weights=apply(pairs_fuzzy^pairs,1,prod)
@@ -97,7 +95,7 @@ cat("\n")
 emClassify <- function (rpairs,threshold.upper=Inf, 
                         threshold.lower=threshold.upper,my=Inf, ny=Inf)
 {    
-    o=order(rpairs$W,decreasing=T) # order Weights decreasing
+    o=order(rpairs$W,decreasing=TRUE) # order Weights decreasing
 
     # if no threshold was given, compute them according to the error bounds
     if (missing(threshold.upper) && missing(threshold.lower))
@@ -145,7 +143,7 @@ emClassify <- function (rpairs,threshold.upper=Inf,
       threshold.lower=rpairs$W[o][cutoff_lower]
     } # end if
      
-    prediction=rep("P",nrow(rpairs$valid))
+    prediction=rep("P",nrow(rpairs$pairs))
     prediction[rpairs$Wdata>=threshold.upper]="L"
     prediction[rpairs$Wdata<threshold.lower]="N"
     

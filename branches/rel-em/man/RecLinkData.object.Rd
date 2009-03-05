@@ -13,9 +13,8 @@
   \item{data}{
     Data frame of original records.
   }
-  \item{train,valid}{
-    Data frames of data pairs, split into training and validation set (see note 
-    below). Each row represents the comparison of two records, 
+  \item{pairs}{
+    Data frame of data pairs Each row represents the comparison of two records, 
     identified by columns \code{id1} and \code{id2}. The following columns contain for each
     considered attribute a real number in the range [0..1] representing the degree of
     similarity. These columns are named according to the respective columns in
@@ -33,11 +32,6 @@
   
 }
 
-\note{
-  The possibility to split into training and validation data has no application
-  at the moment, but might be used in later versions of the package. Currently,
-  only the \code{valid} component is used.
-}
 
 \seealso{
 \code{\link{compare.dedup}}, \code{\link{compare.linkage}}

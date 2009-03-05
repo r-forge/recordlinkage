@@ -8,7 +8,7 @@
 }
 \usage{
 getPairs(object, threshold_upper = Inf, threshold_lower = -Inf, 
-         single.rows = F, show = "all", sort = T)
+         single.rows = FALSE, show = "all", sort = TRUE)
 }
 
 \arguments{

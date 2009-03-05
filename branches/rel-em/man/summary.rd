@@ -26,9 +26,9 @@
       
        \itemize{
         \item The number of records.
-        \item The number of training and validation pairs.
+        \item The number of record pairs.
         \item The number of true matches, true non-matches and pairs with unknown
-          status in the validation and training set.
+          status.
         \item If weights have been calculated for this object, the weight distribution, 
           represented by the \code{breaks} and \code{counts} vectors 
           returned by \code{\link{hist}(object$Wdata)}.
