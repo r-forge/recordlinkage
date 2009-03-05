@@ -1,0 +1,44 @@
+\name{genSamples}
+\alias{genSamples}
+
+\title{Generate Training Set}
+\description{
+  Generates training data by unsupervised classification.
+}
+\usage{
+genSamples(dataset, num.non, des.prop = 0.1)
+}
+
+\arguments{
+  \item{dataset}{Object of class \code{\link{RecLinkData}}. Data pairs from 
+                   which to sample.}
+  \item{num.non}{Positive Integer. Number of desired non-links in the training set.}
+  \item{des.prop}{Real number between 0 and 1. Ratio of number of links to
+    number of non-links in the training set.}
+}
+\details{
+  The application of supervised classifiers (via \code{\link{classifyUnsup}})
+  requires a sufficient training set of record pairs with known matching status.
+  Where no such data is available, \code{genSamples} can be used to generate
+  training data. The linkage status is classified based on unsupervised
+  clustering with \code{\link[e1071]{bclust}} and the desired number of links and
+  non-links are sampled.
+}
+\value{
+  A list of \code{\link{RecLinkResult}} objects.
+  \item{train}{The sampled training data.}
+  \item{valid}{All other record pairs}
+  The prediction components represent the clustering result. If weights are
+  present in \code{dataset}, the corresponding fractions of \code{Wdata} are
+  stored to \code{train} and \code{valid}, while \code{M}, \code{U} and
+  \code{W} are copied to both objects.
+}
+
+\author{Andreas Borg}
+\note{
+  Unsupervised clustering may lead to a poor quality of classification, all
+  subsequent results should be evaluated critically!
+}
+\seealso{\code{\link{splitData}} for splitting data sets without clustering.}
+
+\keyword{classif}
