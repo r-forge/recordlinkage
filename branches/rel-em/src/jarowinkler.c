@@ -23,7 +23,12 @@ int getTranspositions(char * common_1, char * common_2, int radius);
 double jaro(char * str_1, char * str_2, 
              double W_1, double W_2, double W_t,
              double r, int use_transpos_radius);
- 
+
+void jarowinkler(char ** strvec_1, char ** strvec_2,
+             int * length_1, int * length_2,
+             double * W_1, double * W_2, double * W_t,
+             double * r, double * ans);
+						  
 
 void jarowinkler(char ** strvec_1, char ** strvec_2,
              int * length_1, int * length_2,
