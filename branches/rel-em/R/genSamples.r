@@ -19,7 +19,7 @@ splitData <- function(dataset,prop,keep.prop=FALSE,num.non=0,des.prop=0,use.pred
 {
 	train=dataset
 	valid=dataset
-    pairs=dataset$pairs
+  pairs=dataset$pairs
 	n_data=nrow(pairs)
 	pairs$is_match=as.logical(pairs$is_match)
 	
@@ -71,11 +71,17 @@ splitData <- function(dataset,prop,keep.prop=FALSE,num.non=0,des.prop=0,use.pred
 		}
 							  						
 		# split weight vector, if present
-		if (!is.null(dataset$W) && !is.null(dataset$Wdata) && 
-			!is.null(dataset$M) && !is.null(dataset$U))
+		if (!is.null(dataset$Wdata))
 		{
 			valid$Wdata=dataset$Wdata[!trainhelp]
 			train$Wdata=dataset$Wdata[trainhelp]
+
+			valid$M=dataset$M
+			valid$U=dataset$U
+			valid$W=dataset$W
+			train$M=dataset$M
+			train$U=dataset$U
+			train$W=dataset$W
 		}
     	return(list(train=train,valid=valid))
 	}
@@ -98,6 +104,12 @@ splitData <- function(dataset,prop,keep.prop=FALSE,num.non=0,des.prop=0,use.pred
 		{
 			train$Wdata=dataset$Wdata[s]
 			valid$Wdata=dataset$Wdata[-s]
+			valid$M=dataset$M
+			valid$U=dataset$U
+			valid$W=dataset$W
+			train$M=dataset$M
+			train$U=dataset$U
+			train$W=dataset$W
 		}
 
 		return (list(train=train, valid=valid))
@@ -126,16 +138,82 @@ splitData <- function(dataset,prop,keep.prop=FALSE,num.non=0,des.prop=0,use.pred
 		}
 							  						
 		# split weight vector, if present
-		if (!is.null(dataset$W) && !is.null(dataset$Wdata) && 
-			!is.null(dataset$M) && !is.null(dataset$U))
+		if (!is.null(dataset$Wdata))
 		{
 			train$Wdata=c(dataset$Wdata[match_ind[s_match]],
 						  	   dataset$Wdata[-match_ind][s_non_match])
 			valid$Wdata=c(dataset$Wdata[match_ind[-s_match]],
 						  	   dataset$Wdata[-match_ind][-s_non_match])
+			valid$M=dataset$M
+			valid$U=dataset$U
+			valid$W=dataset$W
+			train$M=dataset$M
+			train$U=dataset$U
+			train$W=dataset$W
 		}
 
 		return (list(train=train,valid=valid))
 	}
 	
 }
+
+
+getMinimalTrain <- function(rpairs, nEx=1)
+{
+  p=rpairs$pairs
+  # Zeilen markieren, um Paare identifizieren zu können
+  rownames(p)=1:nrow(p)
+  p[is.na(p)]=0
+  # pro vorhandenem Vergleichsmuster werden bis zu nEx
+  # Repräsentanten gezogen
+  trainind=unlist(tapply(1:nrow(p),p[,-c(1,2,ncol(p))],
+    function(x) if (length(x) > 0) return (x[sample(1:length(x),
+      min(length(x),nEx))])
+    else return (NULL),
+    simplify=FALSE))
+  train=rpairs
+  train$pairs=p[trainind,]
+  train$Wdata=rpairs$Wdata[trainind]
+  train$prediction=rpairs$prediction[trainind,]
+  return(train)
+}
+
+
+#splitXValSets <- function (dataset, nXVal=10, keep.prop=TRUE)
+#{
+#  if (length(intersect(class(dataset),c("RecLinkData","RecLinkResult")))==0)
+#    stop("Dataset has illegal class!")
+#  pairs=dataset$pairs
+#	n_data=nrow(pairs)
+#	pairs$is_match=as.logical(pairs$is_match)
+#
+#  retlist=list()
+#
+#	if (isTRUE(keep.prop))
+#	{
+#    # Matche bestimmen und zufällige Permutation erzeugen
+#		match_ind=which(pairs$is_match)
+#		n_matches=length(match_ind)
+#    if (n_matches==0)
+#			stop("No matches found! Call with keep.prop=FALSE.")
+#    match_ind=sample(match_ind,n_matches)
+#
+#    # Non-Matche bestimmen und zufällige Permutation erzeugen
+#		non_match_ind=which(!pairs$is_match)
+#    n_non_matches=length(non_match_ind)
+#		non_match_ind=sample(non_match_ind,n_non_matches)
+#    xval_size_matches=n_matches/nXVal
+#    xval_size_non_matches=n_non_matches/nXVal
+#	  for (i in 1:nXVal)
+#	  {
+#	    xval_ind_matches=match_ind[(1+round((i-1)*xval_size_matches)):round(i*xval_size_matches)];
+#      xval_ind_non_matches=non_match_ind[(1+round((i-1)*xval_size_non_matches)):round(i*xval_size_non_matches)];  
+#    retlist[[i]]=dataset
+#    retlist[[i]]$pairs=dataset$pairs[c(xval_ind_matches,xval_ind_non_matches),];
+#    if (!is.null(dataset$Wdata))  
+#      retlist[[i]]$Wdata=dataset$Wdata[c(xval_ind_matches,xval_ind_non_matches)]
+#	  }
+#	}
+#  return(retlist)
+#}
+#

@@ -95,11 +95,11 @@ cat("\n")
 emClassify <- function (rpairs,threshold.upper=Inf, 
                         threshold.lower=threshold.upper,my=Inf, ny=Inf)
 {    
-    o=order(rpairs$W,decreasing=TRUE) # order Weights decreasing
 
     # if no threshold was given, compute them according to the error bounds
     if (missing(threshold.upper) && missing(threshold.lower))
     {
+      o=order(rpairs$W,decreasing=TRUE) # order Weights decreasing
       FN=rev(cumsum(rev(rpairs$M[o]))) 
       FP=cumsum(rpairs$U[o])
       if (my==Inf && ny==Inf)
@@ -153,6 +153,43 @@ emClassify <- function (rpairs,threshold.upper=Inf,
     class(ret)="RecLinkResult"
     return(ret)
 }
+
+
+optimalThreshold <- function (rpairs, my=NULL, ny=NULL)
+{
+	o=order(rpairs$Wdata,decreasing=TRUE)
+	weights=rpairs$Wdata[o]
+  n_data=length(weights)
+	is_match=rpairs$pairs$is_match[o]
+	FP_err=cumsum(is_match!=1)#/as.numeric(1:n_data)
+  FN_err=rev(cumsum(rev(is_match==1)))#/as.numeric(1:n_data)))
+  error=FP_err+FN_err
+
+    # nun baue Tabelle, in der Gewicht (unique) und Fehlerrate gegenübergestellt
+    # sind. Die Fehlerrate eines Gewichts ist in der sortierten Tabelle gleich
+    # der Fehlerrate für den letzten Datensatz des Blocks
+    # tapply() sortiert aufsteigend, das rev() stellt 
+    # die absteigende Reihenfolge wieder her
+
+    error_unique=rev(tapply(error,weights,tail,1))
+    FP_err_unique=rev(tapply(FP_err/(1:n_data),weights,tail,1))
+    FN_err_unique=rev(tapply(FN_err/(n_data:1),weights,tail,1))
+    
+    weights_unique=unique(weights)
+
+    # Bestimme Gewicht des Datensatzes mit minimalem Fehler.
+
+    if (is.null(my) && is.null(ny))
+      return(as.numeric(weights_unique[which.min(error_unique)]))
+
+    if (!is.null(my))
+      return(tail(as.numeric(weights_unique[FP_err_unique<=my]),1))
+
+    if (!is.null(ny))
+      return(head(as.numeric(weights_unique[FN_err_unique<=ny]),1))
+}
+
+
 
 # EM mit externen Trainingsdaten ist erst mal auf Eis gelegt!
 

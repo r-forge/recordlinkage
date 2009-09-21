@@ -61,3 +61,26 @@ summary.RecLinkResult <- function (object, ...)
     print(table(as.logical(object$pairs$is_match),object$prediction,
           dnn=list("true status","classification"),useNA="ifany"))
 }
+
+texSummary <- function (object)
+{
+    TP=length(which(object$pairs$is_match & object$prediction=="L")) # true positive
+    FP=length(which(!object$pairs$is_match & object$prediction=="L")) # false positive
+    TN=length(which(!object$pairs$is_match & object$prediction=="N")) # true negative
+    FN=length(which(object$pairs$is_match & object$prediction=="N")) # false negative
+    
+    alpha=FN/(TP+FN)
+    beta=FP/(TN+FP)
+    accuracy=(TP+TN)/(TP+TN+FP+FN)
+
+    cat("\\begin{description}\n")
+	cat(sprintf("\\item[alpha error] %f\n",alpha))
+    cat(sprintf("\\item[beta error] %f\n",beta))
+    cat(sprintf("\\item[accuracy] %f\n",accuracy))
+    cat("\\end{description}\n")
+    cat("\n")
+#    cat("Classification table:\n\n")
+    print(xtable(table(as.logical(object$pairs$is_match),object$prediction,
+          dnn=list("true status","classification"),useNA="ifany")),
+          floating=FALSE, latex.environments=NULL)
+}

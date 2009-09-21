@@ -16,13 +16,18 @@ getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
 	{
 		show.ind=switch(show,links=which(object$prediction[ind]=="L"),
 						nonlinks=which(object$prediction[ind]=="N"),
-               			possible=which(object$prediction[ind]=="P"),TRUE)
+               			possible=which(object$prediction[ind]=="P"),
+						FP=which(object$prediction=="L" &
+							object$pairs$is_match==FALSE),
+						FN=which(object$prediction=="N" &
+							object$pairs$is_match==TRUE),
+							
+							TRUE)
 		ind=ind[show.ind]		
 	} else if (!missing(show) && is.null(object$prediction))
 		warning("No prediction vector found, returning all data pairs!")
 
-
-    pairs=cbind(Weight=object$Wdata[ind],
+    pairs=data.frame(Weight=object$Wdata[ind],
                     data1[object$pairs[ind,1],],
                     data2[object$pairs[ind,2],])
 	if (sort)
@@ -47,3 +52,35 @@ getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
     colnames(m)=c("Weight",colnames(data1))
     return(m)
 }
+
+editMatch <- function (rpairs)
+{
+  if (rpairs$type=="deduplication")
+  {
+      data1=rpairs$data
+      data2=data1
+  } else
+  {
+      data1=rpairs$data1
+      data2=rpairs$data2
+  }
+  p=data.frame(data1[rpairs$pairs[,1],],
+                   data2[rpairs$pairs[,2],],
+                   matrix("",nrow=nrow(rpairs$pairs),
+                      ncol=ncol(rpairs$data)))
+
+  # die komplizierten Umwandlungen sind so begründet: Um in der Spalte
+  # "is_match" Leerzeichen zu haben (ein Wert bezieht sich immer auf zwei
+  # Zeilen, dazu kommt eine Leerzeile), muss der Wertetyp Faktor sein. Dieser
+  # muss am Ende wieder auf TRUE/FALSE umgewandelt werden.
+  p=matrix(as.matrix(t(p))[TRUE],nrow=nrow(p)*3,byrow=TRUE)
+  # unlist(lapply) statt sapply, weil man sonst eine Matrix bekommt
+  p=data.frame(p,is_match=unlist(lapply(rpairs$pairs$is_match,function(x) c(x,"",""))))
+  colnames(p)=c(colnames(data1),"is_match")
+  p=edit(p)
+  is_match=p[seq(1,nrow(p)-2,3),"is_match"]
+  is_match=as.integer(levels(is_match)[as.integer(is_match)])
+  rpairs$pairs$is_match
+  return(rpairs)
+}
+

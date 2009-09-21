@@ -31,7 +31,8 @@
 #     return (classify.single.svm(rpairs,gamma=fitted$g,epsilon=fitted$e,cost=fitted$c))
 # }
 
-trainSupv <- function(dataset,method,use.pred=FALSE,omit.possible=TRUE,convert.na=TRUE,...)
+trainSupv <- function(dataset,method,use.pred=FALSE,omit.possible=TRUE,
+                convert.na=TRUE, include.data=FALSE, ...)
 {
 	pairs=dataset$pairs[,-c(1:2)]
 	if (convert.na)
@@ -58,8 +59,11 @@ trainSupv <- function(dataset,method,use.pred=FALSE,omit.possible=TRUE,convert.n
 		bagging=bagging(is_match ~ .,data=pairs,method="class",...),
 		nnet=nnet(is_match ~ .,data=pairs,size=ncol(pairs)*2, ...),
 		warning("Illegal method"))
-		
-	ret=list(train=dataset,model=model,method=method)
+  ret=list()
+ 	if (isTRUE(include.data))
+	   ret$train=dataset
+  ret$model=model
+  ret$method=method
 	class(ret)="RecLinkClassif"
     return(ret)
 
@@ -69,19 +73,18 @@ trainSupv <- function(dataset,method,use.pred=FALSE,omit.possible=TRUE,convert.n
 classifySupv <- function(model,newdata,...)
 {
 	ret=newdata
-	if (ncol(model$train$pairs)!=ncol(newdata$pairs))
-		stop ("Mismatching number of attributes!")
 
     x=newdata$pairs[,-c(1,2,ncol(newdata$pairs))]
 	x[is.na(x)]=0
 
     predict=switch(model$method,
-		svm=predict(model$model, newdata=x,...),       
-		rpart=predict(model$model, newdata=x,type="class",...),       
-		ada=predict(model$model, newdata=x,type="class",...),       
-		bagging=predict(model$model, newdata=x,type="class",...),
-		nnet=predict(model$model, newdata=x,type="class",...))			       
-    ret$prediction=predict
+  		svm=predict(model$model, newdata=x,...),       
+	 	 rpart=predict(model$model, newdata=x,type="class",...),       
+		  ada=predict(model$model, newdata=x,type="vector",...),       
+		  bagging=predict(model$model, newdata=x,type="class",...),
+		  nnet=predict(model$model, newdata=x,type="class",...))
+    # refactor to ensure uniform order of levels
+    ret$prediction=factor(predict,levels=c("N","P","L"))
     class(ret)="RecLinkResult"
     return(ret)
 }
@@ -102,6 +105,8 @@ classifyUnsup <- function(dataset, method,...)
 		link=ifelse(sum(clust$centers[1,])>sum(clust$centers[2,]),1,2)
 		dataset$prediction=rep("N",length(y))
 		dataset$prediction[y==link]="L"
+    # refactor to ensure uniform order of levels
+    dataset$prediction=factor(dataset$prediction,levels=c("N","P","L"))
 		class(dataset)="RecLinkResult"
 		return(dataset)	
 	}
