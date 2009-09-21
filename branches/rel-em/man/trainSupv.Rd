@@ -6,19 +6,21 @@
   Trains a classifier for supervised classification of record pairs.
 }
 \usage{
-trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE, convert.na = TRUE, ...)
+trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE, 
+  convert.na = TRUE, include.data = FALSE, ...)
 }
 
 \arguments{
   \item{dataset}{Object of class \code{\link{RecLinkData}}. Training data.}
   \item{method}{The classification method to use. One of \code{"svm"},
     \code{"rpart"},\code{"ada"},\code{"bagging"},\code{"nnet"}}
-  \item{use.pred}{Logical. Wether to use result of previous classification 
+  \item{use.pred}{Logical. Whether to use result of previous classification 
     instead of true matching status.}
-  \item{omit.possible}{Logical. Wether to remove pairs labeled as possible
+  \item{omit.possible}{Logical. Whether to remove pairs labeled as possible
     links or with unknown status.}
-  \item{convert.na}{Logical. Wether to convert \code{NA}s to 0 in the
+  \item{convert.na}{Logical. Whether to convert \code{NA}s to 0 in the
     comparison patterns.}
+  \item{include.data}{Logical. Whether to include training data in the result.}
   \item{\dots}{Further arguments for the training method.}
 }
 \details{
@@ -45,11 +47,16 @@ trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE, convert.na = 
   are excluded from the trainings set. Setting this argument to \code{FALSE}
   allows three-class-classification (links, non-links and possible links), but
   the results are usually poor.
+  
+  Leaving \code{include.data=FALSE} saves memory, setting it to \code{TRUE}
+  can be useful for saving the classificator while keeping track of the
+  underlying training data.
 }
 
 \value{
   An object of class \code{RecLinkClassif} with the following components:
-  \item{train}{A copy of \code{dataset}.}
+  \item{train}{If \code{include.data} is \code{TRUE}, a copy of \code{dataset},
+    otherwise an empty data frame with the same column names.}
   \item{model}{The model returned by the underlying training function.}
   \item{method}{A copy of the argument \code{method}}
 }

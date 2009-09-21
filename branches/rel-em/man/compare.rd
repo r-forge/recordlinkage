@@ -8,11 +8,12 @@
 
 compare.dedup (dataset, blockfld = FALSE, phonetic = FALSE, 
   phonfun = pho_h, strcmp = FALSE, strcmpfun = jarowinkler, exclude = FALSE,
-  identity = NA)
+  identity = NA, n_match = NA, n_non_match = NA)
 
 compare.linkage (dataset1, dataset2, blockfld = FALSE, 
   phonetic = FALSE, phonfun = pho_h, strcmp = FALSE, 
-  strcmpfun = jarowinkler, exclude = FALSE, identity1 = NA, identity2 = NA)
+  strcmpfun = jarowinkler, exclude = FALSE, identity1 = NA, identity2 = NA,
+  n_match = NA, n_non_match = NA)
 }
 
 \arguments{
@@ -40,6 +41,8 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
               \code{identity[i,]==identity[j,]}. In a linkage process, two 
               records \code{dataset1[i,]} and \code{dataset2[j,]} are a true 
               match if and only if \code{identity1[i,]==identity2[j,]}.}
+  \item{n_match, n_non_match}{Number of desired matches and non-matches in
+      the result.}
 }
 
 \value{An object of class \code{RecLinkPairs} with the following components:
@@ -67,6 +70,12 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
   combined. Blocking can be omitted, which leads to a large number of record
   pairs (\eqn{\frac{n(n-1)}{2}}{n*(n-1)/2} where \eqn{n} is the number of
   records.).
+  
+  As an alternative to blocking, a determined number of \code{n_match} matches 
+  and \code{n_non_match} non-matches can be drawn if \code{identity} of
+  \code{identity1} and \code{identity2} are supplied. This can be useful for
+  generating training sets for the supervised classificators (see 
+  \code{\link{trainSupv}}.
   
   Fields can be excluded from the linkage process by supplying their column
   index in the vector \code{exclude}, which is espacially useful for

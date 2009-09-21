@@ -20,11 +20,11 @@
   \code{r} see the referenced article. For most applications, the default 
   values are okay.
   The function is vectorized and supports recycling. If both \code{str1} and
-  \code{str2} are arrays, their dimensions must agree.}
+  \code{str2} are arrays, their dimensions must agree.  The elements of the 
+  shorter vector of \code{str1} and \code{str2} are recycled as necessary.}
 
 \value{A numeric vector with similarity values in the interval 
-  \eqn{[0,1]}{[0,1]}. The elements of the shorter vector of \code{str1} and
-  \code{str2} are recycled as necessary.
+  \eqn{[0,1]}{[0,1]}.
   }
 
 \references{Winkler, W.E.: String Comparator Metrics and Enhanced Decision
@@ -33,5 +33,15 @@ of the Section on Survey Research Methods, American Statistical Association
 (1990), S. 354-369}
 
 \author{Andreas Borg}
+
+\examples{
+# compare two strings:
+jarowinkler("Andreas","Anreas")
+# compare one string with several others:
+jarowinkler("Andreas",c("Anreas","Andeas"))
+# compare two vectors of strings:
+jarowinkler(c("Andreas","Borg"),c("Andreas","Bork"))
+}
+
 \keyword{misc}
 
