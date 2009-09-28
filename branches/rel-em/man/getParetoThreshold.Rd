@@ -1,3 +1,4 @@
+\encoding{latin1}
 \name{getParetoThreshold}
 \Rdversion{1.1}
 \alias{getParetoThreshold}
@@ -49,13 +50,17 @@ getParetoThreshold(rpairs, quantil = 0.95, interval = NA)
   The resulting threshold.
 }
 \references{
-  Ergänzen!
+  Sariyar et al.: Bestimmung der False Match-Rate im Fellegi-Sunter-Modell 
+  mittels verallgemeinerte Paretoverteilung, Presentation for
+  54. Jahrestagung der Deutschen Gesellschaft für Medizinische 
+  Informatik, Biometrie und Epidemiologie e.V. (GMDS).
 }
 \author{
   Andreas Borg
 }
 \note{
-  TODO: warnen vor schlechten Ergebnissen
+  The quality of matching varies, poor results can occur in some cases. 
+  Evaluate carefully before applying to a real case.
 }
 
 

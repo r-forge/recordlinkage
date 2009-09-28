@@ -5,11 +5,12 @@
 \title{
   Estimate Threshold from Pareto Distribution
 }
-\description{
-  
+\description{Fits weights to a Pareto distribution and calculates a quantil
+  on the fitted model as classification threshold.  
 }
+
 \usage{
-gpdEst(Wdata, thresh = -Inf, quantil = 0.95, scale = NA, shape = NA)
+gpdEst(Wdata, thresh = -Inf, quantil = 0.95)
 }
 
 \arguments{
