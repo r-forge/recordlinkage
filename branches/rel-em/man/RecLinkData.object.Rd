@@ -18,7 +18,8 @@
     identified by columns \code{id1} and \code{id2}. The following columns contain for each
     considered attribute a real number in the range [0..1] representing the degree of
     similarity. These columns are named according to the respective columns in
-    \code{data}.
+    \code{data}. The last column contains the matching status of the pair,
+    coded as 1 for a match or 0 for a non-match.
   }
   \item{frequencies}{Numeric vector with average frequency of values for each column 
     included in \code{pairs} (reciprocal of number of distinct values).
@@ -28,7 +29,7 @@
 
   Furthermore, the components \code{M}, \code{U}, \code{W} and \code{Wdata}
   are present if weights have been calculated. See
-  \code{\link{emWeights}} for details.
+  \code{\link{emWeights}} and \code{\link{epiWeights}} for details.
   
 }
 
