@@ -84,3 +84,20 @@ texSummary <- function (object)
           dnn=list("true status","classification"),useNA="ifany")),
           floating=FALSE, latex.environments=NULL)
 }
+
+errorMeasures <- function(result)
+{
+  TP=length(which(result$pairs$is_match & result$prediction=="L")) # true positive
+  FP=length(which(!result$pairs$is_match & result$prediction=="L")) # false positive
+  TN=length(which(!result$pairs$is_match & result$prediction=="N")) # true negative
+  FN=length(which(result$pairs$is_match & result$prediction=="N")) # false negative
+    
+  return(list(
+    alpha=FN/(TP+FN),
+    beta=FP/(TN+FP),
+    accuracy=(TP+TN)/(TP+TN+FP+FN),
+    precision=TP/(TP+FP),
+    sensitivity=TP/(TP+FN),
+    specificity=TN/(TN+FP)
+  ))
+}
