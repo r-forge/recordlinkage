@@ -1,4 +1,4 @@
-# varios utility functions
+# tools.r: varios utility functions
 
 unorderedPairs <- function (x) 
 {

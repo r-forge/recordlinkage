@@ -1,3 +1,5 @@
+# summary.r: various functions to print summarized information on an object
+
 summary.RecLinkData <- function(object,...)
 {
     if (object$type=="linkage")

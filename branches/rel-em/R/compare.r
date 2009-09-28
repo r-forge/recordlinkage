@@ -1,3 +1,5 @@
+# compare.r: Functions to group records to pairs.
+
 compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
                     phonfun=pho_h, strcmp=FALSE,strcmpfun=jarowinkler, exclude=FALSE, 
                     identity=NA, n_match=NA, n_non_match=NA)

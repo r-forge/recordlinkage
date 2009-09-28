@@ -1,3 +1,5 @@
+# phonetic.r: functions for phonetic coding
+
 pho_h <- function(str)
 {
    if (is.factor(str))

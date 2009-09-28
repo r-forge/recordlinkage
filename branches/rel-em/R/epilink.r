@@ -1,8 +1,8 @@
+# epilink.r: Functions for the Epilink matching procedure
+# See Continiero et al.: The EpiLink record linkage software, in:
+# Methods of Information in Medicine 2005, 44(1):66-71.
 
-# Arguments:
-#
-#   rpairs  data pairs (class RecLinkPairs)
-#   e       error rate
+
 epiWeights <- function (rpairs, e=0.01, f=rpairs$frequencies)
 {
 

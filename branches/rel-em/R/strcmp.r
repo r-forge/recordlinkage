@@ -1,3 +1,5 @@
+# strcmp.r: functions for string comparison
+
 jarowinkler <- function(str1, str2, W_1=1/3, W_2=1/3, W_3=1/3, r=0.5)
 {
    if (is.array(str1) && is.array(str2) && dim(str1)!=dim(str2))

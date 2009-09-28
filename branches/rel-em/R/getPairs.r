@@ -1,3 +1,5 @@
+# getPairs.r: functions to view and edit record pairs
+
 getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
 					single.rows=FALSE, show="all",
 					sort=TRUE)

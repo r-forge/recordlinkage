@@ -1,3 +1,4 @@
+# em.r: Functions for Record Linkage with weights calculated by the EM algorithm
 
 # Arguments:
 #

@@ -1,3 +1,5 @@
+# evt.r: Functions for applying Extreme Value Theory to Record Linkage
+
 # simplified version of mrl.plot in package ismev
 mrl<-
 function(data, umin = min(data), umax = max(data) - 0.1, nint = 

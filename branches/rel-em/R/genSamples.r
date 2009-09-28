@@ -1,3 +1,6 @@
+# genSamples.r: functions to extract subsets of data sets 
+# (e.g. for training sets)
+
 genSamples = function (dataset, num.non, des.prop=0.1)
 {   
 
