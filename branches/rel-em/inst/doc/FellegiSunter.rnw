@@ -1,5 +1,9 @@
 % \VignetteIndexEntry{Fellegi-Sunter Deduplication}
 
+<<echo=false,results=hide>>=
+options(width=50)
+@
+
 \documentclass[a4paper]{article}
 
 \usepackage[ansinew]{inputenc}
