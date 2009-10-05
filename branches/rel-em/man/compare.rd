@@ -31,7 +31,8 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
                   will be used for all columns; if a numeric vector is given, the
                   phonetic code will be used for the specified columns.}
   \item{phonfun}{Function for phonetic code. See details.}
-  \item{strcmp}{Determines usage of a string metric. See details}
+  \item{strcmp}{Determines usage of a string metric. Used in the same manner
+                as \code{phonetic}}
   \item{strcmpfun}{User-defined function for string metric. See details.}
   \item{exclude}{Columns to be excluded. A numeric vector of indices of columns
                   which should be excluded from comparision}                                                                                                            
@@ -69,13 +70,13 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
   given by the \code{blockfld} argument, while multiple blocking criteria can be 
   combined. Blocking can be omitted, which leads to a large number of record
   pairs (\eqn{\frac{n(n-1)}{2}}{n*(n-1)/2} where \eqn{n} is the number of
-  records.).
+  records).
   
   As an alternative to blocking, a determined number of \code{n_match} matches 
-  and \code{n_non_match} non-matches can be drawn if \code{identity} of
+  and \code{n_non_match} non-matches can be drawn if \code{identity} or
   \code{identity1} and \code{identity2} are supplied. This can be useful for
   generating training sets for the supervised classificators (see 
-  \code{\link{trainSupv}}.
+  \code{\link{trainSupv}}).
   
   Fields can be excluded from the linkage process by supplying their column
   index in the vector \code{exclude}, which is espacially useful for
@@ -88,8 +89,9 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
   A string comparator leads to a fuzzy similarity value in the range $[0,1]$.
   String comparison is not allowed on a field for which a phonetic code
   is generated. For phonetic encoding functions included in the package, 
-  see \link{phonetics}. For the included string comparator, see 
-  \code{\link{jarowinkler}}. Please note that phonetic code and string 
+  see \link{phonetics}. For the included string comparators, see 
+  \code{\link{jarowinkler}} and \code{\link{levenshteinSim}}. 
+  Please note that phonetic code and string 
   metrics can slow down the generation of comparison patterns significantly.
   
   User-defined functions for phonetic code and string comparison can be supplied

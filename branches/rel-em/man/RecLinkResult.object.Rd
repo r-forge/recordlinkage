@@ -10,16 +10,16 @@
 
 \value{
   \item{data, pairs, frequencies}{
-    Inherited from \link{RecLinkData}.
+    Inherited from \code{\link{RecLinkData}}.
   }
 
   
   \item{prediction}{Factor object indicating the classification of each record
     pair in \code{valid}. Levels are:
     \describe{
-      \item{"L"}{for links,}
-      \item{"P"}{for possible links}
-      \item{"N"}{for non-links}
+      \item{\code{"L"}}{for links,}
+      \item{\code{"P"}}{for possible links}
+      \item{\code{"N"}}{for non-links}
     }
   }
     

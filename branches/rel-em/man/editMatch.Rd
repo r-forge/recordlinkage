@@ -6,7 +6,7 @@
   Edit Matching Status
 }
 \description{
-  Allows editing the matching status of record pairs manually.
+  Allows editing the matching status of record pairs.
 }
 \usage{
 editMatch(rpairs)
@@ -19,10 +19,10 @@ editMatch(rpairs)
 }
 
 \details{
-  This function brings up an editor (via \code{\link{edit}} where each record
-  pair in \code{rpairs} is printed in two consecutive lines, seperated by blank
+  This function brings up an editor (via \code{\link{edit}}) where each record
+  pair in \code{rpairs} is printed in two consecutive lines, pairs seperated by blank
   lines. The matching status is printed and can be edited in the last column
-  following the respective first record. A match is denoted by 1, a non-match
+  following the first respective record. A match is denoted by 1, a non-match
   by 0. \code{NA}s are possible to mark pairs with unkown status. Changes in
   other fields are ignored.
   

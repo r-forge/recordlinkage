@@ -18,7 +18,7 @@ levenshteinSim(str1, str2)
 }
 
 \details{
-  The similarity of two strings is computed by
+  The similarity of two strings is computed by \cr
   \code{1-(\link{levenshteinDist}(str1,str2)/pmax(nchar(str1),nchar(str2))))},
   which returns a number from 0 (maximal disagreement) and 1 (equality).
   The function is vectorized and supports recycling. If both \code{str1} and

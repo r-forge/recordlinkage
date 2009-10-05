@@ -19,7 +19,7 @@ genSamples(dataset, num.non, des.prop = 0.1)
 \details{
   The application of supervised classifiers (via \code{\link{classifyUnsup}})
   requires a sufficient training set of record pairs with known matching status.
-  Where no such data is available, \code{genSamples} can be used to generate
+  Where no such data are available, \code{genSamples} can be used to generate
   training data. The linkage status is classified based on unsupervised
   clustering with \code{\link[e1071]{bclust}} and the desired number of links and
   non-links are sampled.
@@ -28,16 +28,17 @@ genSamples(dataset, num.non, des.prop = 0.1)
   A list of \code{\link{RecLinkResult}} objects.
   \item{train}{The sampled training data.}
   \item{valid}{All other record pairs}
-  The prediction components represent the clustering result. If weights are
+  Record pairs are split into the respective \code{pairs} components.
+  The \code{prediction} components represent the clustering result. If weights are
   present in \code{dataset}, the corresponding fractions of \code{Wdata} are
-  stored to \code{train} and \code{valid}, while \code{M}, \code{U} and
-  \code{W} are copied to both objects.
+  stored to \code{train} and \code{valid}. All other components are copied
+  from \code{dataset}.
 }
 
 \author{Andreas Borg}
 \note{
   Unsupervised clustering may lead to a poor quality of classification, all
-  subsequent results should be evaluated critically!
+  subsequent results should be evaluated critically.
 }
 \seealso{\code{\link{splitData}} for splitting data sets without clustering.}
 

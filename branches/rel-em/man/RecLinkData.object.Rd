@@ -4,7 +4,7 @@
   Record Linkage Data Object 
 }
 \description{
-  An object representing information about compared records for Record
+  An object representing information about record pairs for Record
   Linkage, as returned by functions \code{\link{compare.dedup}} and
   \code{\link{compare.linkage}}. 
 }
@@ -14,7 +14,7 @@
     Data frame of original records.
   }
   \item{pairs}{
-    Data frame of data pairs Each row represents the comparison of two records, 
+    Data frame of data pairs. Each row represents the comparison of two records, 
     identified by columns \code{id1} and \code{id2}. The following columns contain for each
     considered attribute a real number in the range [0..1] representing the degree of
     similarity. These columns are named according to the respective columns in
@@ -25,7 +25,8 @@
     included in \code{pairs} (reciprocal of number of distinct values).
   }
   \item{type}{Character string identifying whether a linkage
-    ("linkage") or a deduplication ("dedup") project is represented.}
+    (\code{"linkage"}) or a deduplication (\code{"dedup"}) project is 
+    represented.}
 
   Furthermore, the components \code{M}, \code{U}, \code{W} and \code{Wdata}
   are present if weights have been calculated. See

@@ -31,12 +31,13 @@ classifyUnsup(dataset, method, ...)
 
 \value{
   An object of class \code{\link{RecLinkResult}} with the classification
-  result stored in the \code{prediction} component.
+  result stored in the \code{prediction} component, otherwise a copy of
+  \code{dataset}.
 }
 
 \author{Andreas Borg}
 
-\seealso{\code{\link{trainSupv}} and \link{classifySupv} for supervised
+\seealso{\code{\link{trainSupv}} and \code{\link{classifySupv}} for supervised
   classification.}
 
 \examples{

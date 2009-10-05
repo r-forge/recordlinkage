@@ -30,7 +30,7 @@
 \references{Winkler, W.E.: String Comparator Metrics and Enhanced Decision
 Rules in the Fellegi-Sunter Model of Record Linkage. In: Proceedings
 of the Section on Survey Research Methods, American Statistical Association
-(1990), S. 354-369}
+(1990), S. 354--369.}
 
 \author{Andreas Borg}
 

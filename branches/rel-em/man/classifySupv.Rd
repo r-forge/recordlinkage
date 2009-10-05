@@ -14,7 +14,7 @@ classifySupv(model, newdata, ...)
     trained model. See \code{\link{trainSupv}}.}
   \item{newdata}{Object of type \code{\link{RecLinkData}}. The data to
     classify.}
-  \item{\dots}{Further arguments for \code{\link{predict}}}
+  \item{\dots}{Further arguments for \code{\link{predict}}.}
 }
 
 \details{
@@ -26,13 +26,14 @@ classifySupv(model, newdata, ...)
 
 \value{
   An object of class \code{\link{RecLinkResult}} with the classification
-  result stored in the \code{prediction} component.
+  result stored in the \code{prediction} component, otherwise a copy of
+  \code{newdata}.
 }
 
 \author{Andreas Borg}
 
 \seealso{\code{\link{trainSupv}} for training of classifiers,
-         \code{\link{classifyUnsup} for unsupervised classification}
+         \code{\link{classifyUnsup} for unsupervised classification.}
          }
 \examples{
 # Split data into training and validation set, train and classify with rpart

@@ -12,11 +12,9 @@ delete.NULLs(x)
 \arguments{
   \item{x}{A vector or list}
 }
-\details{
-  Removes all \code{NULL} elements from x.
-}
+
 \value{
-  The returned object has the same type as \code{x}.
+  A copy of \code{x} with \code{NULL} values removed.
 }
 
 \references{Taken from a posting by Jim Holtman on the R-help mailing list,

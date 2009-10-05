@@ -40,7 +40,7 @@
           \item The number of detected links, non-links and possible links.
           
           \item Error rates, if the true matching status of all record pairs is
-            known.Alpha error is the ratio of false links
+            known. Alpha error is the ratio of false links
             to matches, beta error is the ratio of false non-links to
             non-matches and accuracy the ratio of correctly classified
             pairs to the total number of pairs.
@@ -50,9 +50,9 @@
             values, possibly including \code{NA} for unknown status.
             Classification results are represented by:
             \describe{
-              \item{"L"}{for links,}
-              \item{"P"}{for possible links}
-              \item{"N"}{for non-links}
+              \item{\code{"L"}}{for links,}
+              \item{\code{"P"}}{for possible links}
+              \item{\code{"N"}}{for non-links}
             }
 
       }

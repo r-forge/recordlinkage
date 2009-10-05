@@ -13,7 +13,7 @@ trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE,
 \arguments{
   \item{dataset}{Object of class \code{\link{RecLinkData}}. Training data.}
   \item{method}{The classification method to use. One of \code{"svm"},
-    \code{"rpart"},\code{"ada"},\code{"bagging"},\code{"nnet"}}
+    \code{"rpart"},\code{"ada"},\code{"bagging"},\cr \code{"nnet"}}
   \item{use.pred}{Logical. Whether to use result of previous classification 
     instead of true matching status.}
   \item{omit.possible}{Logical. Whether to remove pairs labeled as possible
@@ -21,7 +21,7 @@ trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE,
   \item{convert.na}{Logical. Whether to convert \code{NA}s to 0 in the
     comparison patterns.}
   \item{include.data}{Logical. Whether to include training data in the result.}
-  \item{\dots}{Further arguments for the training method.}
+  \item{\dots}{Further arguments to the training method.}
 }
 \details{
   The given dataset is used as training data for a supervised classification.
@@ -31,6 +31,7 @@ trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE,
   argument \code{use.pred} has to be set to \code{TRUE}.
   
   The supported classifiers, as identified by \code{method} are:
+
   \describe{
     \item{svm}{Support vector machine, see \code{\link[e1071]{svm}}.}
     \item{rpart}{Recursive partitioning tree, see \code{\link{rpart}}.}
@@ -58,7 +59,7 @@ trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE,
   \item{train}{If \code{include.data} is \code{TRUE}, a copy of \code{dataset},
     otherwise an empty data frame with the same column names.}
   \item{model}{The model returned by the underlying training function.}
-  \item{method}{A copy of the argument \code{method}}
+  \item{method}{A copy of the argument \code{method}.}
 }
 
 \author{Andreas Borg}

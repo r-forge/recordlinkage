@@ -23,17 +23,18 @@ errorMeasures(result)
   i. e. there must be no other values than 0 or 1 in 
   \code{result$pairs$is_match}.
   
-  Let \eqn{TP} be the number of correctly classified matches (true positives),
-  \eqn{TN} the number of correctly classified non-matches (true negatives),
-  \eqn{FP} and \eqn{FN} the number of misclassified non-matches and matches
+  Let \eqn{\mathit{TP}}{TP} be the number of correctly classified matches 
+  (true positives), \eqn{\mathit{TN}}{TN} the number of correctly classified 
+  non-matches (true negatives), \eqn{\mathit{FP}}{FP} and \eqn{\mathit{FN}}{FN} 
+  the number of misclassified non-matches and matches
   (false positives and false negatives). The calculated error measures are:
   \describe{
-    \item{alpha error}{\eqn{\frac{FN}{TP+FN}}{FN/(TP+FN)}}
-    \item{beta error}{\eqn{\frac{FP}{TN+FP}}{FP/(TN+FP)}}
-    \item{accuracy}{\eqn{\frac{TP+TN}{TP+TN+FP+FN}}{(TP+TN)/(TP+TN+FP+FN)}}
-    \item{precision}{\eqn{\frac{TP}{TP+FP}}{TP/(TP+FP)}}
-    \item{sensitivity}{\eqn{\frac{TP}{TP+FN}}{TP/(TP+FN)}}
-    \item{specificity}{\eqn{\frac{TN}{TN+FP}}{TN/(TN+FP)}}
+    \item{alpha error}{\eqn{\frac{\mathit{FN}}{\mathit{TP}+\mathit{FN}}}{FN/(TP+FN)}}
+    \item{beta error}{\eqn{\frac{\mathit{FP}}{\mathit{TN}+\mathit{FP}}}{FP/(TN+FP)}}
+    \item{accuracy}{\eqn{\frac{\mathit{TP}+\mathit{TN}}{\mathit{TP}+\mathit{TN}+\mathit{FP}+\mathit{FN}}}{(TP+TN)/(TP+TN+FP+FN)}}
+    \item{precision}{\eqn{\frac{\mathit{TP}}{\mathit{TP}+\mathit{FP}}}{TP/(TP+FP)}}
+    \item{sensitivity}{\eqn{\frac{\mathit{TP}}{\mathit{TP}+\mathit{FN}}}{TP/(TP+FN)}}
+    \item{specificity}{\eqn{\frac{\mathit{TN}}{\mathit{TN}+\mathit{FP}}}{TN/(TN+FP)}}
   }
 }
 \value{
@@ -43,7 +44,7 @@ errorMeasures(result)
 }
 
 \author{
-  Andreas Borg
+  Murat Sariyar, Andreas Borg
 }
 
 \keyword{classif}

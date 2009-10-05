@@ -9,9 +9,10 @@
 emWeights(rpairs, cutoff = 0.95, ...)
 }
 \arguments{
-  \item{rpairs}{Record pairs as \code{\link{RecLinkData}} object}
-  \item{cutoff}{cutoff value for string comparator}
-  \item{\dots}{additional arguments for \code{\link{mygllm}}}
+  \item{rpairs}{\code{\link{RecLinkData}} object. The record pairs for which to
+    compute weights.}
+  \item{cutoff}{Numeric value between 0 and 1. Cutoff value for string comparator.}
+  \item{\dots}{Additional arguments for \code{\link{mygllm}}.}
 }
 \details{
   The weight of a record pair is calculated by \eqn{\log_{2}\frac{M}{U}}{
@@ -30,9 +31,8 @@ emWeights(rpairs, cutoff = 0.95, ...)
   pattern, the estimated numbers of matches and non-matches are used to compute
   the corresponding probabilities. An estimation based on the average 
   frequencies of values and fixed error rates is taken as initial values.
-  Our experience has shown that this increases stability and performance of the
-  EM algorithm while the results are more or less independent of the chosen
-  values.
+  In our experience, this increases stability and performance of the
+  EM algorithm.
 }
 
 \value{
@@ -49,7 +49,7 @@ emWeights(rpairs, cutoff = 0.95, ...)
 \references{William E. Winkler: Using the EM Algorithm for Weight Computation 
   in the Fellegi-Sunter Model of Record Linkage, in: Proceedings of the Section 
   on Survey Research Methods, American Statistical Association 1988, 
-  pp. 667--671}
+  pp. 667--671.}
 \author{Andreas Borg}
 \seealso{\code{\link{emClassify}} for classification of weighted pairs.}
 

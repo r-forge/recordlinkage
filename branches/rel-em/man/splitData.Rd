@@ -7,23 +7,21 @@
 }
 
 \usage{
-splitData(dataset, prop, keep.prop = FALSE, num.non = 0, des.prop = 0, use.pred = FALSE)
+splitData(dataset, prop, keep.prop = FALSE, num.non = 0, des.prop = 0, 
+use.pred = FALSE)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{dataset}{Object of class \code{\link{RecLinkData}}. Data pairs to split.}
   \item{prop}{Real number between 0 and 1. Proportion of data pairs to form the training set.}
   \item{keep.prop}{Logical. Whether the ratio of matches should be retained.}
-  \item{num.non}{Positive Integer. Desired number on non-matches in the training set}
+  \item{num.non}{Positive Integer. Desired number on non-matches in the training set.}
   \item{des.prop}{Real number between 0 and 1. Desired proportion of matches to
                   non-matches in the training set.}
   \item{use.pred}{Logical. Whether to apply match ratio to previous classification 
                  results instead of true matching status.}
 }
 
-\details{
-
-}
 \value{
   A list of \code{\link{RecLinkData}} objects.
   \item{train}{The sampled training data.}
@@ -44,7 +42,7 @@ data(RLdata500)
 pairs=compare.dedup(RLdata500, identity=identity.RLdata500, 
   blockfld=list(1,3,5,6,7))
 
-# split into halves, not consider match ratio
+# split into halves, do not enforce match ratio
 l=splitData(pairs, prop=0.5)
 summary(l$train)
 summary(l$valid)

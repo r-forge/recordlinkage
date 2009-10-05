@@ -12,11 +12,11 @@ emClassify(rpairs, threshold.upper = Inf,
 }
 
 \arguments{
-  \item{rpairs}{\code{\link{RecLinkData}} object with weight information}
-  \item{my}{error bound for false positives}
-  \item{ny}{error bound for false negatives}
-  \item{threshold.upper}{threshold for links}
-  \item{threshold.lower}{threshold for possible links}
+  \item{rpairs}{\code{\link{RecLinkData}} object with weight information.}
+  \item{my}{A probability. Error bound for false positives.}
+  \item{ny}{A probability. Error bound for false negatives.}
+  \item{threshold.upper}{A numeric value. Threshold for links.}
+  \item{threshold.lower}{A numeric value. Threshold for possible links.}
 }
 \details{
   Two general approaches are implemented for classification. The classical procedure
@@ -59,7 +59,7 @@ emClassify(rpairs, threshold.upper = Inf,
 
 \references{Ivan P. Fellegi, Alan B. Sunter: A Theory for Record Linkage,
   in: Journal of the American Statistical Association Vol. 64, No. 328 
-  (Dec., 1969), pp. 1183-1210.}
+  (Dec., 1969), pp. 1183--1210.}
 
 \author{Andreas Borg}
 

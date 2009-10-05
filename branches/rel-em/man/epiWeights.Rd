@@ -33,7 +33,7 @@ epiWeights(rpairs, e = 0.01, f = rpairs$frequencies)
   \deqn{\frac{\sum_{i}w_{i}s(x^{1}_{i},x^{2}_{i})}{\sum_{i}w_{i}}}{sum_i (w_1 * s(x1_i, x2_i)) / sum_i w_i}
   where \eqn{s(x^{1}_{i},x^{2}_{i})}{s(x1_i, x2_i)} is the value of a string comparison of
   records \eqn{x^{1}}{x1} and \eqn{x^{2}}{x2} in the i-th field and 
-  \eqn{w_{i}}{w_i} is a weighting computed by 
+  \eqn{w_{i}}{w_i} is a weighting factor computed by 
   \deqn{w_{i}=\log_{2}(1-e_{i})/f_{i}}{w_i = log_2 (1-e_i) / f_i}
    where \eqn{f_{i}}{f_i} denotes the
   average frequency of values and \eqn{e_{i}}{e_i} the estimated error rate
@@ -51,13 +51,13 @@ epiWeights(rpairs, e = 0.01, f = rpairs$frequencies)
   
 }
 \value{
-  A copy of \code{rpairs} with the calculated weights stored in field
+  A copy of \code{rpairs} with the calculated weights stored in component
   \code{rpairs$Wdata}.
 }
 
 \references{
 P. Contiero et al., The EpiLink record linkage software, in: Methods of 
-Information in Medicine 2005, 44 (1), 66-71.
+Information in Medicine 2005, 44 (1), 66--71.
 }
 \author{
 Andreas Borg

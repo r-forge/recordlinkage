@@ -14,11 +14,10 @@ isFALSE(x)
 }
 
 \value{
-  Returns \code{TRUE} if and only if \code{x} is \code{FALSE}, \code{FALSE}
+  Returns \code{TRUE} if \code{x} is identical to \code{FALSE}, \code{FALSE}
   otherwise.
 }
 \author{Andreas Borg}
 
-\seealso{\code{\link{identical}},\code{\link{isTRUE}}}
 
 \keyword{misc}

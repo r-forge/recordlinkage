@@ -17,9 +17,11 @@ epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper)
 \arguments{
   \item{rpairs}{
     \code{\link{RecLinkData}} object. Record pairs to be classified.}
-  \item{threshold.upper}{Threshold for links.}
-  \item{threshold.lower}{Threshold for possible links.}
+  \item{threshold.upper}{A numeric value between 0 and 1. Threshold for links.}
+  \item{threshold.lower}{A numeric value between 0 and 1. Threshold for 
+    possible links.}
 }
+
 \details{
   The object \code{rpairs} must have weights calculated by \code{\link{epiWeights}},
   stored in component \code{Wdata}. All record pairs with weights greater or
@@ -28,9 +30,10 @@ epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper)
   \code{threshold.lower} are classified as possible links. All remaining
   records are classified as non-links.
 }
+
 \value{
-  A \code{\link{RecLinkResult}} object which is a copy of \code{rpairs}
-  with classification results stored in \code{rpairs$prediction}.
+  A \code{\link{RecLinkResult}} object with classification results stored in 
+  component \code{prediction}, otherwise a copy of \code{rpairs}.
 }
 
 \author{

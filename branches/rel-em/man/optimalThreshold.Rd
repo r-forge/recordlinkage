@@ -17,10 +17,10 @@ optimalThreshold(rpairs, my = NULL, ny = NULL)
     a threshold.
 }
   \item{my}{
-    Error bound for false posicives.
+    A probability. Error bound for false posicives.
 }
   \item{ny}{
-    Error bound for false negatives.
+    A probability. Error bound for false negatives.
 }
 }
 \details{
@@ -45,7 +45,7 @@ optimalThreshold(rpairs, my = NULL, ny = NULL)
   possible links).
 }
 \value{
-  A numeric value.
+  A numeriv value, the calculated threshold.
 }
 
 \author{

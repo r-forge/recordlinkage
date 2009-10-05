@@ -32,8 +32,8 @@ getParetoThreshold(rpairs, quantil = 0.95, interval = NA)
 
 \details{
   This threshold calculation is based on the assumption that weights in
-  the 'middle' range (the region of 'possible links' in classical Record 
-  Linkage) form a 'fat tail' and can be fitted to a generalized Pareto 
+  the `middle' range (the region of 'possible links' in classical Record 
+  Linkage) form a `fat tail' and can be fitted to a generalized Pareto 
   distribution (GPD). The limits of the interval which is subject to
   fitting are usually determined by reviewing a mean residual life plot of
   the data. If not supplied, a MRL plot is displayed from which the endpoints

@@ -31,7 +31,8 @@ gpdEst(Wdata, thresh = -Inf, quantil = 0.95)
   generalized Pareto distribution (GPD). The estimated parameters \code{shape}
   and \code{shape} are used to calculate a classification threshold by the
   formula
-  \deqn{thresh+\frac{scale}{shape}((\frac{n}{k}(1-quantil))^{-shape} -1)}{
+  \deqn{\mathit{thresh}+\frac{\mathit{scale}}{\mathit{shape}}
+    ((\frac{n}{k}(1-\mathit{quantil}))^{-\mathit{shape}} -1)}{
   thresh+scale/shape*((n/k*(1-quantil))^(-shape) -1)}  
   where \eqn{n} is the total number of weights and \eqn{k} the number of
   exceedances.
