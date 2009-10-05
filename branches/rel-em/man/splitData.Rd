@@ -25,13 +25,14 @@ splitData(dataset, prop, keep.prop = FALSE, num.non = 0, des.prop = 0, use.pred 
 
 }
 \value{
-  A list of \code{\link{RecLinkResult}} objects.
+  A list of \code{\link{RecLinkData}} objects.
   \item{train}{The sampled training data.}
   \item{valid}{All other record pairs}
-  The prediction components represent the clustering result. If weights are
-  present in \code{dataset}, the corresponding fractions of \code{Wdata} are
-  stored to \code{train} and \code{valid}, while \code{M}, \code{U} and
-  \code{W} are copied to both objects.
+
+  The sampled data are stored in the \code{pairs} attributes of \code{train} 
+  and \code{valid}. If present, the attributes \code{prediction} and \code{Wdata} 
+  are split and the corresponding fractions saved. All other attributes are
+  copied to both data sets.
 }
 
 \author{Andreas Borg, Murat Sariyar}
