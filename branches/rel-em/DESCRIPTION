@@ -3,6 +3,9 @@ Version: 0.2-0
 Title: Record Linkage in R
 Author: Andreas Borg <borg@imbei.uni-mainz.de>, Murat Sariyar <sariyar@imbei.uni-mainz.de>,  
 Maintainer: Andreas Borg <borg@imbei.uni-mainz.de>
-Description: Record Linkage in R
+Description: Provides functions for linking and deduplicating data sets.
+  Methods based on the stochastical approach by Fellegi and Sunter
+  are implemented as well as classification algorithms from the machine
+  learning domain. 
 License: GPL (version 2 or later)
 Depends: R (>= 2.8.0), e1071, rpart, ada, ipred, stats, xtable, evd
