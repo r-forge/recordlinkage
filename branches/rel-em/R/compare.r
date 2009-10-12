@@ -107,8 +107,6 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 		for (i in 1:n_non_match)
 		{
 			if (i %% 100 == 0)
-#			 cat(sprintf("%d Non-Matche gezogen\r",i))
-        message(sprintf("%d Non-Matche gezogen",i))
 			repeat
 		 	{
 		  		d1=sample(ndata,1)
