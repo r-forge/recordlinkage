@@ -1,7 +1,7 @@
 # genSamples.r: functions to extract subsets of data sets 
 # (e.g. for training sets)
 
-genSamples = function (dataset, num.non, des.prop=0.1)
+genSamples = function (dataset, num.non, des.mprop=0.1)
 {   
 
 	
@@ -12,13 +12,13 @@ genSamples = function (dataset, num.non, des.prop=0.1)
 #     ddpairs <- emWeights(datapairs)
 # 	ddclass <- emClassify(ddpairs)
 	ddclass=classifyUnsup(dataset,method="bclust")    
-  return(splitData(ddclass, use.pred=TRUE, num.non=num.non, des.prop=des.prop))
+  return(splitData(ddclass, use.pred=TRUE, num.non=num.non, des.mprop=des.mprop))
 }
     
     
 
 
-splitData <- function(dataset,prop,keep.prop=FALSE,num.non=0,des.prop=0,use.pred=FALSE)
+splitData <- function(dataset,prop,keep.mprop=FALSE,num.non=0,des.mprop=0,use.pred=FALSE)
 {
 	train=dataset
 	valid=dataset
@@ -34,15 +34,15 @@ splitData <- function(dataset,prop,keep.prop=FALSE,num.non=0,des.prop=0,use.pred
 		pairs$is_match=dataset$prediction=="L"
 	}
 
-	if (!missing(num.non) && !missing(des.prop))
+	if (!missing(num.non) && !missing(des.mprop))
 	{
    	 	#ids=as.matrix(ret$pairs[,c(1:2)]) # any filters will be set
     	ids <- seq(from=1,to=n_data)
-	    nlink <- round(des.prop*(num.non)) 
+	    nlink <- round(des.mprop*(num.non)) 
 	    ngesamt <- num.non+nlink 
 	    if (ngesamt > n_data)
 			stop("Inconsistent values for training data!")
-	    if (des.prop<0 || des.prop >=1)
+	    if (des.mprop<0 || des.mprop >=1)
 			stop("Inconsistent value for link proportion!")		
 
     	linksid <- ids[pairs$is_match]
@@ -89,7 +89,7 @@ splitData <- function(dataset,prop,keep.prop=FALSE,num.non=0,des.prop=0,use.pred
     	return(list(train=train,valid=valid))
 	}
 
-	if (isFALSE(keep.prop))
+	if (isFALSE(keep.mprop))
 	{
 		s=sample(1:n_data,n_data*prop)
 		train$pairs=dataset$pairs[s,]
@@ -118,12 +118,12 @@ splitData <- function(dataset,prop,keep.prop=FALSE,num.non=0,des.prop=0,use.pred
 		return (list(train=train, valid=valid))
 	}
 	
-	if (isTRUE(keep.prop))
+	if (isTRUE(keep.mprop))
 	{
 		match_ind=which(as.logical(pairs$is_match))
 		n_match=length(match_ind)
 		if (n_match==0)
-			stop("No matches found! Call with keep.prop=FALSE.")
+			stop("No matches found! Call with keep.mprop=FALSE.")
 		s_match=sample(1:n_match,n_match*prop)
 		s_non_match=sample(1:(n_data-n_match),(n_data-n_match)*prop)
 		train$pairs=rbind(dataset$pairs[match_ind[s_match],],
@@ -181,42 +181,3 @@ getMinimalTrain <- function(rpairs, nEx=1)
   return(train)
 }
 
-
-#splitXValSets <- function (dataset, nXVal=10, keep.prop=TRUE)
-#{
-#  if (length(intersect(class(dataset),c("RecLinkData","RecLinkResult")))==0)
-#    stop("Dataset has illegal class!")
-#  pairs=dataset$pairs
-#	n_data=nrow(pairs)
-#	pairs$is_match=as.logical(pairs$is_match)
-#
-#  retlist=list()
-#
-#	if (isTRUE(keep.prop))
-#	{
-#    # Matche bestimmen und zufällige Permutation erzeugen
-#		match_ind=which(pairs$is_match)
-#		n_matches=length(match_ind)
-#    if (n_matches==0)
-#			stop("No matches found! Call with keep.prop=FALSE.")
-#    match_ind=sample(match_ind,n_matches)
-#
-#    # Non-Matche bestimmen und zufällige Permutation erzeugen
-#		non_match_ind=which(!pairs$is_match)
-#    n_non_matches=length(non_match_ind)
-#		non_match_ind=sample(non_match_ind,n_non_matches)
-#    xval_size_matches=n_matches/nXVal
-#    xval_size_non_matches=n_non_matches/nXVal
-#	  for (i in 1:nXVal)
-#	  {
-#	    xval_ind_matches=match_ind[(1+round((i-1)*xval_size_matches)):round(i*xval_size_matches)];
-#      xval_ind_non_matches=non_match_ind[(1+round((i-1)*xval_size_non_matches)):round(i*xval_size_non_matches)];  
-#    retlist[[i]]=dataset
-#    retlist[[i]]$pairs=dataset$pairs[c(xval_ind_matches,xval_ind_non_matches),];
-#    if (!is.null(dataset$Wdata))  
-#      retlist[[i]]$Wdata=dataset$Wdata[c(xval_ind_matches,xval_ind_non_matches)]
-#	  }
-#	}
-#  return(retlist)
-#}
-#
