@@ -1,37 +1,37 @@
 # getPairs.r: functions to view and edit record pairs
 
-getPairs <- function(object,threshold_upper=Inf,threshold_lower=-Inf,
+getPairs <- function(rpairs,threshold_upper=Inf,threshold_lower=-Inf,
 					single.rows=FALSE, show="all",
 					sort=TRUE)
 {
-    if (object$type=="deduplication")
+    if (rpairs$type=="deduplication")
     {   
-        data1=object$data
+        data1=rpairs$data
         data2=data1
     } else
     {
-        data1=object$data1
-        data2=object$data2
+        data1=rpairs$data1
+        data2=rpairs$data2
     }
-	ind=which(object$Wdata<threshold_upper & object$Wdata>=threshold_lower)
-	if (!is.null(object$prediction))
+	ind=which(rpairs$Wdata<threshold_upper & rpairs$Wdata>=threshold_lower)
+	if (!is.null(rpairs$prediction))
 	{
-		show.ind=switch(show,links=which(object$prediction[ind]=="L"),
-						nonlinks=which(object$prediction[ind]=="N"),
-               			possible=which(object$prediction[ind]=="P"),
-						FP=which(object$prediction=="L" &
-							object$pairs$is_match==FALSE),
-						FN=which(object$prediction=="N" &
-							object$pairs$is_match==TRUE),
+		show.ind=switch(show,links=which(rpairs$prediction[ind]=="L"),
+						nonlinks=which(rpairs$prediction[ind]=="N"),
+               			possible=which(rpairs$prediction[ind]=="P"),
+						FP=which(rpairs$prediction=="L" &
+							rpairs$pairs$is_match==FALSE),
+						FN=which(rpairs$prediction=="N" &
+							rpairs$pairs$is_match==TRUE),
 							
 							TRUE)
 		ind=ind[show.ind]		
-	} else if (!missing(show) && is.null(object$prediction))
+	} else if (!missing(show) && is.null(rpairs$prediction))
 		warning("No prediction vector found, returning all data pairs!")
 
-    pairs=data.frame(Weight=object$Wdata[ind],
-                    data1[object$pairs[ind,1],],
-                    data2[object$pairs[ind,2],])
+    pairs=data.frame(Weight=rpairs$Wdata[ind],
+                    data1[rpairs$pairs[ind,1],],
+                    data2[rpairs$pairs[ind,2],])
 	if (sort)
 	{
     	o=order(pairs$Weight,decreasing=TRUE)
