@@ -14,7 +14,7 @@ classifySupv(model, newdata, ...)
     trained model. See \code{\link{trainSupv}}.}
   \item{newdata}{Object of type \code{\link{RecLinkData}}. The data to
     classify.}
-  \item{\dots}{Further arguments for \code{\link{predict}}.}
+  \item{\dots}{Further arguments for the \code{\link{predict}} function.}
 }
 
 \details{
@@ -25,9 +25,9 @@ classifySupv(model, newdata, ...)
 }
 
 \value{
-  An object of class \code{\link{RecLinkResult}} with the classification
-  result stored in the \code{prediction} component, otherwise a copy of
-  \code{newdata}.
+  A \code{\link{RecLinkResult}} object which is a copy of \code{newdata},
+  except for element \code{rpairs$prediction}, which stores the classification
+  result.
 }
 
 \author{Andreas Borg}
@@ -40,7 +40,7 @@ classifySupv(model, newdata, ...)
 data(RLdata500)
 pairs=compare.dedup(RLdata500, identity=identity.RLdata500,
                     blockfld=list(1,3,5,6,7))
-l=splitData(pairs, prop=0.5, keep.prop=TRUE)                    
+l=splitData(pairs, prop=0.5, keep.mprop=TRUE)                    
 model=trainSupv(l$train, method="rpart", minsplit=5)
 result=classifySupv(model=model, newdata=l$valid)
 summary(result)

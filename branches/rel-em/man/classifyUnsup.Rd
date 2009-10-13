@@ -7,11 +7,11 @@
 }
 
 \usage{
-classifyUnsup(dataset, method, ...)
+classifyUnsup(rpairs, method, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{dataset}{Object of type \code{\link{RecLinkData}}. The data to
+  \item{rpairs}{Object of type \code{\link{RecLinkData}}. The data to
     classify.}
   \item{method}{The classification method to use. One of \code{"kmeans"},
     \code{"bclust"}.}
@@ -19,7 +19,7 @@ classifyUnsup(dataset, method, ...)
 }
 \details{
   A clustering algorithm is applied to find two clusters in the record pairs. 
-  The cluster further from 0 (i.e. representing higher similarity values) is
+  The cluster further from the origin (i.e. representing higher similarity values) is
   interpreted as the set of links, the other as the set of non-links.
   
   Supported methods are:
@@ -32,7 +32,7 @@ classifyUnsup(dataset, method, ...)
 \value{
   An object of class \code{\link{RecLinkResult}} with the classification
   result stored in the \code{prediction} component, otherwise a copy of
-  \code{dataset}.
+  \code{rpairs}.
 }
 
 \author{Andreas Borg}

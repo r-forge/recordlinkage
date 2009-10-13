@@ -10,13 +10,13 @@ options(width=50)
 
 \begin{document}
 
-\title{Example Session for Fellegi-Sunter Deduplication}
+\title{Example Session for Weight Based Deduplication}
 \author{Andreas Borg}
 \maketitle
 
 This document shows an example session using the package 
-\textit{RecordLinkage}. A single data set is deduplicated using a 
-Fellegi-Sunter approach with weight calculation by the EM algorithm.
+\textit{RecordLinkage}. A single data set is deduplicated using the EM 
+algorithm for weight calculation.
 Conducting linkage of two data sets differs only in the step of generating
 record pairs.
 
@@ -24,6 +24,7 @@ record pairs.
 
 <<results=hide,echo=false>>=
 library(RecordLinkage)
+library(xtable)
 @
 
 The data to be deduplicated is expected to reside in a data frame or matrix,
@@ -48,7 +49,8 @@ summary(pairs)
 
 \section{Weight calculation}
 
-Weights are calculated with the EM algorithm. This step might take a while.
+Weights are calculated with the EM algorithm. This step is computationally
+intensive and might take a while.
 The histogram shows the resulting weight distribution.
 <<>>=
 pairs=emWeights(pairs)
@@ -60,9 +62,9 @@ hist(pairs$Wdata, plot=FALSE)
 For determining thresholds, 
 record pairs within a given range of weights can be printed using 
 \texttt{getPairs}\footnote{The output of \texttt{getPairs} is shortened in this
-document.}. In this case, 11 is set as upper and lower threshold,
-dividing links from non-links. The summary shows that 36 matches were correctly
-classified while 10 matches were not detected.
+document.}. In this case, the value $11$ is set as upper and lower threshold,
+dividing links from non-links. The summary shows the resulting contingency table
+and error measures.
 
 
 <<results=hide>>=

@@ -6,14 +6,14 @@
   Generates training data by unsupervised classification.
 }
 \usage{
-genSamples(dataset, num.non, des.prop = 0.1)
+genSamples(dataset, num.non, des.mprop = 0.1)
 }
 
 \arguments{
   \item{dataset}{Object of class \code{\link{RecLinkData}}. Data pairs from 
                    which to sample.}
   \item{num.non}{Positive Integer. Number of desired non-links in the training set.}
-  \item{des.prop}{Real number between 0 and 1. Ratio of number of links to
+  \item{des.mprop}{Real number between 0 and 1. Ratio of number of links to
     number of non-links in the training set.}
 }
 \details{

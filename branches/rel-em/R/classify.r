@@ -1,16 +1,16 @@
 # classify.r: Functions for Record Linkage with machine learning algorithms.
 
-trainSupv <- function(dataset,method,use.pred=FALSE,omit.possible=TRUE,
+trainSupv <- function(rpairs,method,use.pred=FALSE,omit.possible=TRUE,
                 convert.na=TRUE, include.data=FALSE, ...)
 {
-	pairs=dataset$pairs[,-c(1:2)]
+	pairs=rpairs$pairs[,-c(1:2)]
 	if (convert.na)
 		pairs[is.na(pairs)]=0
 	if (use.pred)
     {
-    	if (is.null(dataset$prediction))
-    		stop ("No prediction vector in dataset! Call with use.pred=FALSE.")
-		pairs$is_match=dataset$prediction
+    	if (is.null(rpairs$prediction))
+    		stop ("No prediction vector in rpairs! Call with use.pred=FALSE.")
+		pairs$is_match=rpairs$prediction
 	} else
 	{
 		pairs$is_match=factor(pairs$is_match)
@@ -30,7 +30,7 @@ trainSupv <- function(dataset,method,use.pred=FALSE,omit.possible=TRUE,
 		warning("Illegal method"))
   ret=list()
  	if (isTRUE(include.data))
-	   ret$train=dataset
+	   ret$train=rpairs
   ret$model=model
   ret$method=method
 	class(ret)="RecLinkClassif"
@@ -59,11 +59,11 @@ classifySupv <- function(model,newdata,...)
 }
 
 
-classifyUnsup <- function(dataset, method,...)
+classifyUnsup <- function(rpairs, method,...)
 {
 	if (method=="kmeans" || method=="bclust")
 	{
-		x=as.matrix(dataset$pairs[,-c(1,2,ncol(dataset$pairs))])
+		x=as.matrix(rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))])
 		x[is.na(x)]=0
 		clust=switch(method,
 			kmeans=kmeans(x,centers=2,...),
@@ -72,12 +72,12 @@ classifyUnsup <- function(dataset, method,...)
 		# mark links and non-links. The cluster farther from 0 is
 		# interpreted as link cluster
 		link=ifelse(sum(clust$centers[1,])>sum(clust$centers[2,]),1,2)
-		dataset$prediction=rep("N",length(y))
-		dataset$prediction[y==link]="L"
+		rpairs$prediction=rep("N",length(y))
+		rpairs$prediction[y==link]="L"
     # refactor to ensure uniform order of levels
-    dataset$prediction=factor(dataset$prediction,levels=c("N","P","L"))
-		class(dataset)="RecLinkResult"
-		return(dataset)	
+    rpairs$prediction=factor(rpairs$prediction,levels=c("N","P","L"))
+		class(rpairs)="RecLinkResult"
+		return(rpairs)	
 	}
 	stop("Illegal method!")
 }

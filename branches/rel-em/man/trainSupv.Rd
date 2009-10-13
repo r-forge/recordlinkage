@@ -6,12 +6,12 @@
   Trains a classifier for supervised classification of record pairs.
 }
 \usage{
-trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE, 
+trainSupv(rpairs, method, use.pred = FALSE, omit.possible = TRUE, 
   convert.na = TRUE, include.data = FALSE, ...)
 }
 
 \arguments{
-  \item{dataset}{Object of class \code{\link{RecLinkData}}. Training data.}
+  \item{rpairs}{Object of class \code{\link{RecLinkData}}. Training data.}
   \item{method}{The classification method to use. One of \code{"svm"},
     \code{"rpart"},\code{"ada"},\code{"bagging"},\cr \code{"nnet"}}
   \item{use.pred}{Logical. Whether to use result of previous classification 
@@ -56,7 +56,7 @@ trainSupv(dataset, method, use.pred = FALSE, omit.possible = TRUE,
 
 \value{
   An object of class \code{RecLinkClassif} with the following components:
-  \item{train}{If \code{include.data} is \code{TRUE}, a copy of \code{dataset},
+  \item{train}{If \code{include.data} is \code{TRUE}, a copy of \code{rpairs},
     otherwise an empty data frame with the same column names.}
   \item{model}{The model returned by the underlying training function.}
   \item{method}{A copy of the argument \code{method}.}

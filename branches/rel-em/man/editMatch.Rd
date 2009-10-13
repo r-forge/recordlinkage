@@ -27,7 +27,7 @@ editMatch(rpairs)
   other fields are ignored.
   
   Manual editing of the matching status is useful for clerical review in 
-  general, but particularly to label training sets. In conjunction with
+  general and in particular to label training sets. In conjunction with
   \code{\link{getMinimalTrain}}, good results can be obtained with a manageable
   effort of manual review.
 }

@@ -26,11 +26,15 @@ emWeights(rpairs, cutoff = 0.95, ...)
   \eqn{s^{i}_{j}}{s[i,j]} is the value of the string metric for attribute j in 
   data pair i.
   
+  The appropriate value of \code{cutoff} depends on the choice of string
+  comparator. The default is adjusted to \code{\link{jarowinkler}},
+  a lower value (e.g. $0.7$) is recommended for \code{\link{levenshteinSim}}.
+  
   Estimation of \eqn{M} and \eqn{U} is done by \code{\link{mygllm}},
   an adoption of the EM algorithm in package \code{gllm}. For every comparison
   pattern, the estimated numbers of matches and non-matches are used to compute
-  the corresponding probabilities. An estimation based on the average 
-  frequencies of values and fixed error rates is taken as initial values.
+  the corresponding probabilities. Estimations based on the average 
+  frequencies of values and given error rates are taken as initial values.
   In our experience, this increases stability and performance of the
   EM algorithm.
 }

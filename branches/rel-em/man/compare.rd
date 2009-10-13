@@ -21,11 +21,8 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
                  a matrix.} 
   \item{dataset1, dataset2}{Two data sets to be linked.}
   \item{blockfld}{Blocking field definition. A list of integer vectors
-      corresponding to column numbers. 
-                  A record pair is included in the output if
-                  and only if for one item of \code{blockfld}, the records
-                  have equal values in all columns specified by this item.
-                  If \code{FALSE}, no blocking will be performed.}
+                  corresponding to column numbers or \code{FALSE} to disable
+                  blocking. See details and examples.}
   \item{phonetic}{Determines usage of a phonetic code. If \code{FALSE}, no
                   phonetic code will be used; if \code{TRUE}, the phonetic code
                   will be used for all columns; if a numeric vector is given, the
@@ -54,7 +51,7 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
 }
 
 \details{
-  These functions build record pairs and comparison patterns
+  These functions build record pairs and finally comparison patterns
   by which these pairs are later classified as links or non-links. They make up
   the initial stage in a Record Linkage process after possibly 
   normalizing the data. Two general
@@ -66,10 +63,13 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
   character), each row representing one record, each column representing one
   field or attribute (like first name, date of birth\ldots).
   
-  Blocking is done by checking identity on an arbitrary number of fields as 
-  given by the \code{blockfld} argument, while multiple blocking criteria can be 
-  combined. Blocking can be omitted, which leads to a large number of record
-  pairs (\eqn{\frac{n(n-1)}{2}}{n*(n-1)/2} where \eqn{n} is the number of
+  Each element of \code{blockfld} specifies a set of columns in which two
+  records must agree to be included in the output. Each blocking definition in
+  the list is applied individually, the sets obtained 
+  thereby are combined by a union operation.                              
+  If \code{blockfld} is \code{FALSE}, no blocking will be performed,
+  which leads to a large number of record pairs 
+  (\eqn{\frac{n(n-1)}{2}}{n*(n-1)/2} where \eqn{n} is the number of
   records).
   
   As an alternative to blocking, a determined number of \code{n_match} matches 
@@ -86,19 +86,22 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
   Phonetic codes and string similarity measures are supported for better 
   detection of misspelled data. Applying a phonetic code leads to a binary
   comparison value, where 1 denotes equality of the generated phonetic code.
-  A string comparator leads to a fuzzy similarity value in the range $[0,1]$.
+  A string comparator leads to a fuzzy similarity value in the range \eqn{[0,1]}.
   String comparison is not allowed on a field for which a phonetic code
   is generated. For phonetic encoding functions included in the package, 
   see \link{phonetics}. For the included string comparators, see 
-  \code{\link{jarowinkler}} and \code{\link{levenshteinSim}}. 
+  \code{\link{jarowinkler}} and \code{\link{levenshteinSim}}.
   Please note that phonetic code and string 
   metrics can slow down the generation of comparison patterns significantly.
   
   User-defined functions for phonetic code and string comparison can be supplied
   via the arguments \code{phonfun} and \code{strcmpfun}. \code{phonfun} is 
-  expected to have as single argument the string to be transformed, 
-  \code{strcmpfun} must have as arguments the two strings to be compared. Both
-  functions must be fully vectorized to work on a matrix.
+  expected to have as single argument the string to be transformed and must
+  return a character value with the encoded string. 
+  \code{strcmpfun} must have as arguments the two strings to be compared and
+  return a similarity value in the range \eqn{[0,1]}, with 0 denoting the lowest 
+  and 1 denoting the highest degree of similarity. Both
+  functions must be fully vectorized to work on matrices.
   
   
 }
@@ -111,4 +114,21 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
 
 \author{Andreas Borg}
 
+\examples{
+data(RLdata500)
+data(RLdata10000)
+
+# deduplication without blocking, use string comparator on names
+rpairs=compare.dedup(RLdata500,strcmp=1:4)
+# linkage with blocking on first name and year of birth, use phonetic
+# code on first components of first and last name
+rpairs=compare.linkage(RLdata500,RLdata10000,blockfld=c(1,7),phonetic=c(1,3))
+# deduplication with blocking on either last name or complete date of birth,
+# use string comparator on all fields, include real identity information
+rpairs=compare.dedup(RLdata500, identity=identity.RLdata500, strcmp=TRUE,
+  blockfld=list(1,c(5,6,7)))
+# Draw 100 matches and 1000 non-matches
+rpairs=compare.dedup(RLdata10000,identity=identity.RLdata10000,n_match=100,
+  n_non_match=10000)
+}
 \keyword{classif}

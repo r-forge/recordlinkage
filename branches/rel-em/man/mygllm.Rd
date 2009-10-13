@@ -4,7 +4,7 @@
 \title{Extended emgllm}
 
 \description{
-   Adoption and Extension of \code{\link[gllm]{emgllm}}, originally algorithm AS 207 
+   Adoption and extension of \code{\link[gllm]{emgllm}}, originally algorithm AS 207 
    (see references).
 }
 \usage{
@@ -27,7 +27,7 @@ mygllm(y, s, X, maxit = 1000, tol = 1e-05, E = rep(1, length(s)))
         a priori estimates of the full contingency table can be given as
         start values for argument \code{E}. This extension can 
         reduce execution time significantly.        
-        }
+}
 
 \value{Estimated full contingency table.}
 

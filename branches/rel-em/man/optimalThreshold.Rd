@@ -29,7 +29,7 @@ optimalThreshold(rpairs, my = NULL, ny = NULL)
   \code{\link{epiWeights}}. The true match result must be known for
   \code{rpairs}.
   
-  For the follwing it is assumed that all records with weights greater than or
+  For the following it is assumed that all records with weights greater than or
   equal to the threshold are classified as links, the remaining as non-links.
   If no further arguments are given, a threshold which minimizes the
   absolute number of misclassified record pairs is returned. If \code{my} is 
@@ -45,7 +45,7 @@ optimalThreshold(rpairs, my = NULL, ny = NULL)
   possible links).
 }
 \value{
-  A numeriv value, the calculated threshold.
+  A numeric value, the calculated threshold.
 }
 
 \author{
@@ -68,7 +68,7 @@ p=compare.dedup(RLdata500,identity=identity.RLdata500, strcmp=TRUE,
 p=epiWeights(p)
 
 # split record pairs in two sets
-l=splitData(dataset=p, prop=0.5, keep.prop=TRUE)
+l=splitData(dataset=p, prop=0.5, keep.mprop=TRUE)
 
 # get threshold from training set
 threshold=optimalThreshold(l$train)

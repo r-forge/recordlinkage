@@ -19,7 +19,7 @@
   identity.RLdata500
   identity.RLdata10000}
 
-\format{\code{RLdata500} and \code{RLdata10000} are character matrix with 
+\format{\code{RLdata500} and \code{RLdata10000} are character matrices with 
   500 and 10000 records. Each row represents one record, with the following
   columns:
   \describe{
@@ -39,8 +39,25 @@
 
 \source{Generated with the data generation component of Febrl (Freely 
   Extensible Biomedical Record Linkage), version 0.3. See 
-  http://datamining.anu.edu.au/projects/linkage.html for details.}
+  \url{http://datamining.anu.edu.au/projects/linkage.html} for details.
+  The following data sources were used (all relate to Germany):
 
+  \url{http://blog.beliebte-vornamen.de/2009/02/prozentuale-anteile-2008/}, a
+  list of the frequencies of the 20 most popular female names in 2008.
+  
+  \url{http://www.beliebte-vornamen.de/760-alle_jahre.htm}, a list of the
+  100 most popular first names since 1890. The frequencies found in
+  the source above were extrapolated to fit this list.
+  
+  \url{http://www.peter-doerling.de/Geneal/Nachnamen_100.htm}, a list of the
+  100 most frequent family names with frequencies.
+
+  Age distribution as of Dec 31st, 2008, statistics of Statistisches
+  Bundesamt Deutschland, taken from the GENESIS database
+  (\url{https://www-genesis.destatis.de/genesis/online/logon}).  
+  
+  Web links as of October 2009.
+}
 \author{Andreas Borg}
 
 \keyword{datasets}

@@ -53,13 +53,10 @@ plotMRL(rpairs, l = mrl(rpairs$Wdata))
   \item{y}{y-coordinates of MRL statistics}
 }
 
-\author{
-  Andreas Borg
-}
 
 \seealso{
   \code{\link{getParetoThreshold}}
 }
 
-\keyword{misc}
+\keyword{internal}
 

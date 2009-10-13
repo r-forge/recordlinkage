@@ -38,7 +38,8 @@ gpdEst(Wdata, thresh = -Inf, quantil = 0.95)
   exceedances.
 }
 \value{
-  A real number representing the resulting classification threshold.
+  A real number representing the resulting classification threshold. It is
+  assured that the threshold lies in a reasonable range.
 }
 
 \author{

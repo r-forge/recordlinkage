@@ -46,7 +46,7 @@ getMinimalTrain(rpairs, nEx = 1)
 \value{
   A \code{\link{RecLinkData}} object representing the minimal training set.
   Component \code{pairs} represents the selected training pairs.
-  The corresponding fractions of \code{rpairs$prediction} and \code{rpairs$W}
+  The corresponding values of \code{rpairs$prediction} and \code{rpairs$W}
   are saved, if present. All other components are copied from \code{rpairs}.
 }
 

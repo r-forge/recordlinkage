@@ -22,10 +22,11 @@ record pairs.
 See also the vignette on Fellegi-Sunter deduplication for some general
 information on using the package.
 
-\section{Generating record pairs}
+\section{Generating comparison patterns}
 
 <<results=hide,echo=false>>=
 library(RecordLinkage)
+library(xtable)
 @
 
 For supervised classification, a training set is necessary for which the true 
@@ -81,7 +82,7 @@ texSummary(result_rpart)
 texSummary(result_bagging)
 @
 
-\subsection{Boosting}
+\subsection{SVM}
 <<results=tex,echo=false>>=
 texSummary(result_svm)
 @
