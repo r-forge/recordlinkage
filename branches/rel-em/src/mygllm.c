@@ -34,14 +34,10 @@
  * @param I Number of cells in the full table.
  * @param J Number of cells in the observed table.
  * @param K Number of columns in the design matrix.
- * @param dec_int_tol Chooses convergence parameter for inner loop (IPF 
- *        algorithm). If value is 0, tol is used, otherwise a decreasing value: 
- *        max(tol,1/(number of iterations)^2).
- * @param std_min_C currently not used        
  * @return Fitted full contingency table in E.
  */                                    
 void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E, 
-          int * I, int * J, int * K, int * dec_int_tol, int * std_min_C)
+          int * I, int * J, int * K)
 {
   /* Zählvariablen */
   unsigned int i;
@@ -61,19 +57,6 @@ void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E
    F_alt[j]=0;
   
   /* Designmatrix normalisieren */
-  /* Minimum bestimmen */
-  if (*std_min_C)
-  {
-    double min_C=*C;
-    for (i=1; i< *I * *K; i++)
-      if (C[i] < min_C)
-        min_C=C[i];
-//    printf("Minimum in C:%f",min_C);
-    /* normalisieren, so dass min(C)==0 */ 
-    if (min_C!=0)
-      for (i=0; i< *I * *K; i++)
-        C[i]-=min_C;
-  }
   /* maximale Zeilensumme bestimmen */
   double max_sum=0;
   double sum;
@@ -158,15 +141,6 @@ void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E
       for (i=0;i<*I;i++)
         Z[k]+=C[i+k * *I]*X[i];
     }
-    double int_tol;
-    if (*dec_int_tol)
-    {
-      int_tol=1/((double)it * (double)it);
-      if (int_tol<*tol)
-        int_tol=*tol;
-    }
-    else
-      int_tol=*tol;
     do
     {
       for (i=0;i<*I;i++)
@@ -185,7 +159,7 @@ void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E
       break_flag=0;
       for (i=0;i<*I;i++)
       {  
-        if (fabs(E[i]-E_alt[i]) > int_tol)
+        if (fabs(E[i]-E_alt[i]) > *tol)
         {
           break_flag=1;
           break; 
