@@ -1,21 +1,16 @@
-classify.em <- function (rpairs, m=0.97, my=Inf, ny=Inf,...)
-{
-    w=emWeights(rpairs=rpairs, m=m,...)
-    return (emClassify(rpairs=w, my=my, ny=ny))
-}
-
+# em.r: Functions for Record Linkage with weights calculated by the EM algorithm
 
 # Arguments:
 #
 #   rpairs  data pairs (class RecLinkPairs)
 #   m       probability for an error (m-probability), either one value for
 #           all attributes or a vector with distinct values
-emWeights <- function (rpairs, m=0.97,cutoff=0.95,...)
+emWeights <- function (rpairs, cutoff=0.95,...)
 {
     library(e1071)
 # t0=proc.time()
 # print("Datenvorbereitung")
-    pairs=rpairs$valid
+    pairs=rpairs$pairs
     # ids und Matchingstatus rausnehmen
     pairs=pairs[,-c(1,2,ncol(pairs))]
 # print(proc.time()-t0)
@@ -80,8 +75,6 @@ emWeights <- function (rpairs, m=0.97,cutoff=0.95,...)
     ret$U=U
     ret$W=W
     ret$Wdata=W[indices]
-    ret$PM=n_matches/n_data
-    ret$res=res
     if (is_fuzzy)
     {
         str_weights=apply(pairs_fuzzy^pairs,1,prod)
@@ -100,14 +93,14 @@ cat("\n")
 #   ny      error bound  # False Non-Matches / # Found Non-Matches
 #       If an error bound is Inf, it will not be considered, meaning that
 #       "possible link" will not be assigned
-emClassify <- function (rpairs, my=Inf, ny=Inf,threshold_upper=Inf, 
-                        threshold_lower=threshold_upper)
+emClassify <- function (rpairs,threshold.upper=Inf, 
+                        threshold.lower=threshold.upper,my=Inf, ny=Inf)
 {    
-    o=order(rpairs$W,decreasing=T) # order Weights decreasing
 
     # if no threshold was given, compute them according to the error bounds
-    if (missing(threshold_upper) && missing(threshold_lower))
+    if (missing(threshold.upper) && missing(threshold.lower))
     {
+      o=order(rpairs$W,decreasing=TRUE) # order Weights decreasing
       FN=rev(cumsum(rev(rpairs$M[o]))) 
       FP=cumsum(rpairs$U[o])
       if (my==Inf && ny==Inf)
@@ -147,20 +140,57 @@ emClassify <- function (rpairs, my=Inf, ny=Inf,threshold_upper=Inf,
           }
       } 
       print("Threshold berechnen und Klassifikation zuweisen")
-      threshold_upper=rpairs$W[o][cutoff_upper]
-      threshold_lower=rpairs$W[o][cutoff_lower]
+      threshold.upper=rpairs$W[o][cutoff_upper]
+      threshold.lower=rpairs$W[o][cutoff_lower]
     } # end if
      
-    prediction=as.logical(rep(NA,nrow(rpairs$valid)))
-    prediction[rpairs$Wdata>=threshold_upper]=T
-    prediction[rpairs$Wdata<threshold_lower]=F
+    prediction=rep("P",nrow(rpairs$pairs))
+    prediction[rpairs$Wdata>=threshold.upper]="L"
+    prediction[rpairs$Wdata<threshold.lower]="N"
     
     ret=rpairs # keeps all components of rpairs
-    ret$prediction=prediction
-	ret$threshold=threshold_upper
+    ret$prediction=factor(prediction,levels=c("N","P","L"))
+  	ret$threshold=threshold.upper
     class(ret)="RecLinkResult"
     return(ret)
 }
+
+
+optimalThreshold <- function (rpairs, my=NULL, ny=NULL)
+{
+	o=order(rpairs$Wdata,decreasing=TRUE)
+	weights=rpairs$Wdata[o]
+  n_data=length(weights)
+	is_match=rpairs$pairs$is_match[o]
+	FP_err=cumsum(is_match!=1)#/as.numeric(1:n_data)
+  FN_err=rev(cumsum(rev(is_match==1)))#/as.numeric(1:n_data)))
+  error=FP_err+FN_err
+
+    # nun baue Tabelle, in der Gewicht (unique) und Fehlerrate gegenübergestellt
+    # sind. Die Fehlerrate eines Gewichts ist in der sortierten Tabelle gleich
+    # der Fehlerrate für den letzten Datensatz des Blocks
+    # tapply() sortiert aufsteigend, das rev() stellt 
+    # die absteigende Reihenfolge wieder her
+
+    error_unique=rev(tapply(error,weights,tail,1))
+    FP_err_unique=rev(tapply(FP_err/(1:n_data),weights,tail,1))
+    FN_err_unique=rev(tapply(FN_err/(n_data:1),weights,tail,1))
+    
+    weights_unique=unique(weights)
+
+    # Bestimme Gewicht des Datensatzes mit minimalem Fehler.
+
+    if (is.null(my) && is.null(ny))
+      return(as.numeric(weights_unique[which.min(error_unique)]))
+
+    if (!is.null(my))
+      return(tail(as.numeric(weights_unique[FP_err_unique<=my]),1))
+
+    if (!is.null(ny))
+      return(head(as.numeric(weights_unique[FN_err_unique<=ny]),1))
+}
+
+
 
 # EM mit externen Trainingsdaten ist erst mal auf Eis gelegt!
 

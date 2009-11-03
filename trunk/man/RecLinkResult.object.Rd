@@ -9,26 +9,26 @@
 }
 
 \value{
-  \item{data, train, valid, frequencies,identity}{
-    Inherited from \link{RecLinkData}.
+  \item{data, pairs, frequencies}{
+    Inherited from \code{\link{RecLinkData}}.
   }
 
   
-  \item{prediction}{Logical vector indicating the classification of each record
-    pair in \code{valid}
+  \item{prediction}{Factor object indicating the classification of each record
+    pair in \code{valid}. Levels are:
+    \describe{
+      \item{\code{"L"}}{for links,}
+      \item{\code{"P"}}{for possible links}
+      \item{\code{"N"}}{for non-links}
+    }
   }
-  
-  \item{model}{The trained classification model. In the case of rpart, bagging,
-    ada and svm this is the predictor returned by the corresponding function, 
-    in the case of epilink, the determined threshold.
-  }
-  
+    
 }
 
 \author{Andreas Borg}
 
 \seealso{
-\code{\link{classify}}.
+\code{\link{emClassify}}.
 \code{\link{RecLinkData}}.
 }
 

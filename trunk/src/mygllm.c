@@ -7,6 +7,10 @@
 /*   nach: Michael Haber, Algorithm AS 207: Fitting a General Log-Linear      */
 /*         Model, in: Applied Statistics 33 Vol. 33 No. 3 (1984),             */
 /*         S. 358-362                                                         */
+/*																																						*/
+/*   Erweiterung um maximale Anzahl an Iterationen übernommen von:						*/
+/*	 David Duffy (2006). gllm: Generalised log-linear model. R package				*/
+/*   version 0.31.																														*/
 /*                                                                            */
 /* ========================================================================== */
 
@@ -15,17 +19,6 @@
 #include <math.h>
 #include <R.h>
 
-void print2Ddoublearray(double * data, int nrow, int ncol)
-{
-  int i;
-  int j;
-  for (i=0;i<nrow;i++)
-  {
-    for (j=0;j<ncol;j++)
-      printf("%f, ", data[i+j*nrow]);
-    printf("\n");
-  }
-}
 
 /**
  * Fit Log-Linear Model to observed contingency table y.
@@ -41,13 +34,10 @@ void print2Ddoublearray(double * data, int nrow, int ncol)
  * @param I Number of cells in the full table.
  * @param J Number of cells in the observed table.
  * @param K Number of columns in the design matrix.
- * @param dec_int_tol Chooses convergence parameter for inner loop (IPF 
- *        algorithm). If value is 0, tol is used, otherwise a decreasing value: 
- *        max(tol,1/(number of iterations)^2).
  * @return Fitted full contingency table in E.
  */                                    
 void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E, 
-          int * I, int * J, int * K, int * dec_int_tol, int * std_min_C)
+          int * I, int * J, int * K)
 {
   /* Zählvariablen */
   unsigned int i;
@@ -67,19 +57,6 @@ void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E
    F_alt[j]=0;
   
   /* Designmatrix normalisieren */
-  /* Minimum bestimmen */
-  if (*std_min_C)
-  {
-    double min_C=*C;
-    for (i=1; i< *I * *K; i++)
-      if (C[i] < min_C)
-        min_C=C[i];
-//    printf("Minimum in C:%f",min_C);
-    /* normalisieren, so dass min(C)==0 */ 
-    if (min_C!=0)
-      for (i=0; i< *I * *K; i++)
-        C[i]-=min_C;
-  }
   /* maximale Zeilensumme bestimmen */
   double max_sum=0;
   double sum;
@@ -164,15 +141,6 @@ void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E
       for (i=0;i<*I;i++)
         Z[k]+=C[i+k * *I]*X[i];
     }
-    double int_tol;
-    if (*dec_int_tol)
-    {
-      int_tol=1/((double)it * (double)it);
-      if (int_tol<*tol)
-        int_tol=*tol;
-    }
-    else
-      int_tol=*tol;
     do
     {
       for (i=0;i<*I;i++)
@@ -191,7 +159,7 @@ void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E
       break_flag=0;
       for (i=0;i<*I;i++)
       {  
-        if (fabs(E[i]-E_alt[i]) > int_tol)
+        if (fabs(E[i]-E_alt[i]) > *tol)
         {
           break_flag=1;
           break; 

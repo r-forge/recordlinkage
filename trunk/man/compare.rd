@@ -1,53 +1,47 @@
 \name{compare}
-\alias{compare_dedup}
-\alias{compare_linkage}
+\alias{compare.dedup}
+\alias{compare.linkage}
 \title{Compare Records}
-\description{Builds comparision tables of record pairs for deduplication or
+\description{Builds comparison patterns of record pairs for deduplication or
   linkage.}
 \usage{
 
-compare_dedup (dataset, blockfld = FALSE, phonetic = FALSE, phonfun = F, 
-  strcmp = FALSE, strcmpfun = FALSE, exclude = F, identity = NA, 
-  num_non = 0, des_prop = 0.05, adjust = F)
+compare.dedup (dataset, blockfld = FALSE, phonetic = FALSE, 
+  phonfun = pho_h, strcmp = FALSE, strcmpfun = jarowinkler, exclude = FALSE,
+  identity = NA, n_match = NA, n_non_match = NA)
 
-compare_linkage (dataset1, dataset2, blockfld = FALSE, phonetic = FALSE, 
-  phonfun = F, strcmp = FALSE, strcmpfun = FALSE, exclude = F, 
-  identity1 = NA, identity2 = NA, num_non = 0, des_prop = 0.05, 
-  adjust = F)
+compare.linkage (dataset1, dataset2, blockfld = FALSE, 
+  phonetic = FALSE, phonfun = pho_h, strcmp = FALSE, 
+  strcmpfun = jarowinkler, exclude = FALSE, identity1 = NA, identity2 = NA,
+  n_match = NA, n_non_match = NA)
 }
+
 \arguments{
   \item{dataset}{Table of records to be deduplicated. Either a data frame or 
                  a matrix.} 
-  \item{dataset1, dataset2}{Two data sets to link.}
-  \item{blockfld}{Blocking field definition. A list of integers vectors). 
-                  Two records are considered in the output if
-                  and only if for one item of \code{blockfield}, the record
-                  have equal values in all columns specified by this item.
-                  If \code{FALSE}, no blocking will be performed.}
+  \item{dataset1, dataset2}{Two data sets to be linked.}
+  \item{blockfld}{Blocking field definition. A list of integer vectors
+                  corresponding to column numbers or \code{FALSE} to disable
+                  blocking. See details and examples.}
   \item{phonetic}{Determines usage of a phonetic code. If \code{FALSE}, no
                   phonetic code will be used; if \code{TRUE}, the phonetic code
                   will be used for all columns; if a numeric vector is given, the
                   phonetic code will be used for the specified columns.}
-  \item{phonfun}{Function for phonetic code.}
-  \item{strcmp}{Determines usage of a string metric.}
-  \item{strcmpfun}{User-defined function for string metric. Must take as 
-                  arguments two character vector of equal length and output
-                  a similarity value in the range [0..1].}
-  \item{exclude}{Columns to exclude. A numeric vector of indices of columns
-                  which should be excluded from comparision. E.g. useful for
-                  external identifiers.}                                                                                                            
-  \item{identity}{Optional logical vectors for identifying true matches and
+  \item{phonfun}{Function for phonetic code. See details.}
+  \item{strcmp}{Determines usage of a string metric. Used in the same manner
+                as \code{phonetic}}
+  \item{strcmpfun}{User-defined function for string metric. See details.}
+  \item{exclude}{Columns to be excluded. A numeric vector of indices of columns
+                  which should be excluded from comparision}                                                                                                            
+  \item{identity, identity1, identity2}{Optional numerical vectors for identifying true matches and
               non-matches. In a deduplication process, two records \code{dataset[i,]}
                and \code{dataset[j,]} are a true match if and only if 
               \code{identity[i,]==identity[j,]}. In a linkage process, two 
               records \code{dataset1[i,]} and \code{dataset2[j,]} are a true 
               match if and only if \code{identity1[i,]==identity2[j,]}.}
-  \item{num_non}{Number of non-matches to generate for training set. See details
-              for information on training sets.}
-  \item{des_prop}{Desired proportion of matches to non-matches in generated
-            training set.}
-  \item{adjust}{Currently not used.}
-}                  
+  \item{n_match, n_non_match}{Number of desired matches and non-matches in
+      the result.}
+}
 
 \value{An object of class \code{RecLinkPairs} with the following components:
   \item{data}{Copy of the records, converted to a data frame.}
@@ -57,57 +51,84 @@ compare_linkage (dataset1, dataset2, blockfld = FALSE, phonetic = FALSE,
 }
 
 \details{
-  These functions group records into record pairs and build comparison patterns
+  These functions build record pairs and finally comparison patterns
   by which these pairs are later classified as links or non-links. They make up
-  the initial stage in an Record Linkage process after possibly 
+  the initial stage in a Record Linkage process after possibly 
   normalizing the data. Two general
-  scenarios are reflected by the two functions: \code{compare_dedup} works on a
-  single data set which is to be deduplicated, \code{compare_linkage} is intended
+  scenarios are reflected by the two functions: \code{compare.dedup} works on a
+  single data set which is to be deduplicated, \code{compare.linkage} is intended
   for linking two data sets together.
   
   Data sets are represented as data frames or matrices (typically of type 
   character), each row representing one record, each column representing one
   field or attribute (like first name, date of birth\ldots).
   
-  Blocking is done by checking identity on an arbitrary number of fields as 
-  given by the blockfld argument, while multiple blocking criteria can be 
-  combined. Blocking can be omitted, which leads to a large number of record
-  pairs (\eqn{\frac{|dataset|-1}{2}}{(length(dataset)-1)/2}).
+  Each element of \code{blockfld} specifies a set of columns in which two
+  records must agree to be included in the output. Each blocking definition in
+  the list is applied individually, the sets obtained 
+  thereby are combined by a union operation.                              
+  If \code{blockfld} is \code{FALSE}, no blocking will be performed,
+  which leads to a large number of record pairs 
+  (\eqn{\frac{n(n-1)}{2}}{n*(n-1)/2} where \eqn{n} is the number of
+  records).
+  
+  As an alternative to blocking, a determined number of \code{n_match} matches 
+  and \code{n_non_match} non-matches can be drawn if \code{identity} or
+  \code{identity1} and \code{identity2} are supplied. This can be useful for
+  generating training sets for the supervised classificators (see 
+  \code{\link{trainSupv}}).
   
   Fields can be excluded from the linkage process by supplying their column
-  index in the vector \code{exclude}. Excluded fields can still be used for
+  index in the vector \code{exclude}, which is espacially useful for
+  external identifiers. Excluded fields can still be used for
   blocking, also with phonetic code.
   
   Phonetic codes and string similarity measures are supported for better 
   detection of misspelled data. Applying a phonetic code leads to a binary
   comparison value, where 1 denotes equality of the generated phonetic code.
-  A string comparator leads to a fuzzy similarity value in the range $[0,1]$.
-  String comparison is not allowed on a field for which also a phonetic code
-  is generated. Please note that phonetic code and string metrics can slow down
-  the generation of comparison patterns significantly.
+  A string comparator leads to a fuzzy similarity value in the range \eqn{[0,1]}.
+  String comparison is not allowed on a field for which a phonetic code
+  is generated. For phonetic encoding functions included in the package, 
+  see \link{phonetics}. For the included string comparators, see 
+  \code{\link{jarowinkler}} and \code{\link{levenshteinSim}}.
+  Please note that phonetic code and string 
+  metrics can slow down the generation of comparison patterns significantly.
   
   User-defined functions for phonetic code and string comparison can be supplied
   via the arguments \code{phonfun} and \code{strcmpfun}. \code{phonfun} is 
-  expected to have as single argument the string to be transformed, 
-  \code{strcmpfun} must have as arguments the two strings to be compared. Both
-  functions must be fully vectorized to work on a matrix.
+  expected to have as single argument the string to be transformed and must
+  return a character value with the encoded string. 
+  \code{strcmpfun} must have as arguments the two strings to be compared and
+  return a similarity value in the range \eqn{[0,1]}, with 0 denoting the lowest 
+  and 1 denoting the highest degree of similarity. Both
+  functions must be fully vectorized to work on matrices.
   
-  If the arguments \code{identity} (for \code{compare_dedup}) or \code{identity1}
-  and \code{identity2} (for \code{compare_linkage} are given, data can be split 
-  into training and validation sets. \code{num_non} matches and 
-  \code{num_non*des_prop} non-matches are sampled randomly as a training set, 
-  all other pairs form the validation set.
-  
-  For data sets where the true matching status is unknown, training pairs can
-  be generated by \code{\link{gen_samples}}.
   
 }
 
+
 \seealso{
   \code{\link{RecLinkData}} for the format of returned objects,
-  \code{\link{gen_samples}} for automatic generation of training data.
+%-  \code{\link{genSamples}} for automatic generation of training data.
 }
 
 \author{Andreas Borg}
 
+\examples{
+data(RLdata500)
+data(RLdata10000)
+
+# deduplication without blocking, use string comparator on names
+rpairs=compare.dedup(RLdata500,strcmp=1:4)
+# linkage with blocking on first name and year of birth, use phonetic
+# code on first components of first and last name
+rpairs=compare.linkage(RLdata500,RLdata10000,blockfld=c(1,7),phonetic=c(1,3))
+# deduplication with blocking on either last name or complete date of birth,
+# use string comparator on all fields, include real identity information
+rpairs=compare.dedup(RLdata500, identity=identity.RLdata500, strcmp=TRUE,
+  blockfld=list(1,c(5,6,7)))
+# Draw 100 matches and 1000 non-matches
+rpairs=compare.dedup(RLdata10000,identity=identity.RLdata10000,n_match=100,
+  n_non_match=10000)
+}
 \keyword{classif}
