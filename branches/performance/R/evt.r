@@ -38,8 +38,8 @@ plotMRL <- function(rpairs,l=mrl(rpairs$Wdata))
 {
   plot(l$x,l$y,type="l",lty="blank",xlab="Threshold",ylab="MRL")
   # Draw grid
-  abline(v=pretty(l$x,n=40),h=pretty(l$y,n=40),col="lightgray")
-  abline(v=pretty(l$x,n=8),h=pretty(l$y,n=8),col="gray")
+  abline(v=pretty(extendrange(l$x),n=40),h=pretty(extendrange(l$y),n=40),col="lightgray")
+  abline(v=pretty(extendrange(l$x),n=8),h=pretty(extendrange(l$y),n=8),col="gray")
   box()
   points(l$x,l$y,type="l")
 }
