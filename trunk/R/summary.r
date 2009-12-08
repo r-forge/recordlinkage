@@ -30,8 +30,13 @@ summary.RecLinkData <- function(object,...)
 		cat("\n")
 		cat("Weight distribution:\n\n")
 		h=hist(object$Wdata,plot=FALSE)
-		print(h$breaks)
-		print(h$counts)
+		c=h$counts
+		# nehme Gewichtsintervalle als Indizes, um Histogrammansicht zu erhalten
+    names(c)=sapply(1:(length(h$breaks)-1),
+      function(x) sprintf("(%g,%g]",h$breaks[x],h$breaks[x+1]))
+    # erstes Intervall ist auch links geschlossen
+    names(c)[1]=sprintf("[%g,%g]", h$breaks[1], h$breaks[2])
+		print(c)
 	}
 }
 
