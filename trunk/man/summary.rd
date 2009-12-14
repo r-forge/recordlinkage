@@ -29,10 +29,8 @@
         \item The number of record pairs.
         \item The number of true matches, true non-matches and pairs with unknown
           status.
-        \item If weights have been calculated for this object, the weight distribution, 
-          represented by the \code{breaks} and \code{counts} vectors 
-          returned by \code{\link{hist}(object$Wdata)}.
-            
+        \item If weights have been calculated for this object, a textual histogram
+          of the weight distribution.            
        }
        Information on \code{\link{RecLinkResult}} objects includes all of the
        above and the following:
