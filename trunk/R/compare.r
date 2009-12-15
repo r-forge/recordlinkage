@@ -83,7 +83,7 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     if (is.na(n_match) || is.na(n_non_match))
    	{
 	   pair_ids=t(unorderedPairs(nrow(dataset)))
-	} else
+	 } else
 	 {
 		tempdat=data.frame(id=1:ndata,identity=identity)
 		
@@ -151,7 +151,12 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
       # for each record, concatenate values in blocking fields
       blockstr=apply(block_data,1,function(x) paste(x[blockelem],collapse=" "))
 	  # exclude pairs with NA in blocking variable
-    	blockstr=gsub("NA", NA, blockstr)
+	  # (paste just converts to "NA")
+      for (i in blockelem)
+      {
+        is.na(blockstr)=is.na(block_data[,i])
+      }
+#    	blockstr=gsub("NA", NA, blockstr)
       rm(block_data)
      id_vec=tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))
      id_vec=delete.NULLs(id_vec)
@@ -389,8 +394,11 @@ compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
       rm(block_data1)
       rm(block_data2)
   	  # exclude pairs with NA in blocking variable 
-	  blockstr1=gsub("NA", NA, blockstr1)
-	  blockstr2=gsub("NA", NA, blockstr2)
+      for (i in blockelem)
+      {
+        is.na(blockstr1)=is.na(block_data1[,i])
+        is.na(blockstr2)=is.na(block_data2[,i])
+      }
 	  id_vec=merge(data.frame(id1=1:ndata1,blockstr=blockstr1),
                    data.frame(id2=1:ndata2,blockstr=blockstr2))[,-1]
 
