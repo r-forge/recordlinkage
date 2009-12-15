@@ -1,18 +1,16 @@
 \name{mygllm}
 \alias{mygllm}
 
-\title{Extended emgllm}
+\title{Generalized Log-Linear Fitting}
 
 \description{
-   Adoption and extension of \code{\link[gllm]{emgllm}}, originally algorithm AS 207 
-   (see references).
+  Fits a log-linear model for incomplete contingency tables.
 }
 \usage{
 mygllm(y, s, X, maxit = 1000, tol = 1e-05, E = rep(1, length(s)))
 }
 
 \arguments{
-  See \code{\link[gllm]{emgllm}} in package \code{gllm} for detailed description.
  \item{y}{Vector of observed cell frequencies.}
  \item{s}{Scatter matrix. s[i] is the cell in the observed array that
           corresponds to cell i in the full array.}
@@ -23,21 +21,24 @@ mygllm(y, s, X, maxit = 1000, tol = 1e-05, E = rep(1, length(s)))
           a priori estimates.}
 }
 
-\details{Works like \code{\link[gllm]{emgllm}}. In addition,
-        a priori estimates of the full contingency table can be given as
-        start values for argument \code{E}. This extension can 
-        reduce execution time significantly.        
+\details{This is an implementation and extension of the algorithm published by
+  Haber (1984). It also incorporates ideas of David Duffy (see references).
+
+  A priori estimates of the full contingency table can be given as
+  start values by argument \code{E}. This can reduce
+  execution time significantly.        
 }
 
 \value{Estimated full contingency table.}
 
 
 \references{Michael Haber, Algorithm AS 207: Fitting a General Log-Linear
-            Model, in: Applied Statistics 33 Vol. 33 No. 3 (1984),  S. 358--362.
+            Model, in: Applied Statistics 33 (1984) No. 3, 358--362.
             
             David Duffy: gllm: Generalised log-linear model. R package
-            version 0.31.}
+            version 0.31. see \url{http://www.qimr.edu.au/davidD/#loglin}}
 
-\author{Andreas Borg (R interface and translation to C)}
+\author{Andreas Borg}
 
-\seealso{\code{\link[gllm]{emgllm}}}
+\seealso{\code{\link{emWeights}}, which makes use of log-linear fitting for
+  weight calculation.}

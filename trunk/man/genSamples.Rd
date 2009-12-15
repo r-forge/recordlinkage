@@ -23,6 +23,9 @@ genSamples(dataset, num.non, des.mprop = 0.1)
   training data. The linkage status is classified based on unsupervised
   clustering with \code{\link[e1071]{bclust}} and the desired number of links and
   non-links are sampled.
+  
+  If the requested numbers of matches or non-matches is not feasible, a
+  warning is issued and the maximum possible number is considered.
 }
 \value{
   A list of \code{\link{RecLinkResult}} objects.
