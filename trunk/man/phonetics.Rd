@@ -15,7 +15,7 @@ soundex(str)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{str}{A character vector or matrix.}
+  \item{str}{A character vector or matrix. Factors are converted to character.}
 }
 \details{
   Translates its argument to a phonetic coding. \code{pho_h}

@@ -30,7 +30,7 @@ levenshteinDist(str1, str2)
   lowest degree of similarity. In the context of Record Linkage, string
   similarities can improve the discernibility between matches and non-matches.
   
-  \code{jarowinkler} is an implementation of the algorithm by Jaro and Winkle
+  \code{jarowinkler} is an implementation of the algorithm by Jaro and Winkler
   (see references). For the meaning of \code{W_1}, \code{W_2}, \code{W_3} and
   \code{r} see the referenced article. For most applications, the default
   values are okay.
@@ -43,7 +43,8 @@ levenshteinDist(str1, str2)
   1 - d(str1,str2) / max(A,B)}, where \eqn{\mathrm{d}} is the Levenshtein distance
   function and \eqn{A} and \eqn{B} are the lenghts of the strings.
 
-  Arguments \code{str1} and \code{str2} are cast to character.
+  Arguments \code{str1} and \code{str2} are expected to be of type 
+  \code{"character"]}.
   Non-alphabetical characters can be processed. Valid format combinations for
   the arguments are:
   \itemize{
