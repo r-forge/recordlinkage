@@ -2,9 +2,12 @@
 
 pho_h <- function(str)
 {
-   if (is.factor(str))
-     stop("pho_h does not work on factors")
-   out <- .C("pho_h", as.character(str), ans=character(length(str)),length(str),
+  # check type
+  if (typeof(str) != "character" && class(str) != "factor")
+     stop(sprintf("Illegal data type: %s", typeof(str)))
+  if (class(str) == "factor")
+    str=as.character(str)
+   out <- .C("pho_h", str, ans=character(length(str)),length(str),
              PACKAGE="RecordLinkage")
    if (any(is.na(str)))
     out$ans[is.na(str)]=NA
@@ -15,8 +18,11 @@ pho_h <- function(str)
 
 soundex <- function(str)
 {
-   if (is.factor(str))
-     stop("soundex does not work on factors")
+  # check type
+  if (typeof(str) != "character" && class(str) != "factor")
+     stop(sprintf("Illegal data type: %s", typeof(str)))
+  if (class(str) == "factor")
+    str=as.character(str)
    out <- .C("soundex", as.character(str), ans=character(length(str)),length(str),
              PACKAGE="RecordLinkage")
    if (any(is.na(str)))
