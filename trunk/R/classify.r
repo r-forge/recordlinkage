@@ -3,6 +3,16 @@
 trainSupv <- function(rpairs,method,use.pred=FALSE,omit.possible=TRUE,
                 convert.na=TRUE, include.data=FALSE, ...)
 {
+  # catch erronous input
+  if (!("RecLinkData" %in% class(rpairs) ||
+    "RecLinkResult" %in% class(rpairs)))
+    stop("Wrong class for rpairs!")
+  # error if only matches or non-matches are present
+#  if(!isTRUE(use.pred) && length(unique(rpairs$pairs$is_match))==1)
+#    stop("Training examples have the same match status!")
+#  if(isTRUE(use.pred) && length(unique(rpairs$prediction))==1)
+#    stop("Training examples have the same match status!")
+
 	pairs=rpairs$pairs[,-c(1:2)]
 	if (convert.na)
 		pairs[is.na(pairs)]=0
@@ -13,26 +23,35 @@ trainSupv <- function(rpairs,method,use.pred=FALSE,omit.possible=TRUE,
 		pairs$is_match=rpairs$prediction
 	} else
 	{
-		pairs$is_match=factor(pairs$is_match)
-		levels(pairs$is_match)=c("N","L","P")
-		pairs$is_match[is.na(pairs$is_match)]="P"		
+		pairs$is_match=factor(rep("P",length(pairs$is_match)),
+		  levels=c("N","P","L"))
+		pairs$is_match[rpairs$pairs$is_match==1]="L"		
+		pairs$is_match[rpairs$pairs$is_match==0]="N"		
 	}
 	# delete possible links if desired
 	if (omit.possible)
-		pairs=pairs[pairs$is_match!="P",]
+		pairs=pairs[pairs$is_match!="P",,drop=FALSE]
 
-	model=switch(method,
+  # now check if a usable training set remains, i.e. there are
+  # at least two distinct examples with different match outcome
+  if (nrow(unique(pairs[,-ncol(pairs)])) < 2)
+    stop("Not enough distinct training examples!")
+  if (length(unique(pairs$is_match))==1)
+    stop("All training examples have the same match status!")
+  
+
+	model=switch(as.character(method[1]),
 		svm=svm(is_match ~ .,data=pairs,type="C-classification",...),
 		rpart=rpart(is_match ~ .,data=pairs,method="class",...),
 		ada=ada(is_match ~ .,data=pairs,...),
 		bagging=bagging(is_match ~ .,data=pairs,method="class",...),
 		nnet=nnet(is_match ~ .,data=pairs,size=ncol(pairs)*2, ...),
-		warning("Illegal method"))
+		stop("Illegal method"))
   ret=list()
  	if (isTRUE(include.data))
 	   ret$train=rpairs
   ret$model=model
-  ret$method=method
+  ret$method=as.character(method)[1]
 	class(ret)="RecLinkClassif"
     return(ret)
 
@@ -41,6 +60,14 @@ trainSupv <- function(rpairs,method,use.pred=FALSE,omit.possible=TRUE,
 
 classifySupv <- function(model,newdata,...)
 {
+  if (!("RecLinkClassif" %in% class(model)))
+    stop("Wrong class for model!")
+
+  if (!("RecLinkData" %in% class(newdata) ||
+    "RecLinkResult" %in% class(newdata)))
+    stop("Wrong class for newdata!")
+
+      
 	ret=newdata
 
     x=newdata$pairs[,-c(1,2,ncol(newdata$pairs))]
@@ -51,7 +78,8 @@ classifySupv <- function(model,newdata,...)
 	 	 rpart=predict(model$model, newdata=x,type="class",...),       
 		  ada=predict(model$model, newdata=x,type="vector",...),       
 		  bagging=predict(model$model, newdata=x,type="class",...),
-		  nnet=predict(model$model, newdata=x,type="class",...))
+		  nnet=predict(model$model, newdata=x,type="class",...),
+      stop("Illegal classification method!"))
     # refactor to ensure uniform order of levels
     ret$prediction=factor(predict,levels=c("N","P","L"))
     class(ret)="RecLinkResult"
@@ -61,6 +89,13 @@ classifySupv <- function(model,newdata,...)
 
 classifyUnsup <- function(rpairs, method,...)
 {
+  if (!("RecLinkData" %in% class(rpairs) ||
+    "RecLinkResult" %in% class(rpairs)))
+    stop("Wrong class for rpairs!")
+
+  if (nrow(rpairs$pairs) < 2)
+    stop("Not enough record pairs!")
+  
 	if (method=="kmeans" || method=="bclust")
 	{
 		x=as.matrix(rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))])
