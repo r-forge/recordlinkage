@@ -12,8 +12,7 @@ trainSupv(rpairs, method, use.pred = FALSE, omit.possible = TRUE,
 
 \arguments{
   \item{rpairs}{Object of class \code{\link{RecLinkData}}. Training data.}
-  \item{method}{The classification method to use. One of \code{"svm"},
-    \code{"rpart"},\code{"ada"},\code{"bagging"},\cr \code{"nnet"}}
+  \item{method}{A character vector. The classification method to use.}
   \item{use.pred}{Logical. Whether to use result of previous classification 
     instead of true matching status.}
   \item{omit.possible}{Logical. Whether to remove pairs labeled as possible
@@ -30,14 +29,16 @@ trainSupv(rpairs, method, use.pred = FALSE, omit.possible = TRUE,
   \code{\link{emClassify}} or \code{\link{classifyUnsup}}. In the latter case,
   argument \code{use.pred} has to be set to \code{TRUE}.
   
-  The supported classifiers, as identified by \code{method} are:
+  A classifying method has to be provided as a character string (factors are
+  converted to character) through argument \code{method}.
+  The supported classifiers are:
 
   \describe{
-    \item{svm}{Support vector machine, see \code{\link[e1071]{svm}}.}
-    \item{rpart}{Recursive partitioning tree, see \code{\link{rpart}}.}
-    \item{ada}{Stochastic boosting model, see \code{\link[ada]{ada}}.}
-    \item{bagging}{Bagging with classification trees, see \code{\link[ipred]{bagging}}.}
-    \item{nnet}{Single-hidden-layer neural network, see \code{\link[nnet]{nnet}}.}
+    \item{\code{"svm"}}{Support vector machine, see \code{\link[e1071]{svm}}.}
+    \item{\code{"rpart"}}{Recursive partitioning tree, see \code{\link{rpart}}.}
+    \item{\code{"ada"}}{Stochastic boosting model, see \code{\link[ada]{ada}}.}
+    \item{\code{"bagging"}}{Bagging with classification trees, see \code{\link[ipred]{bagging}}.}
+    \item{\code{"nnet"}}{Single-hidden-layer neural network, see \code{\link[nnet]{nnet}}.}
   }
   Arguments in \code{...} are passed to the corresponding function.
 

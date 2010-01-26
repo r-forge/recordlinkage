@@ -16,7 +16,7 @@ emWeights(rpairs, cutoff = 0.95, ...)
 }
 \details{
   The weight of a record pair is calculated by \eqn{\log_{2}\frac{M}{U}}{
-  \code{log(M/U,base=2)}}, where \eqn{M} and \eqn{U} are estimated m- and u-probabilities
+  log(M/U,base=2)}, where \eqn{M} and \eqn{U} are estimated m- and u-probabilities
   for the present comparison pattern. If a string comparator is used, weights
   are first calculated based on a binary table where all comparison 
   values greater or equal \code{cutoff} are set to one, all other to zero.
@@ -28,10 +28,10 @@ emWeights(rpairs, cutoff = 0.95, ...)
   
   The appropriate value of \code{cutoff} depends on the choice of string
   comparator. The default is adjusted to \code{\link{jarowinkler}},
-  a lower value (e.g. $0.7$) is recommended for \code{\link{levenshteinSim}}.
+  a lower value (e.g. 0.7) is recommended for \code{\link{levenshteinSim}}.
   
-  Estimation of \eqn{M} and \eqn{U} is done by \code{\link{mygllm}},
-  an adoption of the EM algorithm in package \code{gllm}. For every comparison
+  Estimation of \eqn{M} and \eqn{U} is done by an EM algorithm, implemented by
+  \code{\link{mygllm}}. For every comparison
   pattern, the estimated numbers of matches and non-matches are used to compute
   the corresponding probabilities. Estimations based on the average 
   frequencies of values and given error rates are taken as initial values.
