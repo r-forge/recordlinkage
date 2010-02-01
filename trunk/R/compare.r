@@ -146,13 +146,21 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
   			repeat
   		 	{
   		  		d1=sample(ndata,1)
-  		  		d2=sample((1:ndata)[-d1],1)
-  		  		sorted_id=sort(c(d1,d2))
+  		  		d2=sample(ndata,1)
   				# Wenn ein Match gezogen wurde, nochmal versuchen
   				if (identical(identity[d1],identity[d2]))
   				{
   				 	next
   				}
+ 		  		if (d1==d2)
+ 		  		  next
+	  		  if (d1 > d2)
+ 		      {
+ 		        sorted_id=c(d2,d1)
+	        } else
+	        {
+	          sorted_id=c(d1,d2)
+           }
   				# Wenn das gezogene Paar schon gezogen wurde, nochmal versuchen 
   				if (!is.null(A[[paste(sorted_id,collapse=" ")]]))
   			  	{
@@ -218,7 +226,7 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
   }
   
     pair_ids=as.matrix(unique(as.data.frame(pair_ids)))  # runs faster with data frame
-   
+  
     left=dataset[pair_ids[,1],,drop=FALSE]
     right=dataset[pair_ids[,2],,drop=FALSE]
     # matrix to hold comparison patterns
