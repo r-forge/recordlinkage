@@ -3,6 +3,20 @@
 
 genSamples = function (dataset, num.non, des.mprop=0.1)
 {   
+  # catch erronous input
+  # for dataset: errors are detected in classifyUnsup
+  
+  if (!is.numeric(num.non))
+    stop("Illegal type for num.non!")
+
+  if (!is.numeric(des.mprop))
+    stop("Illegal type for des.mprop!")
+
+  if (num.non <0)
+    stop(sprintf("Illegal value for num.non: %g", num.non))
+
+  if (des.mprop <= 0)
+    stop(sprintf("Illegal value for des.mprop: %g", num.non))
 
 	
     # run clustering algorithm?
@@ -18,8 +32,26 @@ genSamples = function (dataset, num.non, des.mprop=0.1)
     
 
 
-splitData <- function(dataset,prop,keep.mprop=FALSE,num.non=0,des.mprop=0,use.pred=FALSE)
+splitData <- function(dataset, prop=0.5, keep.mprop=FALSE, num.non=0,
+  des.mprop=0, use.pred=FALSE)
 {
+  # catch erronous input
+  if (!(("RecLinkData" %in% class(dataset)) || 
+    "RecLinkResult" %in% class(dataset)))
+    stop("Wrong class for dataset!")
+  
+  if (nrow(dataset$pairs) < 2)
+    stop("Not enough data!")
+  
+  if (prop <= 0 || prop >= 1)
+    stop(sprintf("Illegal value for prop: %g!", prop))
+
+  if (num.non <0)
+    stop(sprintf("Illegal value for num.non: %g", num.non))
+
+  if (!is.numeric(num.non))
+    stop(sprintf("Illegal type of num.non: %s", typeof(num.non)))
+
 	train=dataset
 	valid=dataset
   pairs=dataset$pairs
@@ -124,20 +156,26 @@ splitData <- function(dataset,prop,keep.mprop=FALSE,num.non=0,des.mprop=0,use.pr
 		n_match=length(match_ind)
 		if (n_match==0)
 			stop("No matches found! Call with keep.mprop=FALSE.")
-		s_match=sample(1:n_match,n_match*prop)
-		s_non_match=sample(1:(n_data-n_match),(n_data-n_match)*prop)
+		s_match=sample(1:n_match,round(n_match*prop))
+		s_non_match=sample(1:(n_data-n_match),round(n_data*prop)-round(n_match*prop))
 		train$pairs=rbind(dataset$pairs[match_ind[s_match],],
 						  dataset$pairs[-match_ind,][s_non_match,])
 		valid$pairs=rbind(dataset$pairs[match_ind[-s_match],],
 						  dataset$pairs[-match_ind,][-s_non_match,])
 
 		# split prediction vector, if present
+		# c() removes levels, use workaround
 		if (!is.null(dataset$prediction))
 		{
 			train$prediction=c(dataset$prediction[match_ind[s_match]],
 						  	   dataset$prediction[-match_ind][s_non_match])
+      class(train$prediction) <- "factor"
+      levels(train$prediction) <- levels(dataset$prediction)
+      
 			valid$prediction=c(dataset$prediction[match_ind[-s_match]],
 						  	   dataset$prediction[-match_ind][-s_non_match])
+      class(valid$prediction) <- "factor"
+      levels(valid$prediction) <- levels(dataset$prediction)
 		}
 							  						
 		# split weight vector, if present
@@ -163,6 +201,14 @@ splitData <- function(dataset,prop,keep.mprop=FALSE,num.non=0,des.mprop=0,use.pr
 
 getMinimalTrain <- function(rpairs, nEx=1)
 {
+  # catch erronous input
+  if (!(("RecLinkData" %in% class(rpairs)) || 
+    "RecLinkResult" %in% class(rpairs)))
+    stop("Wrong class for rpairs!")
+  
+  if (nEx < 1)
+    stop(sprintf("Illegal value for nEx: %d!", nEx))
+    
   p=rpairs$pairs
   # Zeilen markieren, um Paare identifizieren zu können
   rownames(p)=1:nrow(p)

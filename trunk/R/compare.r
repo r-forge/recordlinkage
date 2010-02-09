@@ -140,6 +140,8 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
       } else
      {
    	   # bereits gezogene Paare werden in A markiert
+   	   # zum Ziehen ungeordneter Paare vgl. Steven S. Skiena: The algorithm
+   	   # design manual, 250-251.
   		A=list()
   		for (i in 1:n_non_match)
   		{
@@ -236,8 +238,8 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
         patterns=strcmpfun(as.matrix(left),as.matrix(right))
     } else if (is.numeric(strcmp)) 
     {
-        patterns[,-strcmp]=(as.matrix(left[,-strcmp])==as.matrix(right[,-strcmp]))*1
-        patterns[,strcmp]=strcmpfun(as.matrix(left[,strcmp]),as.matrix(right[,strcmp])) #*1
+        patterns[,-strcmp]=(left[,-strcmp]==right[,-strcmp])*1
+        patterns[,strcmp]=strcmpfun(left[,strcmp],right[,strcmp]) #*1
     } else
     {
        patterns=(left==right)*1

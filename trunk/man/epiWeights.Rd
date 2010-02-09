@@ -17,7 +17,7 @@ epiWeights(rpairs, e = 0.01, f = rpairs$frequencies)
   \item{rpairs}{\code{\link{RecLinkData}} object. Record pairs for which
     weights are to be calculated.}
   \item{e}{
-    Numeric value. Estimated error rate(s).
+    Numeric vector. Estimated error rate(s).
 }
   \item{f}{
     Numeric vector. Average frequency of attribute values.
@@ -44,8 +44,9 @@ epiWeights(rpairs, e = 0.01, f = rpairs$frequencies)
   The use of binary patterns is possible, but in general yields poor results.
   
   The average frequency of values is by default taken from the object
-  \code{rpairs}. The error rate \code{e} can be set to a single value or
-  to a vector with distinct error rates for every field.
+  \code{rpairs}. Both frequency and error rate \code{e} can be set to a single 
+  value, which will be recycled, or to a vector with distinct error rates for 
+  every field.
   
   
   

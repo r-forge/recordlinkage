@@ -38,7 +38,7 @@ genSamples(dataset, num.non, des.mprop = 0.1)
   from \code{dataset}.
 }
 
-\author{Andreas Borg}
+\author{Andreas Borg, Murat Sariyar}
 \note{
   Unsupervised clustering may lead to a poor quality of classification, all
   subsequent results should be evaluated critically.

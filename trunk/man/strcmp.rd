@@ -40,7 +40,7 @@ levenshteinDist(str1, str2)
   \code{levenshteinSim} is a similarity function based on
   the Levenshtein distance, calculated by
   \eqn{1-\frac{\mathrm{d}(\mathit{str}_{1},\mathit{str}_{2})}{\max(A,B))}}{
-  1 - d(str1,str2) / max(A,B)}, where \eqn{\mathrm{d}} is the Levenshtein distance
+  1 - d(str1,str2) / max(A,B)}, where \eqn{\mathrm{d}}{d} is the Levenshtein distance
   function and \eqn{A} and \eqn{B} are the lenghts of the strings.
 
   Arguments \code{str1} and \code{str2} are expected to be of type 

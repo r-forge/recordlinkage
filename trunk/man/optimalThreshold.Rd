@@ -34,10 +34,11 @@ optimalThreshold(rpairs, my = NULL, ny = NULL)
   If no further arguments are given, a threshold which minimizes the
   absolute number of misclassified record pairs is returned. If \code{my} is 
   supplied (\code{ny} is ignored in this case), a threshold is picked which
-  maximizes the number of links while keeping the ratio of pairs falsely
-  classified as links to the total number of links below or equal \code{my}.
-  If \code{ny} is supplied, the number of non-links is maximized under the
-  condition that the ratio of falsely classified does not exceed \code{ny}.
+  maximizes the number of correctly classified links while keeping the ratio 
+  of false links to the total number of links below or equal \code{my}.
+  If \code{ny} is supplied, the number of correct non-links is maximized under the
+  condition that the ratio of falsely classified non-links to the total number of
+  non-links does not exceed \code{ny}.
   
   Two seperate runs of \code{optimalThreshold} with values for \code{my} and
   \code{ny} respectively allow for obtaining a lower and an upper threshold
