@@ -7,15 +7,15 @@
   threshold assignment.
 }
 \usage{
-getPairs(rpairs, threshold_upper = Inf, threshold_lower = -Inf, 
+getPairs(rpairs, threshold.upper = Inf, threshold.lower = -Inf, 
          single.rows = FALSE, show = "all", sort = TRUE)
 }
 
 \arguments{
   \item{rpairs}{A \code{\link{RecLinkResult}} object containing weight information.}
-  \item{threshold_upper, threshold_lower}{Real numbers. Upper and lower
+  \item{threshold.upper, threshold.lower}{Real numbers. Upper and lower
     output threshold.}
-  \item{single.rows}{Print record pairs in one row instead of two consecutive.}
+  \item{single.rows}{Logical. Wether to print record pairs in one row instead of two consecutive.}
   \item{show}{Selects which records to show, one of "links", 
     "nonlinks", "possible", "all".}
   \item{sort}{Logical. Whether to sort descending by weight.}
@@ -25,8 +25,8 @@ getPairs(rpairs, threshold_upper = Inf, threshold_lower = -Inf,
   Input is a \code{\link{RecLinkData}} object for which weights were assigned with 
   \code{\link{emWeights}} or \code{\link{emWeights}}. 
   Records are sorted by weight and those for which
-  the weigth \code{rpairs$Wdata} holds the condition 
-  \code{rpairs$Wdata < threshold_upper && rpairs$Wdata >= threshold_lower}
+  the weight \code{rpairs$Wdata} holds the condition 
+  \code{rpairs$Wdata < threshold.upper && rpairs$Wdata >= threshold.lower}
   are returned. 
   
   Further selection can be made by \code{show} to include all data pairs,

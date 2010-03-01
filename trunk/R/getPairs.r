@@ -1,6 +1,6 @@
 # getPairs.r: functions to view and edit record pairs
 
-getPairs <- function(rpairs,threshold_upper=Inf,threshold_lower=-Inf,
+getPairs <- function(rpairs,threshold.upper=Inf,threshold.lower=-Inf,
 					single.rows=FALSE, show="all",
 					sort=!is.null(rpairs$Wdata))
 {
@@ -15,7 +15,7 @@ getPairs <- function(rpairs,threshold_upper=Inf,threshold_lower=-Inf,
     }
 	if (!is.null(rpairs$Wdata))
   {
-    ind=which(rpairs$Wdata<threshold_upper & rpairs$Wdata>=threshold_lower)
+    ind=which(rpairs$Wdata<threshold.upper & rpairs$Wdata>=threshold.lower)
     weights <- rpairs$Wdata
   } 
   else
@@ -56,6 +56,7 @@ getPairs <- function(rpairs,threshold_upper=Inf,threshold_lower=-Inf,
 								   "id2", paste(colnames(data2),".2",sep=""))
 		return (pairs)
 	}
+
 	printfun=function(x)
     {
         c(x[1:((length(x)+1)/2)],c("",x[((length(x)+3)/2):length(x)]))
