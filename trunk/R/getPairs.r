@@ -39,9 +39,10 @@ getPairs <- function(rpairs,threshold_upper=Inf,threshold_lower=-Inf,
 		{
       warning("No prediction vector found, returning all data pairs!")
     }
-browser()
     pairs=data.frame(Weight=weights[ind],
+                    id1=rpairs$pairs[ind,1],
                     data1[rpairs$pairs[ind,1],],
+                    id2=rpairs$pairs[ind,2],
                     data2[rpairs$pairs[ind,2],])
 	if (sort)
 	{
@@ -51,8 +52,8 @@ browser()
     
 	if (single.rows) 
 	{
-		colnames(pairs)=c("Weight",paste(colnames(data1),".1",sep=""),
-								   paste(colnames(data2),".2",sep=""))
+		colnames(pairs)=c("Weight", "id1", paste(colnames(data1),".1",sep=""),
+								   "id2", paste(colnames(data2),".2",sep=""))
 		return (pairs)
 	}
 	printfun=function(x)
@@ -62,7 +63,7 @@ browser()
     }
     m=apply(pairs,1,printfun)
     m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*2,ncol=nrow(m)/2,byrow=TRUE))
-    colnames(m)=c("Weight",colnames(data1))
+    colnames(m)=c("Weight", "id", colnames(data1))
     return(m)
 }
 
