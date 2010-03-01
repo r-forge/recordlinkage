@@ -1,8 +1,7 @@
 # evt.r: Functions for applying Extreme Value Theory to Record Linkage
 
 # simplified version of mrl.plot in package ismev
-mrl<-
-function(data, umin = min(data), umax = max(data) - 0.1, nint = 
+mrl <- function(data, umin = min(data), umax = max(data) - 0.1, nint = 
 	round(max(data)-min(data))*20)
 {
 #
@@ -18,7 +17,7 @@ function(data, umin = min(data), umax = max(data) - 0.1, nint =
 }
 
 # Estimation of quantile in pareto distribution
-gpdEst<- function(Wdata, thresh=-Inf, quantil=0.95)
+gpdEst <- function(Wdata, thresh=-Inf, quantil=0.95)
 {
     gpd=fpot(x=Wdata, threshold=thresh,std.err=FALSE)
     n=length(Wdata)
@@ -48,6 +47,25 @@ plotMRL <- function(rpairs,l=mrl(rpairs$Wdata))
 
 getParetoThreshold <- function(rpairs, quantil=0.95, interval=NA)
 {
+  if (!("RecLinkData" %in% class(rpairs) || "RecLinkResult" %in% class(rpairs)))
+    stop(sprintf("Wrong class for rpairs: %s", class(rpairs)))
+
+  if (nrow(rpairs$pairs) == 0)
+    stop("No record pairs!")
+
+  if (is.null(rpairs$Wdata))
+    stop("No weights in rpairs!")
+
+  if (!is.numeric(quantil))
+    stop(sprintf("Illegal type for quantil: %s", class(quantil)))
+  
+  if (quantil <0 || quantil > 1)
+    stop(sprintf("Illegal value for quantil: %g!", quantil))
+
+  if (!missing(interval) && !is.numeric(interval))
+    stop(sprintf("Illegal class for interval: %s!", class(interval)))
+
+
   # Auswahl der Ränder. Gewählte Gewichte werden im Plot angezeigt
   l=mrl(rpairs$Wdata)
   if (!is.numeric(interval))
@@ -67,5 +85,5 @@ getParetoThreshold <- function(rpairs, quantil=0.95, interval=NA)
     interval=c(interval,max(rpairs$Wdata))
   fatTail=rpairs$Wdata[rpairs$Wdata <= interval[2]]
   threshold=gpdEst(fatTail,interval[1],quantil)  
-  return(threshold)
+  return(as.vector(threshold))
 }

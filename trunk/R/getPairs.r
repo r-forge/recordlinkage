@@ -82,7 +82,7 @@ editMatch <- function (rpairs)
   p=edit(p)
   is_match=p[seq(1,nrow(p)-2,3),"is_match"]
   is_match=as.integer(levels(is_match)[as.integer(is_match)])
-  rpairs$pairs$is_match
+  rpairs$pairs$is_match <- is_match
   return(rpairs)
 }
 
