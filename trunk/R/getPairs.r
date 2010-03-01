@@ -2,7 +2,7 @@
 
 getPairs <- function(rpairs,threshold_upper=Inf,threshold_lower=-Inf,
 					single.rows=FALSE, show="all",
-					sort=TRUE)
+					sort=!is.null(rpairs$Wdata))
 {
     if (rpairs$type=="deduplication")
     {   
@@ -13,7 +13,16 @@ getPairs <- function(rpairs,threshold_upper=Inf,threshold_lower=-Inf,
         data1=rpairs$data1
         data2=rpairs$data2
     }
-	ind=which(rpairs$Wdata<threshold_upper & rpairs$Wdata>=threshold_lower)
+	if (!is.null(rpairs$Wdata))
+  {
+    ind=which(rpairs$Wdata<threshold_upper & rpairs$Wdata>=threshold_lower)
+    weights <- rpairs$Wdata
+  } 
+  else
+  {
+    ind <- 1:nrow(rpairs$pairs)
+    weights <- rep(NA, nrow(rpairs$pairs))
+  }
 	if (!is.null(rpairs$prediction))
 	{
 		show.ind=switch(show,links=which(rpairs$prediction[ind]=="L"),
@@ -26,10 +35,12 @@ getPairs <- function(rpairs,threshold_upper=Inf,threshold_lower=-Inf,
 							
 							TRUE)
 		ind=ind[show.ind]		
-	} else if (!missing(show) && is.null(rpairs$prediction))
-		warning("No prediction vector found, returning all data pairs!")
-
-    pairs=data.frame(Weight=rpairs$Wdata[ind],
+	} else if (show != "all" && is.null(rpairs$prediction))
+		{
+      warning("No prediction vector found, returning all data pairs!")
+    }
+browser()
+    pairs=data.frame(Weight=weights[ind],
                     data1[rpairs$pairs[ind,1],],
                     data2[rpairs$pairs[ind,2],])
 	if (sort)
