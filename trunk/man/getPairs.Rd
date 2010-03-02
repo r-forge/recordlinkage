@@ -33,16 +33,18 @@ getPairs(rpairs, max.weight = Inf, min.weight = -Inf,
   only links, only non-links or only possible links.
   
   If \code{single.rows} is not \code{TRUE}, pairs are output on two consecutive
-  lines to enable easy comparison.
+  lines to enable easy comparison. All data are converted to character, which 
+  can lead to a loss of precision. Therefore, two row-format should be used 
+  for printing only.
 }
 \value{
   A data frame. If \code{single.rows} is \code{TRUE}, each row holds (in this
-  order) the weight of the data pair, the data fields of the first record and
-  the data fields of the second record.
+  order) the weight of the data pair, id and data fields of the first record and
+  id and data fields of the second record.
 
-  If \code{single.rows} is not \code{TRUE}, each odd row contains the weight and
-  the data fields of the first record and each even row a blank field followed
-  by the data fields of the second record.
+  If \code{single.rows} is not \code{TRUE}, each odd row contains the weight
+  followed by id and data fields of the first record, each even row a blank 
+  field followed by id and data fields of the second record.
 }
 \author{Andreas Borg}
 
