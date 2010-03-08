@@ -28,13 +28,15 @@ epiWeights <- function (rpairs, e=0.01, f=rpairs$frequencies)
   # leave out ids and matching status
   pairs=rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))]
   pairs[is.na(pairs)]=0
+
+  # adjust error rate 
   # error rate
   w=log((1-e)/f, base=2)
   
   # weight computation
   row_sum <- function(r,w)
   {
-  return(sum(r*w))
+  return(sum(r*w,na.rm=TRUE))
   }
   
   S=apply(pairs,1,row_sum,w)/sum(w)

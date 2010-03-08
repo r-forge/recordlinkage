@@ -26,7 +26,7 @@ gpdEst <- function(Wdata, thresh=-Inf, quantil=0.95)
    	k=length(gpd$exceedances) # number of exceedances over thresh
     x_quantil=thresh+scale/shape*((n/k*(1-quantil))^(-shape) -1)
   # Falls Threshold das Intervall unterschreitet, nimm Median der Gewichte
-    if (x_quantil < thresh) return (mean(c(thresh,max(Wdata))))
+    if (x_quantil < thresh) return (median(c(thresh,max(Wdata))))
     if (x_quantil > -scale/shape) return (-scale/shape)
     return (x_quantil)
 } 
