@@ -31,6 +31,10 @@ use.pred = FALSE)
   and \code{valid}. If present, the attributes \code{prediction} and \code{Wdata} 
   are split and the corresponding fractions saved. All other attributes are
   copied to both data sets.
+  
+  If the number of desired matches or non-matches is higher than the number
+  actually present in the data, the maximum possible number is chosen and a
+  warning issued.
 }
 
 \author{Andreas Borg, Murat Sariyar}

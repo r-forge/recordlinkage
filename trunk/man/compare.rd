@@ -61,7 +61,10 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
   
   Data sets are represented as data frames or matrices (typically of type 
   character), each row representing one record, each column representing one
-  field or attribute (like first name, date of birth\ldots).
+  field or attribute (like first name, date of birth\ldots). Row names are not
+  retained in the record pairs. If an identifier other than row number is
+  needed, it should be supplied as a designated column and excluded from
+  comparison (see note on \code{exclude} below).
   
   Each element of \code{blockfld} specifies a set of columns in which two
   records must agree to be included in the output. Each blocking definition in
