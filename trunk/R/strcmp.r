@@ -35,6 +35,16 @@ jarowinkler <- function(str1, str2, W_1=1/3, W_2=1/3, W_3=1/3, r=0.5)
 
 levenshteinDist <- function(str1, str2)
 {
+  # check type
+  if (typeof(str1) != "character" && class(str1) != "factor")
+     stop(sprintf("Illegal data type: %s", typeof(str1)))
+  if (class(str1) == "factor")
+    str=as.character(str1)
+
+  if (typeof(str2) != "character" && class(str2) != "factor")
+     stop(sprintf("Illegal data type: %s", typeof(str2)))
+  if (class(str2) == "factor")
+    str=as.character(str2)
    if ((is.array(str1) || is.array(str2)) && dim(str1)!=dim(str2))
       stop ("non-conformable arrays")
    l1 <- length(str1)
