@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <R.h>
+#include <R_ext/Utils.h>
 
 
 /**
@@ -100,6 +101,8 @@ void mygllm (int * y, int * s, double * C, int * maxit, double * tol, double * E
   int it = 0;  // Zählt Anzahl der Iterationen
   while (it<*maxit)
   {
+    /* allow interruption through CTRL-C */
+    R_CheckUserInterrupt();
     it++;
     //Rprintf("Iteration %d\n", it);
     /* Aufsummieren der geschätzten beobachtbaren Häufigkeiten in F */
