@@ -3,7 +3,8 @@
 #include <R.h>
 
 
-static int calc_levdist(const char *s1, const char *s2);
+static int levenshtein_internal(const char *s, const char *t,
+                     int ins_c, int del_c, int sub_c);
 void levenshtein(char ** strvec_1, char ** strvec_2,
              int * length_1, int * length_2, int * ans);
 
@@ -24,7 +25,7 @@ void levenshtein(char ** strvec_1, char ** strvec_2,
   {
     char * str_1=strvec_1[str_ind % *length_1];
     char * str_2=strvec_2[str_ind % *length_2];
-   	int lev_dist=calc_levdist(str_1, str_2);
+   	int lev_dist=levenshtein_internal(str_1, str_2, 1, 1, 1);
     ans[str_ind]=lev_dist;
 // 		Rprintf("Vergleiche %s, %s\n",str_1, str_2); // Debug-Ausgabe
 // 		Rprintf("Levenshtein-Distanz: %d\n",lev_dist);   
@@ -46,102 +47,146 @@ void levenshtein(char ** strvec_1, char ** strvec_2,
 // 	}
 // }
 
+
 /*
-Copyright (C)  2001 Free Software Foundation, Inc.
+ * Below follows extract of PostgreSQL modul fuzzystrmatch. Only the relevant
+ * function levenshtein_internal is retained here. Some changes were made
+ * to fit the needs of an R function (R_alloc is used, PostgreSQL 
+ * error handling has been removed).   
+ */
+ 
+/* Definition fom PostgreSQL sources */ 
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+#define Min(x, y)       ((x) < (y) ? (x) : (y))
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this software; see the file COPYING.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
-Boston, MA 02111-1307 USA
+/*
+ * fuzzystrmatch.c
+ *
+ * Functions for "fuzzy" comparison of strings
+ *
+ * Joe Conway <mail@joeconway.com>
+ *
+ * $PostgreSQL: pgsql/contrib/fuzzystrmatch/fuzzystrmatch.c,v 1.32 2010/01/02 16:57:32 momjian Exp $
+ * Copyright (c) 2001-2010, PostgreSQL Global Development Group
+ * ALL RIGHTS RESERVED;
+ *
+ * levenshtein()
+ * -------------
+ * Written based on a description of the algorithm by Michael Gilleland
+ * found at http://www.merriampark.com/ld.htm
+ * Also looked at levenshtein.c in the PHP 4.0.6 distribution for
+ * inspiration.
+ * Configurable penalty costs extension is introduced by Volkan
+ * YAZICI <volkan.yazici@gmail.com>.
+ *
+ * (comments on metaphone omitted)
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without a written agreement
+ * is hereby granted, provided that the above copyright notice and this
+ * paragraph and the following two paragraphs appear in all copies.
+ *
+ * IN NO EVENT SHALL THE AUTHORS OR DISTRIBUTORS BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING
+ * LOST PROFITS, ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
+ * DOCUMENTATION, EVEN IF THE AUTHOR OR DISTRIBUTORS HAVE BEEN ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * THE AUTHORS AND DISTRIBUTORS SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE AUTHOR AND DISTRIBUTORS HAS NO OBLIGATIONS TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ *
+ */
 
-This software is a derivative work of PHP3 Copyright (c) 1997-2000
-PHP Development Team
-*/
-
-/* $Id: levenshtein.c,v 1.2 2009-11-03 08:27:45 borg Exp $ */
-
-//#include <stdio.h>
-//#include "php.h"
-//#include "internal_functions.h"
-//#include "reg.h"
-//#include "post.h"
-//#include "php3_string.h"
-
-static int calc_levdist(const char *s1, const char *s2) /* faster, but obfuscated */
+/*
+ * levenshtein_internal - Calculates Levenshtein distance metric
+ *                        between supplied strings. Generally
+ *                        (1, 1, 1) penalty costs suffices common
+ *                        cases, but your mileage may vary.
+ */
+static int
+levenshtein_internal(const char *s, const char *t,
+                     int ins_c, int del_c, int sub_c)
 {
-	register char *p1,*p2;
-	register int i,j,n;
-	int l1=0,l2=0;
-	char r[512];
-	const char *tmp;
+    int         m,
+                n;
+    int        *prev;
+    int        *curr;
+    int         i,
+                j;
+    const char *x;
+    const char *y;
 
-	/* skip equal start sequence, if any */
-	while(*s1==*s2) {
-		if(!*s1) break;
-		s1++; s2++;
-	}
-	
-	/* if we already used up one string, then
-      the result is the length of the other */
-	if(*s1=='\0') return strlen(s2);
-	if(*s2=='\0') return strlen(s1);
+    m = strlen(s);
+    n = strlen(t);
 
-	/* length count */
-	while(*s1++) l1++;
-	while(*s2++) l2++;
-	
-	/* cut of equal tail sequence, if any */
-	while(*--s1 == *--s2) {
-		l1--; l2--;		
-	}
-	
-	/* reset pointers, adjust length */
-	s1-=l1++;
-	s2-=l2++;
-  	
-	/* possible dist to great? */
- 	if(abs(l1-l2)>=255) return -1;
+    /*
+     * We can transform an empty s into t with n insertions, or a non-empty t
+     * into an empty s with m deletions.
+     */
+    if (!m)
+        return n * ins_c;
+    if (!n)
+        return m * del_c;
 
-	/* swap if l2 longer than l1 */
-	if(l1<l2) {
-		tmp=s1; s1=s2; s2=tmp;
-		l1 ^= l2; l2 ^= l1; l1 ^= l2;
-	}
+    
+    /* One more cell for initialization column and row. */
+    ++m;
+    ++n;
 
-	
-	/* fill initial row */
-	n=(*s1!=*s2);
-	for(i=0,p1=r;i<l1;i++,*p1++=n++,p1++) {/*empty*/}
-	
-	/* calc. rowwise */
-	for(j=1;j<l2;j++) {
-		/* init pointers and col#0 */
-		p1 = r + !(j&1);
-		p2 = r + (j&1);
-		n=*p1+1;
-		*p2++=n;p2++;
-		s2++;
-		
-		/* foreach column */
-		for(i=1;i<l1;i++) {
-			if(*p1<n) n=*p1+(*(s1+i)!=*(s2)); /* replace cheaper than delete? */
-			p1++;
-			if(*++p1<n) n=*p1+1; /* insert cheaper then insert ? */
-			*p2++=n++; /* update field and cost for next col's delete */
-			p2++;
-		}	
-	}
+    /*
+     * Instead of building an (m+1)x(n+1) array, we'll use two different
+     * arrays of size m+1 for storing accumulated values. At each step one
+     * represents the "previous" row and one is the "current" row of the
+     * notional large array.
+     */
+//    prev = (int *) palloc(2 * m * sizeof(int));
+    prev = (int *) R_alloc(sizeof(int), 2 * m);
+    curr = prev + m;
 
-	/* return result */
-	return n-1;
+    /* Initialize the "previous" row to 0..cols */
+    for (i = 0; i < m; i++)
+        prev[i] = i * del_c;
+
+    /* Loop through rows of the notional array */
+    for (y = t, j = 1; j < n; y++, j++)
+    {
+        int        *temp;
+
+        /*
+         * First cell must increment sequentially, as we're on the j'th row of
+         * the (m+1)x(n+1) array.
+         */
+        curr[0] = j * ins_c;
+
+        for (x = s, i = 1; i < m; x++, i++)
+        {
+            int         ins;
+            int         del;
+            int         sub;
+
+            /* Calculate costs for probable operations. */
+            ins = prev[i] + ins_c;      /* Insertion    */
+            del = curr[i - 1] + del_c;  /* Deletion     */
+            sub = prev[i - 1] + ((*x == *y) ? 0 : sub_c);       /* Substitution */
+
+            /* Take the one with minimum cost. */
+            curr[i] = Min(ins, del);
+            curr[i] = Min(curr[i], sub);
+        }
+
+        /* Swap current row with previous row. */
+        temp = curr;
+        curr = prev;
+        prev = temp;
+    }
+
+    /*
+     * Because the final value was swapped from the previous row to the
+     * current row, that's where we'll find it.
+     */
+    return prev[m - 1];
 }
