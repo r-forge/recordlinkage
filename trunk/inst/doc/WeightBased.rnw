@@ -62,23 +62,33 @@ hist(pairs$Wdata, plot=FALSE)
 For determining thresholds, 
 record pairs within a given range of weights can be printed using 
 \texttt{getPairs}\footnote{The output of \texttt{getPairs} is shortened in this
-document.}. In this case, the value $11$ is set as upper and lower threshold,
-dividing links from non-links. The summary shows the resulting contingency table
-and error measures.
+document.}. In this case, $24$ is set as upper and $-7$ as lower threshold,
+dividing links, possible links and non-links. The summary shows the resulting 
+contingency table and error measures.
 
 
 <<results=hide>>=
-getPairs(pairs,15,10)
+getPairs(pairs,30,20)
 @
 <<echo=false>>=
-getPairs(pairs,15,10)[25:44,]
+getPairs(pairs,30,20)[23:36,]
 @
 <<>>=
-pairs=emClassify(pairs, threshold.upper=11)
+pairs=emClassify(pairs, threshold.upper=24, threshold.lower=-7)
 summary(pairs)
 @
-Detected links can be extracted for further processing with \texttt{getPairs}:
+Review of the record pairs denoted as possible links is facilitated by
+\texttt{getPairs}, which can be forced to show only possible links via argument
+\texttt{show}. A list with the ids of linked pairs can be extracted from the 
+output of \texttt{getPairs} with argument \texttt{single.rows} set to 
+\texttt{TRUE}.
+
 <<>>=
-links=getPairs(pairs,show="links")
+possibles <- getPairs(pairs, show="possible")
+possibles[1:6,]
+links=getPairs(pairs,show="links", single.rows=TRUE)
+link_ids <- links[, c("id1", "id2")]
+link_ids
+
 @
 \end{document}
