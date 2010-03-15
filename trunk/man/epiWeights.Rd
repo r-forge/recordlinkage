@@ -46,10 +46,13 @@ epiWeights(rpairs, e = 0.01, f = rpairs$frequencies)
   The average frequency of values is by default taken from the object
   \code{rpairs}. Both frequency and error rate \code{e} can be set to a single 
   value, which will be recycled, or to a vector with distinct error rates for 
-  every field.
+  every field. 
   
-  
-  
+  The error rate(s) and frequencie(s) must satisfy 
+  \eqn{e_{i}\leq{}1-f_{i}}{e[i] <= 1-f[i]} for all \eqn{i}, otherwise
+  the functions fails. Also, some other rare combinations can result in weights
+  with illegal values (NaN, less than 0 or greater than 1). In this case a
+  warning is issued.  
 }
 \value{
   A copy of \code{rpairs} with the calculated weights stored in component

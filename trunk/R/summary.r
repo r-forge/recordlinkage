@@ -2,6 +2,9 @@
 
 summary.RecLinkData <- function(object,...)
 {
+    if (!("RecLinkData" %in% class(object)) &&
+        !("RecLinkResult" %in% class(object)))
+        stop(sprintf("Wrong type for object: %s!", class(rpairs)))
     if (object$type=="linkage")
     {
         cat("\nLinkage Data Set\n\n")
@@ -44,6 +47,9 @@ summary.RecLinkData <- function(object,...)
 
 summary.RecLinkResult <- function (object, ...)
 {
+    if (!("RecLinkResult" %in% class(object)))
+        stop(sprintf("Wrong type for object: %s!", class(rpairs)))
+
     summary.RecLinkData(object,...)
     cat("\n")
     cat(sprintf("%d links detected",length(which(object$prediction=="L"))),"\n")
@@ -95,6 +101,9 @@ texSummary <- function (object)
 
 errorMeasures <- function(result)
 {
+  if (!("RecLinkResult" %in% class(result)))
+      stop(sprintf("Wrong type for result: %s!", class(rpairs)))
+
   TP=length(which(result$pairs$is_match & result$prediction=="L")) # true positive
   FP=length(which(!result$pairs$is_match & result$prediction=="L")) # false positive
   TN=length(which(!result$pairs$is_match & result$prediction=="N")) # true negative
