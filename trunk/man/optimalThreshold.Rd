@@ -9,7 +9,7 @@
   Calculates the optimal threshold for weight-based Record Linkage.
 }
 \usage{
-optimalThreshold(rpairs, my = NULL, ny = NULL)
+optimalThreshold(rpairs, my = NaN, ny = NaN)
 }
 \arguments{
   \item{rpairs}{
