@@ -2,5 +2,5 @@
 {
    library.dynam("RecordLinkage",pkg,lib)
    cat("RecordLinkage library\n")
-   cat("[c] 2008 IMBEI Mainz\n")
+   cat("[c] IMBEI Mainz\n")
 }
