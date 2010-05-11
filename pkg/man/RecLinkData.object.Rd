@@ -25,7 +25,7 @@
     included in \code{pairs} (reciprocal of number of distinct values).
   }
   \item{type}{Character string identifying whether a linkage
-    (\code{"linkage"}) or a deduplication (\code{"dedup"}) project is 
+    (\code{"linkage"}) or a deduplication (\code{"deduplication"}) project is 
     represented.}
 
   Furthermore, the components \code{M}, \code{U}, \code{W} and \code{Wdata}
