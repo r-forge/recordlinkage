@@ -6,12 +6,12 @@
   Supervised classification of record pairs based on a trained model.
 }
 \usage{
-classifySupv(model, newdata, ...)
+classifySupv(modobj, newdata, ...)
 }
 
 \arguments{
-  \item{model}{Object of type \code{RecLinkClassif}. The
-    trained model. See \code{\link{trainSupv}}.}
+  \item{modobj}{Object of type \code{RecLinkClassif}. The
+    calibrated model. See \code{\link{trainSupv}}.}
   \item{newdata}{Object of type \code{\link{RecLinkData}}. The data to
     classify.}
   \item{\dots}{Further arguments for the \code{\link{predict}} function.}
@@ -20,7 +20,7 @@ classifySupv(model, newdata, ...)
 \details{
 
   The record pairs in \code{newdata} are classified by calling
-  the appropriate \code{\link{predict}} function for \code{model$model}.
+  the appropriate \code{\link{predict}} function for \code{modobj$model}.
   
 }
 
@@ -30,7 +30,7 @@ classifySupv(model, newdata, ...)
   result.
 }
 
-\author{Andreas Borg}
+\author{Andreas Borg, Murat Sariyar}
 
 \seealso{\code{\link{trainSupv}} for training of classifiers,
          \code{\link{classifyUnsup} for unsupervised classification.}

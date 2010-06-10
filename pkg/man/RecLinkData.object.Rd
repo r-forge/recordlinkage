@@ -14,8 +14,8 @@
     Data frame of original records.
   }
   \item{pairs}{
-    Data frame of data pairs. Each row represents the comparison of two records, 
-    identified by columns \code{id1} and \code{id2}. The following columns contain for each
+    Data frame of data pairs. Each row represents the comparison pattern of two records, 
+    identified by columns \code{id1} and \code{id2}. The other columns contain for each
     considered attribute a real number in the range [0..1] representing the degree of
     similarity. These columns are named according to the respective columns in
     \code{data}. The last column contains the matching status of the pair,
@@ -39,5 +39,5 @@
 \code{\link{compare.dedup}}, \code{\link{compare.linkage}}
 }
 
-\author{Andreas Borg}
+\author{Andreas Borg, Murat Sariyar}
 \keyword{classif}
