@@ -68,7 +68,7 @@ Andreas Borg, Murat Sariyar
 }
 \examples{
 data(RLdata500)
-p <- compare.dedup(RLdata500,identity=identity.RLdata500)
+p <- compare.dedup(RLdata500,blockfld=list(1,3),identity=identity.RLdata500)
 train <- getMinimalTrain(p)
 classif <- trainSupv(train,method="bagging")
 summary(classifySupv(classif,newdata=p))
