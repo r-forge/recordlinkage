@@ -57,34 +57,7 @@ trainSupv <- function(rpairs,method,use.pred=FALSE,omit.possible=TRUE,
 
 }
 
-
-classifySupv <- function(model,newdata,...)
-{
-  if (!("RecLinkClassif" %in% class(model)))
-    stop("Wrong class for model!")
-
-  if (!("RecLinkData" %in% class(newdata) ||
-    "RecLinkResult" %in% class(newdata)))
-    stop("Wrong class for newdata!")
-
-      
-	ret=newdata
-
-    x=newdata$pairs[,-c(1,2,ncol(newdata$pairs))]
-	x[is.na(x)]=0
-
-    predict=switch(model$method,
-  		svm=predict(model$model, newdata=x,...),       
-	 	 rpart=predict(model$model, newdata=x,type="class",...),       
-		  ada=predict(model$model, newdata=x,type="vector",...),       
-		  bagging=predict(model$model, newdata=x,type="class",...),
-		  nnet=predict(model$model, newdata=x,type="class",...),
-      stop("Illegal classification method!"))
-    # refactor to ensure uniform order of levels
-    ret$prediction=factor(predict,levels=c("N","P","L"))
-    class(ret)="RecLinkResult"
-    return(ret)
-}
+# classifySupv: moved to classifySupv-methods.r
 
 
 classifyUnsup <- function(rpairs, method,...)
