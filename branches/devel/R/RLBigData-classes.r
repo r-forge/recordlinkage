@@ -16,6 +16,10 @@ setClass(
     frequencies = "numeric",
     blockFld = "list",
     excludeFld = "numeric",
+    strcmpFld = "numeric",
+    strcmpFun = "character",
+    phoneticFld = "numeric",
+    phoneticFun ="character",
     drv = "DBIDriver",
     con = "DBIConnection",
     "VIRTUAL"
@@ -60,10 +64,13 @@ setClass(
 
 # constructor
 RLBigDataDedup <-function(data, identity = NA, blockfld = list(), 
-  exclude = integer(0), strcmp)
+  exclude = numeric(0), strcmp = numeric(0), 
+  strcmpfun = "jarowinkler", phonetic=numeric(0), phonfun = "pho_h")
 {
  if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
  if (is.character(exclude)) exclude <- match(exclude, colnames(data))
+ if (is.character(strcmp)) strcmp <- match(strcmp, colnames(data))
+ if (is.character(phonetic)) phonetic <- match(phonetic, colnames(data))
  # set up database
  drv <- dbDriver("SQLite")
  con <- dbConnect(drv, dbname="")
@@ -72,8 +79,9 @@ RLBigDataDedup <-function(data, identity = NA, blockfld = list(),
  blockfld <- lapply(blockfld, 
    function(x) {if (is.character(x)) match(x, coln) else (x)})
  object <- new("RLBigDataDedup", data=as.data.frame(data), identity=factor(identity),
-  blockFld = blockfld, excludeFld = exclude, drv = drv, con = con,
-  frequencies = apply(data,2,function(x) 1/length(unique(x))) )
+  blockFld = blockfld, excludeFld = exclude, strcmpFld = strcmp,
+  strcmpFun = strcmpfun, phoneticFld = phonetic, phoneticFun = phonfun,
+  drv = drv, con = con, frequencies = apply(data,2,function(x) 1/length(unique(x))) )
  # write records to data base
  dbWriteTable(con, "data", cbind(data, identity))
  # calculate frequencies of attributes

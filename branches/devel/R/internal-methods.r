@@ -26,12 +26,34 @@ setMethod(
   signature = "RLBigDataDedup",
   definition = function(object)
   {
-    coln <- make.db.names(object@con, colnames(object@data))
+    # constructs select for a single column, to be used by lapply 
+    # (see below)
+    selectListElem <- function(fldIndex, coln, excludeFld, strcmpFld, strcmpFun,
+                              phoneticFld, phoneticFun)
+    {
+      # nothing if field is excluded
+      if (fldIndex %in% excludeFld)
+        return(character(0))
+        
+      # something like 'jarowinkler(t1.fname, t2.fname) as fname'
+      if (fldIndex %in% strcmpFld)
+        return(sprintf("%1$s(t1.%2$s, t2.%2$s) as %2$s", strcmpFun, coln[fldIndex]))
+
+      # something like 'pho_h(t1.fname)=pho_h(t2.fname) as fname'
+      if (fldIndex %in% phoneticFld)
+        return(sprintf("%1$s(t1.%2$s)=%1$s(t2.%2$s as %2$s", phoneticFun, coln[fldIndex]))
+
+      # direct comparison: something like 't1.fname=t2.fname as fname'      
+      return(sprintf("t1.%1$s=t2.%1$s as %1$s", coln[fldIndex]))
+    }
+    coln <- make.db.names(object@con, colnames(object@data))                  
     if (length(object@excludeFld) > 0)
       coln <- coln[-excludeFld]
     selectlist_id <- "t1.row_names as id1, t2.row_names as id2"
-    selectlist <- paste(sapply(coln, 
-      function(x) sprintf("t1.%s=t2.%s as %s",x,x,x)), collapse = ", ")
+    # use unlist to delete NULLs from list
+    selectlist <- paste(unlist(lapply(1:length(coln), selectListElem,
+      coln, object@excludeFld, object@strcmpFld, object@strcmpFun,
+      object@phoneticFld, object@phoneticFun)), collapse = ", ")
     selectlist <- paste(selectlist, "t1.identity=t2.identity as is_match", sep=",")
     fromclause <- "data t1, data t2"
     whereclause <- "t1.row_names < t2.row_names"

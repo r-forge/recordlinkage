@@ -19,6 +19,13 @@ double jarowinkler_core(char * str_1, char * str_2,
 
 void jarowinkler_wrapper(sqlite3_context *ctx, int n_values, sqlite3_value **value)
 {
+	// check for NULL values, return NULL if any of the input strings is NULL
+	if(sqlite3_value_type(value[0]) == SQLITE_NULL || 
+  	 sqlite3_value_type(value[1]) == SQLITE_NULL)
+  {
+		sqlite3_result_null(ctx);
+		return;
+	}
   const unsigned char *str1 = sqlite3_value_text(value[0]);
   const unsigned char *str2 = sqlite3_value_text(value[1]);
 //   Rprintf("String 1: %s\n", str1);
