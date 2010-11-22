@@ -15,7 +15,7 @@ setClass(
   representation = representation(
     frequencies = "numeric",
     blockFld = "list",
-    excludeFld = "integer",
+    excludeFld = "numeric",
     drv = "DBIDriver",
     con = "DBIConnection",
     "VIRTUAL"
@@ -58,9 +58,9 @@ setClass(
   )
 )    
 
-
+# constructor
 RLBigDataDedup <-function(data, identity = NA, blockfld = list(), 
-  exclude = integer(0))
+  exclude = integer(0), strcmp)
 {
  if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
  if (is.character(exclude)) exclude <- match(exclude, colnames(data))
@@ -84,7 +84,11 @@ RLBigDataDedup <-function(data, identity = NA, blockfld = list(),
      paste(coln[blockelem], collapse="_"),
      paste(coln[blockelem], collapse=", "))
 #     message(query)
-  dbGetQuery(con, query)
+    dbGetQuery(con, query)
   }
+  # create index on identity vector to speed up identifying true matches
+  dbGetQuery(con, "create index index_identity on data (identity)")
+  # init extension functions (string comparison, phonetic code) for SQLite
+  init_sqlite_extensions(con)
   return(object)
 }
