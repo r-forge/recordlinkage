@@ -8,7 +8,10 @@ setGeneric(
 setMethod(
   f = "getFrequencies",
   signature = "RLBigData",
-  definition = function(x) x@frequencies
+  definition = function(x) 
+    if (length(x@excludeFld)!=0)
+      x@frequencies[-x@excludeFld]
+    else x@frequencies
 )
 
 setGeneric(

@@ -54,17 +54,15 @@ setMethod(
 #' Internal workhorse function
 classifySupvBigData <- function(rpairs, model, stepsize=10000, ...)
 {
- on.exit(clear(rpairs))
- rpairs <- begin(rpairs)
- links <- matrix(0L, 0L, nrow=0, ncol=2)
- i = stepsize
- while(nrow(slice <- nextPairs(rpairs,stepsize)) > 0)
- {
-  message(i)
-  flush.console()
-  # vorläufig!
-#   slice <- data.frame(as.integer(slice[,1]),
-#   as.integer(slice[,2]), as.matrix(slice[,3:ncol(slice)]))
+  on.exit(clear(rpairs))
+  rpairs <- begin(rpairs)
+  links <- matrix(0L, 0L, nrow=0, ncol=2)
+  possibleLinks <- matrix(0L, 0L, nrow=0, ncol=2)
+  nPairs <- 0
+  while(nrow(slice <- nextPairs(rpairs,stepsize)) > 0)
+  {
+   # Spaltennamen angleichen
+   # TODO: Fehlerbehandlung für ungleiche Attributanzahl
    colnames(slice) <- c("id1", "id2", levels(model$model$frame$var)[-1])
     prediction=switch(model$method,
   	  svm=predict(model$model, newdata=slice,...),       
@@ -73,9 +71,13 @@ classifySupvBigData <- function(rpairs, model, stepsize=10000, ...)
   		  bagging=predict(model$model, newdata=slice,type="class",...),
   		  nnet=predict(model$model, newdata=slice,type="class",...),
         stop("Illegal classification method!"))
-   links <- rbind(links, slice[prediction=="L",1:2]) 
-   i <- i + stepsize
- }      
- links
+   links <- rbind(links, as.matrix(slice[prediction=="L",1:2]))
+   possibleLinks <- rbind(possibleLinks, as.matrix(slice[prediction=="P",1:2]))
+   nPairs <- nPairs + nrow(slice)
+   message(nPairs)
+   flush.console()
+  }      
+  result <- new("RLResult", data = rpairs, links = links, 
+    possibleLinks = possibleLinks, nPairs = nPairs)
 }
 

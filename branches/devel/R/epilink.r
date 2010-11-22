@@ -60,44 +60,4 @@ epiWeights <- function (rpairs, e=0.01, f=rpairs$frequencies)
 
 
 
-
-# Arguments:
-#   rpairs      weighted record pairs (output of emWeights)
-#   my      error bound: # False Matches / # Found Matches
-#   ny      error bound  # False Non-Matches / # Found Non-Matches
-#       If an error bound is Inf, it will not be considered, meaning that
-#       "possible link" will not be assigned
-epiClassify <- function (rpairs,threshold.upper, 
-                        threshold.lower=threshold.upper)
-{    
-
-  if (!("RecLinkData" %in% class(rpairs) || "RecLinkResult" %in% class(rpairs)))
-    stop(sprintf("Wrong class for rpairs: %s", class(rpairs)))
-
-  if (nrow(rpairs$pairs) == 0)
-    stop("No record pairs!")
-
-  if (is.null(rpairs$Wdata))
-    stop("No weights in rpairs!")
-
-  if (!is.numeric(threshold.upper))
-    stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
-
-  if (!is.numeric(threshold.lower))
-    stop(sprintf("Illegal type for threshold.lower: %s", class(threshold.lower)))
-
-  if (threshold.upper < threshold.lower)
-    stop(sprintf("Upper threshold %g lower than lower threshold %g",
-
-  threshold.upper, threshold.lower))
-  prediction=rep("P",nrow(rpairs$pairs))
-  prediction[rpairs$Wdata>=threshold.upper]="L"
-  prediction[rpairs$Wdata<threshold.lower]="N"
-  
-  ret=rpairs # keeps all components of rpairs
-  ret$prediction=factor(prediction,levels=c("N","P","L"))
-  ret$threshold=threshold.upper
-  class(ret)="RecLinkResult"
-  return(ret)
-}
-
+# epiClassify: Moved to epilink-methods.r

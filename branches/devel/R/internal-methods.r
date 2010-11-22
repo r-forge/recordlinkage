@@ -1,3 +1,4 @@
+# internal utility function to create blocking definition in SQL
 blockfldfun <- function(blockfld, coln)
 {
  paste("(",paste(sapply(blockfld, function(blockvec)
@@ -6,6 +7,43 @@ blockfldfun <- function(blockfld, coln)
                     coln[blockelem])), collapse=" and ")),
                     collapse=") or ("), ")", sep="")
 }
+
+#' Create SQL statement
+#'
+#' Creates SQL statememt to retreive comparison patterns, respecting
+#' parameters such as blocking definition and exclusion of fields.
+#'
+#' @value A list with components "select_list", "from_clause", "where_clause"
+#' representing the corresponding parts of the query without the keywords
+#' 'SELECT', 'FROM' and 'WHERE'.
+setGeneric(
+  name = "getSQLStatement",
+  def = function(object) standardGeneric("getSQLStatement")
+)
+
+setMethod(
+  f = "getSQLStatement",
+  signature = "RLBigDataDedup",
+  definition = function(object)
+  {
+    coln <- make.db.names(object@con, colnames(object@data))
+    if (length(object@excludeFld) > 0)
+      coln <- coln[-excludeFld]
+    selectlist_id <- "t1.row_names as id1, t2.row_names as id2"
+    selectlist <- paste(sapply(coln, 
+      function(x) sprintf("t1.%s=t2.%s as %s",x,x,x)), collapse = ", ")
+    selectlist <- paste(selectlist, "t1.identity=t2.identity as is_match", sep=",")
+    fromclause <- "data t1, data t2"
+    whereclause <- "t1.row_names < t2.row_names"
+    if (length(object@blockFld)>0)
+    {
+     whereclause <- sprintf("%s and (%s)", whereclause, blockfldfun(object@blockFld, coln))
+    }
+    return(list(select_list = paste(selectlist_id, selectlist, sep=", "),
+                from_clause = fromclause, where_clause = whereclause) )
+  }
+)
+
 
 #' Begin generation of data pairs
 #'
@@ -19,25 +57,12 @@ setGeneric(
       
 setMethod(
   f = "begin",
-  signature = "RLBigDataDedup",
+  signature = "RLBigData",
   definition = function(x, ...)
   {
-    coln <- make.db.names(x@con, colnames(x@data))
-    # exclude einbauen
-    selectlist_id <- "select t1.row_names as id1, t2.row_names as id2,"
-    selectlist <- paste(sapply(coln, 
-      function(x) sprintf("t1.%s=t2.%s as %s",x,x,x)), collapse = ", ")
-    selectlist <- paste(selectlist, "t1.identity=t2.identity as is_match", sep=",")
-    fromclause <- "from data t1, data t2"
-    whereclause <- "where t1.row_names < t2.row_names"
-    if (length(x@blockFld)>0)
-    {
-     whereclause <- sprintf("%s and (%s)", whereclause, blockfldfun(x@blockFld, coln))
-    }
-  # sortieren dürfte zu Performanceproblemen führen
-  #  orderclause <- "order by id1, id2")
-  
-    query <- paste(selectlist_id, selectlist, fromclause, whereclause, collapse=" ")  
+    sql <- getSQLStatement(x)  
+    query <- sprintf("select %s from %s where %s", sql$select_list, 
+      sql$from_clause, sql$where_clause)
     message(query)
     dbSendQuery(x@con, query) # can be retreived via dbListResults(x@con)[[1]]
     return(x)
@@ -108,3 +133,21 @@ setMethod(
   }
 )
 
+setGeneric(
+  name = "getMatchCount",
+  def = function(object) standardGeneric("getMatchCount")
+)
+
+setMethod(
+  f = "getMatchCount",
+  signature = "RLBigData",
+  definition = function(object)
+  {
+    sql <- getSQLStatement(object)
+    sql_stmt <- sprintf(
+      "select count(*) from %s where %s and t1.identity==t2.identity",
+      sql$from_clause, sql$where_clause)
+    message(sql_stmt)
+    return(as.integer(dbGetQuery(object@con, sql_stmt)))
+  }
+) 
