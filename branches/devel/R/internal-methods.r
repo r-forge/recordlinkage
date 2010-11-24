@@ -1,11 +1,18 @@
 # internal utility function to create blocking definition in SQL
-blockfldfun <- function(blockfld, coln)
+blockfldfun <- function(blockfld, phoneticFld, phoneticFun, coln)
 {
- paste("(",paste(sapply(blockfld, function(blockvec)
-                  paste(sapply(blockvec, function(blockelem)
-                    sprintf("t1.%s=t2.%s", coln[blockelem], 
-                    coln[blockelem])), collapse=" and ")),
-                    collapse=") or ("), ")", sep="")
+  blockElemFun <- function(fldIndex)
+  {
+    if (fldIndex %in% phoneticFld)
+      return(sprintf("%1$s(t1.%2$s)=%1$s(t2.%2$s)", phoneticFun, coln[fldIndex]))
+    else 
+      return(sprintf("t1.%1$s=t2.%1$s", coln[fldIndex]))
+  }
+  
+ paste("(", paste(sapply(blockfld, function(blockvec)
+                  paste(sapply(blockvec, blockElemFun),
+                        collapse=" and ")),
+                  collapse=") or ("), ")", sep="")
 }
 
 #' Create SQL statement
@@ -41,14 +48,12 @@ setMethod(
 
       # something like 'pho_h(t1.fname)=pho_h(t2.fname) as fname'
       if (fldIndex %in% phoneticFld)
-        return(sprintf("%1$s(t1.%2$s)=%1$s(t2.%2$s as %2$s", phoneticFun, coln[fldIndex]))
+        return(sprintf("%1$s(t1.%2$s)=%1$s(t2.%2$s) as %2$s", phoneticFun, coln[fldIndex]))
 
       # direct comparison: something like 't1.fname=t2.fname as fname'      
       return(sprintf("t1.%1$s=t2.%1$s as %1$s", coln[fldIndex]))
     }
     coln <- make.db.names(object@con, colnames(object@data))                  
-    if (length(object@excludeFld) > 0)
-      coln <- coln[-excludeFld]
     selectlist_id <- "t1.row_names as id1, t2.row_names as id2"
     # use unlist to delete NULLs from list
     selectlist <- paste(unlist(lapply(1:length(coln), selectListElem,
@@ -57,9 +62,12 @@ setMethod(
     selectlist <- paste(selectlist, "t1.identity=t2.identity as is_match", sep=",")
     fromclause <- "data t1, data t2"
     whereclause <- "t1.row_names < t2.row_names"
+#    if (length(object@excludeFld) > 0)
+#      coln <- coln[-object@excludeFld]
     if (length(object@blockFld)>0)
     {
-     whereclause <- sprintf("%s and (%s)", whereclause, blockfldfun(object@blockFld, coln))
+     whereclause <- sprintf("%s and (%s)", whereclause, blockfldfun(object@blockFld,
+      object@phoneticFld, object@phoneticFun, coln))
     }
     return(list(select_list = paste(selectlist_id, selectlist, sep=", "),
                 from_clause = fromclause, where_clause = whereclause) )

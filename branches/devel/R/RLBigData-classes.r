@@ -67,10 +67,20 @@ RLBigDataDedup <-function(data, identity = NA, blockfld = list(),
   exclude = numeric(0), strcmp = numeric(0), 
   strcmpfun = "jarowinkler", phonetic=numeric(0), phonfun = "pho_h")
 {
+ # if strings are used to identify columns, convert to numeric indices
  if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
  if (is.character(exclude)) exclude <- match(exclude, colnames(data))
  if (is.character(strcmp)) strcmp <- match(strcmp, colnames(data))
  if (is.character(phonetic)) phonetic <- match(phonetic, colnames(data))
+
+ # if strcmp or phonetic is TRUE, set it to all existing columns
+ # excluded fields are omitted during construction of SQL commands
+ if (isTRUE(strcmp)) strcmp = 1:ncol(data)
+ if (isTRUE(phonetic)) phonetic = 1:ncol(data)
+ 
+ # construct column names if not assigned
+ if (is.null(colnames(data)))
+  colnames(data)=paste("V", 1:ncol(data), sep="")
  # set up database
  drv <- dbDriver("SQLite")
  con <- dbConnect(drv, dbname="")
@@ -83,7 +93,7 @@ RLBigDataDedup <-function(data, identity = NA, blockfld = list(),
   strcmpFun = strcmpfun, phoneticFld = phonetic, phoneticFun = phonfun,
   drv = drv, con = con, frequencies = apply(data,2,function(x) 1/length(unique(x))) )
  # write records to data base
- dbWriteTable(con, "data", cbind(data, identity))
+ dbWriteTable(con, "data", data.frame(data, identity = identity))
  # calculate frequencies of attributes
  # create indices to speed up blocking
   for (blockelem in blockfld)
