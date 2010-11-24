@@ -63,12 +63,65 @@ setClass(
 )    
 
 # constructor
-RLBigDataDedup <-function(data, identity = NA, blockfld = list(), 
+RLBigDataDedup <- function(data, identity = NA, blockfld = list(), 
+  exclude = numeric(0), strcmp = numeric(0), 
+  strcmpfun = "jarowinkler", phonetic=numeric(0), phonfun = "pho_h")
+{
+  # if strings are used to identify columns, convert to numeric indices
+  if (is.character(exclude)) exclude <- match(exclude, colnames(data))
+  if (is.character(strcmp)) strcmp <- match(strcmp, colnames(data))
+  if (is.character(phonetic)) phonetic <- match(phonetic, colnames(data))
+  
+  # if strcmp or phonetic is TRUE, set it to all existing columns
+  # excluded fields are omitted during construction of SQL commands
+  if (isTRUE(strcmp)) strcmp = 1:ncol(data)
+  if (isTRUE(phonetic)) phonetic = 1:ncol(data)
+  
+  # put blockfld into list if necessary, convert string indices to numeric indices
+  if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
+  blockfld <- lapply(blockfld, 
+   function(x) {if (is.character(x)) match(x, colnames(data)) else (x)})
+
+  # construct column names if not assigned
+  if (is.null(colnames(data)))
+  colnames(data)=paste("V", 1:ncol(data), sep="")
+
+  # set up database
+  drv <- dbDriver("SQLite")
+  con <- dbConnect(drv, dbname="")
+  coln <- make.db.names(con,colnames(data))
+
+  # construct object  
+  object <- new("RLBigDataDedup", data=as.data.frame(data), identity=factor(identity),
+    blockFld = blockfld, excludeFld = exclude, strcmpFld = strcmp,
+    strcmpFun = strcmpfun, phoneticFld = phonetic, phoneticFun = phonfun,
+    drv = drv, con = con, frequencies = apply(data,2,function(x) 1/length(unique(x))) )
+
+  # write records to database
+  dbWriteTable(con, "data", data.frame(data, identity = identity))
+
+  # create indices to speed up blocking
+  for (blockelem in blockfld)
+  {
+    query <- sprintf("create index index_%s on data (%s)",
+     paste(coln[blockelem], collapse="_"),
+     paste(coln[blockelem], collapse=", "))
+    dbGetQuery(con, query)
+  }
+  # create index on identity vector to speed up identifying true matches
+  dbGetQuery(con, "create index index_identity on data (identity)")
+  # init extension functions (string comparison, phonetic code) for SQLite
+  init_sqlite_extensions(con)
+  return(object)
+}
+
+
+# constructor
+RLBigDataLinkage <-function(data1, identity1 = NA, data2, identity2 = NA, blockfld = list(), 
   exclude = numeric(0), strcmp = numeric(0), 
   strcmpfun = "jarowinkler", phonetic=numeric(0), phonfun = "pho_h")
 {
  # if strings are used to identify columns, convert to numeric indices
- if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
  if (is.character(exclude)) exclude <- match(exclude, colnames(data))
  if (is.character(strcmp)) strcmp <- match(strcmp, colnames(data))
  if (is.character(phonetic)) phonetic <- match(phonetic, colnames(data))
@@ -85,7 +138,9 @@ RLBigDataDedup <-function(data, identity = NA, blockfld = list(),
  drv <- dbDriver("SQLite")
  con <- dbConnect(drv, dbname="")
  coln <- make.db.names(con,colnames(data))
+
  # convert string indices to numeric indices
+ if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
  blockfld <- lapply(blockfld, 
    function(x) {if (is.character(x)) match(x, coln) else (x)})
  object <- new("RLBigDataDedup", data=as.data.frame(data), identity=factor(identity),

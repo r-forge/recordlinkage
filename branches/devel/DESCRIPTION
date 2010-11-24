@@ -8,7 +8,7 @@ Description: Provides functions for linking and deduplicating data sets.
   classification algorithms from the machine learning domain. 
 License: GPL (>=2)
 Depends: R (>= 2.8.0), e1071, rpart, ada, ipred, stats, evd, RSQLite, methods
-Suggests: xtable
+Suggests: xtable, RUnit
 LinkingTo: RSQLite
 Collate: register-S3-classes.r RLBigData-classes.r RLResult-class.r 
          accessor-methods.r evt.r               
