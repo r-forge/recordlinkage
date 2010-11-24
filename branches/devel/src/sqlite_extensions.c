@@ -12,8 +12,9 @@
 
 SQLITE_EXTENSION_INIT1
 
+// remove comment to enable diagnostic messages
+// #define DEBUG
 
-#define DEBUG
 #ifndef max
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
 #endif
@@ -48,7 +49,7 @@ void jarowinkler_wrapper(sqlite3_context *ctx, int n_values, sqlite3_value **val
   double result;
   result = jarowinkler_core(str1, str2, 1.0/3, 1.0/3, 1.0/3, 0.5);
 	#ifdef DEBUG
-  	Rprintf("Ergebnis des Stringvergleichs: %f", result);
+  	Rprintf("Ergebnis des Stringvergleichs: %f\n", result);
   #endif
   sqlite3_result_double(ctx, result);
 }
@@ -76,7 +77,7 @@ void levenshtein_wrapper(sqlite3_context *ctx, int n_values, sqlite3_value **val
      package, therefore transform right here */
   result = 1.0 - (double) editDistance / (double) max(strlen(str1), strlen(str2));
 	#ifdef DEBUG
-		Rprintf("Ergebnis des Stringvergleichs: %f", result);
+		Rprintf("Ergebnis des Stringvergleichs: %f\n", result);
 	#endif
   sqlite3_result_double(ctx, result);
 }
@@ -106,7 +107,7 @@ void pho_h_wrapper(sqlite3_context *ctx, int n_values, sqlite3_value **value)
 		return;
 	}
 	#ifdef DEBUG
-		Rprintf("Ergebnis von phonet(): %s", dest);
+		Rprintf("Ergebnis von phonet(): %s\n", dest);
 	#endif
 	
 	sqlite3_result_text(ctx, dest, -1, SQLITE_STATIC);
