@@ -19,7 +19,7 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 {
     # various catching of erronous input
     if (!is.data.frame(dataset) && !is.matrix(dataset))
-        stop ("Illegal format of dataset")
+        stop ("dataset must be a matrix or data frame!")
     ndata=nrow(dataset) # number of records
     nfields=ncol(dataset)
     if (ndata<2) 

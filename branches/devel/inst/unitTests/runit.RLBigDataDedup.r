@@ -1,6 +1,6 @@
 # Unit Test for class RLBigDataDedup (constructor and
 # internal methods). This test corresponds to the test of compare.dedup()
-# for simple data sets.
+
 
 .setUp <- function()
 {
@@ -14,130 +14,9 @@
   data3 <<- read.table("data3.compare.txt", sep=",", na.strings="",header=TRUE)
   identity3 <<- scan("identity3.compare.txt",comment.char="#",sep=",")
 
-}
-
-# test all kinds of illegal input
-#test.compare.dedup.exceptions <- function()
-#{
-#
-#
-#
-#  # illegal dataset
-#  checkException(compare.dedup("andreas")) # wrong data type
-#
-#  # illegal blocking definition
-##  checkException(compare.dedup(data1, blockfld="fname_c1")) # wrong type
-#  checkException(compare.dedup(data1, blockfld=TRUE)) # wrong type/value
-#  checkException(compare.dedup(data1, blockfld=list(1,list(4,6)))) # nested list
-##  checkException(compare.dedup(data1, blockfld=-3)) # negative index
-##  checkException(compare.dedup(data1, blockfld=0))
-#  
-#  # illegal phonetic definition
-#  checkException(compare.dedup(data1, phonetic="fname_c1")) # wrong type
-#  checkException(compare.dedup(data1, phonetic=list(1,4))) # list not okay
-##  checkException(compare.dedup(data1, phonetic=-3)) # negative index
-##  checkException(compare.dedup(data1, phonetic=0))
-#    
-#  # illegal phonetic function
-#  checkException(compare.dedup(data1, phonetic=TRUE, phonfun=5)) # not a function
-#  checkException(compare.dedup(data1, phonetic=TRUE, phonfun="jarowinkler")) # not a function
-#  checkException(compare.dedup(data1, phonetic=TRUE, 
-#    phonfun=list(pho_h, soundex))) # neither list...
-#  checkException(compare.dedup(data1, phonetic=TRUE, 
-#    phonfun=c(pho_h, soundex))) # ...nor vector makes sense
-#  # how to test if function returns the right thing?
-#    
-#  # illegal string comparator definition
-#  checkException(compare.dedup(data1, strcmp="fname_c1")) # wrong type
-#  checkException(compare.dedup(data1, strcmp=list(1,4))) # list not okay
-##  checkException(compare.dedup(data1, strcmp=-3)) # negative index
-##  checkException(compare.dedup(data1, strcmp=0))
-#
-#  # illegal string comparison function
-#  checkException(compare.dedup(data1, strcmp=TRUE, phonfun=5)) # not a function
-#  checkException(compare.dedup(data1, strcmp=TRUE, phonfun="jarowinkler")) # not a function
-#  checkException(compare.dedup(data1, strcmp=TRUE, 
-#    phonfun=list(jarowinkler, levenshteinSim))) # neither list...
-#  checkException(compare.dedup(data1, strcmp=TRUE, 
-#    phonfun=c(jarowinkler, levenshteinSim))) # ...nor vector makes sense
-#  # how to test if function returns the right thing?
-#
-#  # illegal exclude field definition    
-#  checkException(compare.dedup(data1, exclude=c(4,10))) # out of bounds
-#  checkException(compare.dedup(data1, exclude="fname_c1")) # wrong type
-#  checkException(compare.dedup(data1, exlude=list(1,4))) # list not okay
-##  checkException(compare.dedup(data1, exclude=-3)) # negative index
-##  checkException(compare.dedup(data1, exclude=0))
-#
-#  # illegal identity vector
-#  checkException(compare.dedup(data1,identity=as.list(identity1)))
-#
-#  # illegal type for n_match and n_non_match
-#  checkException(compare.dedup(data1, identity=identity1, n_match="1",
-#    n_non_match=2))
-#  checkException(compare.dedup(data1, identity=identity1, n_match=1,
-#    n_non_match="2"))
-#  checkException(compare.dedup(data1, identity=identity1, n_match=TRUE,
-#    n_non_match="2"))
-#  checkException(compare.dedup(data1, identity=identity1, n_match=1,
-#    n_non_match=FALSE))
-#  checkException(compare.dedup(data1, identity=identity1, n_match=factor(1),
-#    n_non_match=2))
-#  checkException(compare.dedup(data1, identity=identity1, n_match=1,
-#    n_non_match=factor(2)))
-#     
-#  # combinations of arguments that cause an error
-#
-#  # dataset and blocking definition:
-#  checkException(compare.dedup(data1, blockfld=c(4,10))) # out of bounds
-#  checkException(compare.dedup(data1, blockfld=c("fname_c1","lname"))) # non-existing column
-#
-#  # dataset and phonetic:
-#  checkException(compare.dedup(data1, phonetic=c(4,10))) # out of bounds
-#
-#  # dataset and strcmp:
-#  checkException(compare.dedup(data1, strcmp=c(4,10))) # out of bounds
-#
-#  # dataset and exclude
-#  checkException(compare.dedup(data1, exclude=c(1,10))) # out of bounds
-#  
-#  # dataset and identity vector (illegal length)
-#  checkException(compare.dedup(data1, identity=1:4))
-#
-#  # dataset and n_match / n_non_match: see below
-#  
-#  # blockfld: no conflicts with other args
-#  
-#  # phonetic and strcmp
-#  # error: string comparator and phonetic code for same column
-#  # first set warnings to errors
-#  oldWarn <- getOption("warn")
-#  options(warn=2)
-#  checkException(compare.dedup(data1, strcmp=1, phonetic=1))  # single column
-#  checkException(compare.dedup(data1, strcmp=1:3, phonetic=3)) # one overlap
-#  checkException(compare.dedup(data1, strcmp=3, phonetic=1:3))  
-#  checkException(compare.dedup(data1, strcmp=1:3, phonetic=2:4)) # several overlaps 
-#  checkException(compare.dedup(data1, strcmp=1:3, phonetic=2:4))  
-#  checkException(compare.dedup(data1, strcmp=TRUE, phonetic=TRUE))  
-#  checkException(compare.dedup(data1, strcmp=1, phonetic=TRUE))  
-#  checkException(compare.dedup(data1, strcmp=TRUE, phonetic=1))  
-#  # reset warning handling
-#  options(warn=oldWarn)
-#  
-#  # strcmp: no conflicts with other args
-#  # exclude: no conflicts with other args
-#  # ...
-#  
-#}
-#
-# test 'normal' behaviour including errors that occur later during execution
-# only an interface test to check that methods return the expected values,
-# no assumptions about internal class structure (slots)
-test.RLBigDataDedup <- function()
-{
   # shortcut for constructing a RLBigDataDedup object and retreiving the
   # record pairs
-  testResultFun <- function(...)
+  testResultFun <<- function(...)
   {
     object <- RLBigDataDedup(...)
     begin(object)
@@ -145,6 +24,110 @@ test.RLBigDataDedup <- function()
     clear(object)
     return(result)
   }
+
+}
+
+
+# test all kinds of illegal input
+test.RLBigDataDedup.exceptions <- function()
+{
+
+  # illegal dataset
+  checkException(RLBigDataDedup("andreas")) # wrong data type
+
+  # illegal blocking definition
+  checkException(RLBigDataDedup(data1, blockfld=TRUE)) # wrong type/value
+  checkException(RLBigDataDedup(data1, blockfld=list(1,list(4,6)))) # nested list
+  checkException(RLBigDataDedup(data1, blockfld=-3)) # negative index
+  checkException(RLBigDataDedup(data1, blockfld=0))
+  
+  # illegal phonetic definition
+  checkException(RLBigDataDedup(data1, phonetic=list(1,4))) # list not okay
+  checkException(RLBigDataDedup(data1, phonetic=-3)) # negative index
+  checkException(RLBigDataDedup(data1, phonetic=0))
+    
+  # illegal phonetic function
+  # TODO
+  checkException(RLBigDataDedup(data1, phonetic=TRUE, phonfun=5)) # not a function
+  checkException(RLBigDataDedup(data1, phonetic=TRUE, phonfun="jarowinkler")) # not a function
+  checkException(RLBigDataDedup(data1, phonetic=TRUE, 
+    phonfun=list(pho_h, soundex))) # neither list...
+  checkException(RLBigDataDedup(data1, phonetic=TRUE, 
+    phonfun=c(pho_h, soundex))) # ...nor vector makes sense
+  # how to test if function returns the right thing?
+    
+  # illegal string comparator definition
+  checkException(RLBigDataDedup(data1, strcmp=list(1,4))) # list not okay
+  checkException(RLBigDataDedup(data1, strcmp=-3)) # negative index
+  checkException(RLBigDataDedup(data1, strcmp=0))
+
+  # illegal string comparison function
+  checkException(RLBigDataDedup(data1, strcmp=TRUE, phonfun=5)) # not a function
+  checkException(RLBigDataDedup(data1, strcmp=TRUE, phonfun="jarowinkler")) # not a function
+  checkException(RLBigDataDedup(data1, strcmp=TRUE, 
+    phonfun=list(jarowinkler, levenshteinSim))) # neither list...
+  checkException(RLBigDataDedup(data1, strcmp=TRUE, 
+    phonfun=c(jarowinkler, levenshteinSim))) # ...nor vector makes sense
+
+  # illegal exclude field definition    
+  checkException(RLBigDataDedup(data1, exclude=list(1,4))) # list not okay
+  checkException(RLBigDataDedup(data1, exclude=-3)) # negative index
+  checkException(RLBigDataDedup(data1, exclude=0))
+
+  # illegal identity vector
+  checkException(RLBigDataDedup(data1,identity=as.list(identity1)))
+
+     
+  # combinations of arguments that cause an error
+
+  # dataset and blocking definition:
+  checkException(RLBigDataDedup(data1, blockfld=c(4,10))) # out of bounds
+# silently ignored:
+#  checkException(RLBigDataDedup(data1, blockfld=c("fname_c1","lname"))) # non-existing column
+
+  # dataset and phonetic:
+  checkException(RLBigDataDedup(data1, phonetic=c(4,10))) # out of bounds
+
+  # dataset and strcmp:
+  checkException(RLBigDataDedup(data1, strcmp=c(4,10))) # out of bounds
+
+  # dataset and exclude
+  checkException(RLBigDataDedup(data1, exclude=c(1,10))) # out of bounds
+  
+  # dataset and identity vector (illegal length)
+  checkException(RLBigDataDedup(data1, identity=1:4))
+
+  # dataset and n_match / n_non_match: see below
+  
+  # blockfld: no conflicts with other args
+  
+  # phonetic and strcmp
+  # error: string comparator and phonetic code for same column
+  # first set warnings to errors
+  oldWarn <- getOption("warn")
+  options(warn=2)
+  checkException(RLBigDataDedup(data1, strcmp=1, phonetic=1))  # single column
+  checkException(RLBigDataDedup(data1, strcmp=1:3, phonetic=3)) # one overlap
+  checkException(RLBigDataDedup(data1, strcmp=3, phonetic=1:3))  
+  checkException(RLBigDataDedup(data1, strcmp=1:3, phonetic=2:4)) # several overlaps 
+  checkException(RLBigDataDedup(data1, strcmp=1:3, phonetic=2:4))  
+  checkException(RLBigDataDedup(data1, strcmp=TRUE, phonetic=TRUE))  
+  checkException(RLBigDataDedup(data1, strcmp=1, phonetic=TRUE))  
+  checkException(RLBigDataDedup(data1, strcmp=TRUE, phonetic=1))  
+  # reset warning handling
+  options(warn=oldWarn)
+  
+  # strcmp: no conflicts with other args
+  # exclude: no conflicts with other args
+  # ...
+  
+}
+
+# test 'normal' behaviour including errors that occur later during execution
+# only an interface test to check that methods return the expected values,
+# no assumptions about internal class structure (slots)
+test.RLBigDataDedup <- function()
+{
 
   # no blocking etc.
   testResult=testResultFun(data1) # default case: no blocking whatsoever
@@ -292,3 +275,17 @@ test.RLBigDataDedup <- function()
   
 }
 
+# names of datasets differ?
+
+
+test.getPatternCounts <- function()
+{
+  # Test für Dedup-Objekt
+  object <- RLBigDataLinkage(data2, data3) # default case: no blocking whatsoever
+  result1=read.table("result1.getPatternCounts.txt")
+  # Check only numeric equality. Reason: result1 is read as a data frame with
+  # one column, which is not easily convertible to a vector with names
+  checkEqualsNumeric(getPatternCounts(object), result1[[1]])
+  checkEqualsNumeric(getPatternCounts(object,n=1), result1[[1]])
+  checkEqualsNumeric(getPatternCounts(object,n=4), result1[[1]])
+}

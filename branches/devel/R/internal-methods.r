@@ -30,7 +30,7 @@ setGeneric(
 
 setMethod(
   f = "getSQLStatement",
-  signature = "RLBigDataDedup",
+  signature = "RLBigData",
   definition = function(object)
   {
     # constructs select for a single column, to be used by lapply 
@@ -53,15 +53,19 @@ setMethod(
       # direct comparison: something like 't1.fname=t2.fname as fname'      
       return(sprintf("t1.%1$s=t2.%1$s as %1$s", coln[fldIndex]))
     }
-    coln <- make.db.names(object@con, colnames(object@data))                  
+    coln <- switch(class(object),
+      RLBigDataDedup = make.db.names(object@con, colnames(object@data)),
+      RLBigDataLinkage = make.db.names(object@con, colnames(object@data1)))
     selectlist_id <- "t1.row_names as id1, t2.row_names as id2"
     # use unlist to delete NULLs from list
     selectlist <- paste(unlist(lapply(1:length(coln), selectListElem,
       coln, object@excludeFld, object@strcmpFld, object@strcmpFun,
       object@phoneticFld, object@phoneticFun)), collapse = ", ")
     selectlist <- paste(selectlist, "t1.identity=t2.identity as is_match", sep=",")
-    fromclause <- "data t1, data t2"
-    whereclause <- "t1.row_names < t2.row_names"
+    fromclause <- switch(class(object), RLBigDataDedup = "data t1, data t2",
+                                        RLBigDataLinkage = "data1 t1, data2 t2")
+    whereclause <- switch(class(object), RLBigDataDedup = "t1.row_names < t2.row_names",
+                                        RLBigDataLinkage = "1")
 #    if (length(object@excludeFld) > 0)
 #      coln <- coln[-object@excludeFld]
     if (length(object@blockFld)>0)

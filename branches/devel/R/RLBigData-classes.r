@@ -1,3 +1,9 @@
+# internal variables to store supported string comparison and phonetic functions
+
+.supportedStrcmp <- c("jarowinkler", "levenshtein")
+.supportedPhonetic <- c("pho_h", "soundex") # soundex directly by sqlite
+
+
 #' Abstract class for large datasets
 #'
 #' Base class for large datasets (millions of record pairs). Each object holds
@@ -63,42 +69,81 @@ setClass(
 )    
 
 # constructor
-RLBigDataDedup <- function(data, identity = NA, blockfld = list(), 
+RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(), 
   exclude = numeric(0), strcmp = numeric(0), 
   strcmpfun = "jarowinkler", phonetic=numeric(0), phonfun = "pho_h")
 {
+  # error checking
+  if (!is.data.frame(dataset) && !is.matrix(dataset))
+    stop("dataset must be a matrix or data frame!") 
+  nfields <- ncol(dataset)
+
   # if strings are used to identify columns, convert to numeric indices
-  if (is.character(exclude)) exclude <- match(exclude, colnames(data))
-  if (is.character(strcmp)) strcmp <- match(strcmp, colnames(data))
-  if (is.character(phonetic)) phonetic <- match(phonetic, colnames(data))
-  
+  if (is.character(exclude)) exclude <- match(exclude, colnames(dataset))
+  if (is.character(strcmp)) strcmp <- match(strcmp, colnames(dataset))
+  if (is.character(phonetic)) phonetic <- match(phonetic, colnames(dataset))
+
+  if (any(exclude <=0 | exclude > nfields)) stop ("exclude contains out-of-bounds value!")  
+  if (any(strcmp <=0 | strcmp > nfields)) stop ("strcmp contains out-of-bounds value!")  
+  if (any(phonetic <=0 | phonetic > nfields)) stop ("phonetic contains out-of-bounds value!")  
+
+  if (is.list(identity)) stop("identity must not be a list!")
+  if (!missing(identity) && nrow(dataset) != length(identity))
+    stop("length of identity differs from number of records!")
+
   # if strcmp or phonetic is TRUE, set it to all existing columns
   # excluded fields are omitted during construction of SQL commands
-  if (isTRUE(strcmp)) strcmp = 1:ncol(data)
-  if (isTRUE(phonetic)) phonetic = 1:ncol(data)
-  
-  # put blockfld into list if necessary, convert string indices to numeric indices
-  if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
-  blockfld <- lapply(blockfld, 
-   function(x) {if (is.character(x)) match(x, colnames(data)) else (x)})
+  if (isTRUE(strcmp)) strcmp = 1:nfields
+  if (isTRUE(phonetic)) phonetic = 1:nfields
 
-  # construct column names if not assigned
-  if (is.null(colnames(data)))
-  colnames(data)=paste("V", 1:ncol(data), sep="")
+  # at this point, strcmp, exclude and phonetic should be numeric vectors
+  if (!is.numeric(strcmp)) stop("strcmp has wrong type!")
+  if (!is.numeric(phonetic)) stop("strcmp has wrong type!")
+  if (!is.numeric(exclude)) stop("exclude has wrong type!")
+
+  # issue a warning if both string metric and phonetic code is used on one field
+    if (length(intersect(phonetic,strcmp)) > 0)
+        warning("Both phonetics and string metric are used on some fields!")
+        
+  # check if string comparison / phonetic function is supported and
+  # has the correct format
+  if (length(strcmpfun) > 1) stop("strcmpfun must have length 1!")
+  if (length(phonfun) > 1) stop("phonfun must have length 1!")
+  if (!(strcmpfun %in% .supportedStrcmp))
+    stop ("unkown string comparison function!")
+  if (!(phonfun %in% .supportedPhonetic))
+    stop ("unkown phonetic function!")
+
+  # put blockfld into list if necessary, check format, 
+  # convert string indices to numeric indices
+  if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
+  if (!all(sapply(blockfld, function(x) class(x) %in% c("character", "integer", "numeric"))))
+    stop("blockfld has wrong format!")
+  blockfld <- lapply(blockfld, 
+   function(x) {if (is.character(x)) match(x, colnames(dataset)) else (x)})
+  if(any(unlist(blockfld) <= 0 | unlist(blockfld) > nfields))
+    stop("blockfld countains out-of-bounds value!")
+    
+  # cast dataset to data.frame
+  # also constructs column names
+  dataset <- as.data.frame(dataset)
+  # construct column names if not assigned 
+#  if (is.null(names(dataset)))
+#    names(dataset) <- paste("V", 1:nfields, sep="")
 
   # set up database
   drv <- dbDriver("SQLite")
   con <- dbConnect(drv, dbname="")
-  coln <- make.db.names(con,colnames(data))
+  coln <- make.db.names(con,colnames(dataset))
 
   # construct object  
-  object <- new("RLBigDataDedup", data=as.data.frame(data), identity=factor(identity),
+  object <- new("RLBigDataDedup", data=dataset, identity=factor(identity),
     blockFld = blockfld, excludeFld = exclude, strcmpFld = strcmp,
     strcmpFun = strcmpfun, phoneticFld = phonetic, phoneticFun = phonfun,
-    drv = drv, con = con, frequencies = apply(data,2,function(x) 1/length(unique(x))) )
+    drv = drv, con = con, frequencies = sapply(dataset, function(x) 1/length(unique(x))) )
 
   # write records to database
-  dbWriteTable(con, "data", data.frame(data, identity = identity))
+  dbWriteTable(con, "data", data.frame(dataset, identity = identity))
 
   # create indices to speed up blocking
   for (blockelem in blockfld)
@@ -115,52 +160,125 @@ RLBigDataDedup <- function(data, identity = NA, blockfld = list(),
   return(object)
 }
 
-
-# constructor
-RLBigDataLinkage <-function(data1, identity1 = NA, data2, identity2 = NA, blockfld = list(), 
-  exclude = numeric(0), strcmp = numeric(0), 
+# constructor for RLBigDataLinkage (linking two datasets)
+RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA, 
+  identity2 = NA, blockfld = list(), exclude = numeric(0), strcmp = numeric(0), 
   strcmpfun = "jarowinkler", phonetic=numeric(0), phonfun = "pho_h")
 {
- # if strings are used to identify columns, convert to numeric indices
- if (is.character(exclude)) exclude <- match(exclude, colnames(data))
- if (is.character(strcmp)) strcmp <- match(strcmp, colnames(data))
- if (is.character(phonetic)) phonetic <- match(phonetic, colnames(data))
+  if (!is.data.frame(dataset1) && !is.matrix(dataset1))
+    stop("dataset1 must be a matrix or data frame!") 
+  nfields <- ncol(dataset1)
 
- # if strcmp or phonetic is TRUE, set it to all existing columns
- # excluded fields are omitted during construction of SQL commands
- if (isTRUE(strcmp)) strcmp = 1:ncol(data)
- if (isTRUE(phonetic)) phonetic = 1:ncol(data)
- 
- # construct column names if not assigned
- if (is.null(colnames(data)))
-  colnames(data)=paste("V", 1:ncol(data), sep="")
- # set up database
- drv <- dbDriver("SQLite")
- con <- dbConnect(drv, dbname="")
- coln <- make.db.names(con,colnames(data))
+  if (!is.data.frame(dataset2) && !is.matrix(dataset2))
+    stop("dataset2 must be a matrix or data frame!") 
 
- # convert string indices to numeric indices
- if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
- blockfld <- lapply(blockfld, 
-   function(x) {if (is.character(x)) match(x, coln) else (x)})
- object <- new("RLBigDataDedup", data=as.data.frame(data), identity=factor(identity),
-  blockFld = blockfld, excludeFld = exclude, strcmpFld = strcmp,
-  strcmpFun = strcmpfun, phoneticFld = phonetic, phoneticFun = phonfun,
-  drv = drv, con = con, frequencies = apply(data,2,function(x) 1/length(unique(x))) )
- # write records to data base
- dbWriteTable(con, "data", data.frame(data, identity = identity))
- # calculate frequencies of attributes
- # create indices to speed up blocking
-  for (blockelem in blockfld)
+  if (nfields != ncol(dataset2))
+    stop("dataset1 and dataset2 have different numbers of columns!")
+
+  # if strings are used to identify columns, convert to numeric indices
+  if (is.character(exclude)) exclude <- match(exclude, colnames(dataset1))
+  if (is.character(strcmp)) strcmp <- match(strcmp, colnames(dataset1))
+  if (is.character(phonetic)) phonetic <- match(phonetic, colnames(dataset1))
+
+  if (any(exclude <=0 | exclude > nfields)) stop ("exclude contains out-of-bounds value!")  
+  if (any(strcmp <=0 | strcmp > nfields)) stop ("strcmp contains out-of-bounds value!")  
+  if (any(phonetic <=0 | phonetic > nfields)) stop ("phonetic contains out-of-bounds value!")  
+
+  if (is.list(identity1)) stop("identity1 must not be a list!")
+  if (!missing(identity1) && nrow(dataset1) != length(identity1))
+    stop("length of identity1 differs from number of records!")
+
+  if (is.list(identity2)) stop("identity2 must not be a list!")
+  if (!missing(identity2) && nrow(dataset2) != length(identity2))
+    stop("length of identity2 differs from number of records!")
+
+  # if strcmp or phonetic is TRUE, set it to all existing columns
+  # excluded fields are omitted during construction of SQL commands
+  if (isTRUE(strcmp)) strcmp = 1:nfields
+  if (isTRUE(phonetic)) phonetic = 1:nfields
+
+  # at this point, strcmp, exclude and phonetic should be numeric vectors
+  if (!is.numeric(strcmp)) stop("strcmp has wrong type!")
+  if (!is.numeric(phonetic)) stop("strcmp has wrong type!")
+  if (!is.numeric(exclude)) stop("exclude has wrong type!")
+
+  # issue a warning if both string metric and phonetic code is used on one field
+    if (length(intersect(phonetic,strcmp))>0)
+        warning("Both phonetics and string metric are used on some fields!")
+        
+  # check if string comparison / phonetic function is supported and
+  # has the correct format
+  if (length(strcmpfun) > 1) stop("strcmpfun must have length 1!")
+  if (length(phonfun) > 1) stop("phonfun must have length 1!")
+  if (!(strcmpfun %in% .supportedStrcmp))
+    stop ("unkown string comparison function!")
+  if (!(phonfun %in% .supportedPhonetic))
+    stop ("unkown phonetic function!")
+
+  # put blockfld into list if necessary, check format, 
+  # convert string indices to numeric indices
+  if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
+  if (!all(sapply(blockfld, function(x) class(x) %in% c("character", "integer", "numeric"))))
+    stop("blockfld has wrong format!")
+  blockfld <- lapply(blockfld, 
+   function(x) {if (is.character(x)) match(x, colnames(dataset1)) else (x)})
+  if(any(unlist(blockfld) <= 0 | unlist(blockfld) > nfields))
+    stop("blockfld countains out-of-bounds value!")
+
+  # cast data sets to data.frame
+  # also constructs missing column names
+  dataset1 <- as.data.frame(dataset1)
+  dataset2 <- as.data.frame(dataset2)
+  
+  # construct column names if not assigned
+#  if (is.null(colnames(dataset1)))
+#    colnames(dataset1) <- paste("V", 1:nfields, sep="")
+
+  # enforce same column names for dataset2
+  names(dataset2) <- names(dataset1)
+
+  # set up database
+  drv <- dbDriver("SQLite")
+  con <- dbConnect(drv, dbname="")
+  coln <- make.db.names(con,colnames(dataset1))
+
+  # convert identity to factors (so that only level indices are used in the
+  # database
+  if (class(identity1) != class(identity2))
+    warning("identity1 and identity2 have different types!")
+  identLevels <- as.character(unique(c(identity1, identity2)))
+  
+  # construct object  
+  object <- new("RLBigDataLinkage", data1=as.data.frame(dataset1), 
+    data2 = as.data.frame(dataset2), identity1=factor(identity1),
+    identity2 = factor(identity2), blockFld = blockfld, 
+    excludeFld = exclude, strcmpFld = strcmp, strcmpFun = strcmpfun, 
+    phoneticFld = phonetic, phoneticFun = phonfun, drv = drv, con = con, 
+    frequencies = sapply(rbind(data1, data2),
+       function(x) 1/length(unique(x)))
+  ) 
+
+  # write records to database
+  dbWriteTable(con, "data1", data.frame(dataset1, identity = identity1))
+  dbWriteTable(con, "data2", data.frame(dataset2, identity = identity2))
+
+  # create indices to speed up blocking
+  for (tablename in c("data1", "data2"))
   {
-    query <- sprintf("create index index_%s on data (%s)",
-     paste(coln[blockelem], collapse="_"),
-     paste(coln[blockelem], collapse=", "))
-#     message(query)
-    dbGetQuery(con, query)
+    for (blockelem in blockfld)
+    {
+      query <- sprintf("create index index_%s_%s on %s (%s)",
+       tablename,
+       paste(coln[blockelem], collapse="_"),
+       tablename,
+       paste(coln[blockelem], collapse=", "))
+      dbGetQuery(con, query)
+    }
+    # create index on identity vector to speed up identifying true matches
+    dbGetQuery(con, sprintf("create index index_identity_%s on %s (identity)",
+        tablename, tablename))
   }
-  # create index on identity vector to speed up identifying true matches
-  dbGetQuery(con, "create index index_identity on data (identity)")
+
   # init extension functions (string comparison, phonetic code) for SQLite
   init_sqlite_extensions(con)
   return(object)
