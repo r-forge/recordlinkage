@@ -363,14 +363,12 @@ test.compare.linkage.exceptions <- function()
 
 
   # illegal blocking definition
-#  checkException(compare.linkage(data2, data3, blockfld="fname_c1")) # wrong type
-#  checkException(compare.linkage(data2, data3, blockfld=TRUE)) # wrong type/value
+  checkException(compare.linkage(data2, data3, blockfld=TRUE)) # wrong type/value
   checkException(compare.linkage(data2, data3, blockfld=list(1,list(4,6)))) # nested list
-#  checkException(compare.linkage(data2, data3, blockfld=-3)) # negative index
-#  checkException(compare.linkage(data2, data3, blockfld=0))
+  checkException(compare.linkage(data2, data3, blockfld=-3)) # negative index
+  checkException(compare.linkage(data2, data3, blockfld=0))
   
   # illegal phonetic definition
-  checkException(compare.linkage(data2, data3, phonetic="fname_c1")) # wrong type
   checkException(compare.linkage(data2, data3, phonetic=list(1,4))) # list not okay
   checkException(compare.linkage(data2, data3, phonetic=-3)) # negative index
   checkException(compare.linkage(data2, data3, phonetic=0))
@@ -385,7 +383,6 @@ test.compare.linkage.exceptions <- function()
   # how to test if function returns the right thing?
     
   # illegal string comparator definition
-  checkException(compare.linkage(data2, data3, strcmp="fname_c1")) # wrong type
   checkException(compare.linkage(data2, data3, strcmp=list(1,4))) # list not okay
   checkException(compare.linkage(data2, data3, strcmp=-3)) # negative index
   checkException(compare.linkage(data2, data3, strcmp=0))
@@ -401,7 +398,6 @@ test.compare.linkage.exceptions <- function()
 
   # illegal exclude field definition    
   checkException(compare.linkage(data2, data3, exclude=c(4,10))) # out of bounds
-  checkException(compare.linkage(data2, data3, exclude="fname_c1")) # wrong type
   checkException(compare.linkage(data2, data3, exlude=list(1,4))) # list not okay
   checkException(compare.linkage(data2, data3, exclude=-3)) # negative index
   checkException(compare.linkage(data2, data3, exclude=0))
@@ -554,6 +550,23 @@ test.compare.linkage <- function()
   reqResult=read.table("result14.compare.txt",sep=",",colClasses="double",
     header=TRUE)
   checkEquals(testResult$pairs, reqResult, msg=" (exclude columns)")
+
+  # use textual column id for phonetic code
+  testResult=compare.linkage(data2, data3, identity1=identity2, 
+    identity2=identity3,  blockfld=3, 
+    phonetic=c("fname_c1", "fname_c2", "lname_c1", "lname_c2"), exclude=c(3,4))
+  reqResult=read.table("result14.compare.txt",sep=",",colClasses="double",
+    header=TRUE)
+  checkEquals(testResult$pairs, reqResult, msg=" (exclude columns)")
+
+  # use textual id for exclude
+  testResult=compare.linkage(data2, data3, identity1=identity2, 
+    identity2=identity3,  blockfld=3, phonetic=1:4, 
+    exclude=c("lname_c1", "lname_c2"))
+  reqResult=read.table("result14.compare.txt",sep=",",colClasses="double",
+    header=TRUE)
+  checkEquals(testResult$pairs, reqResult, msg=" (exclude columns)")
+
   # check if frequencies are based on used fields
   checkEqualsNumeric(testResult$frequencies, frequencies1[-c(3,4)],
     tolerance = 1e-6, msg = " (check frequencies with excluded attributes)")
@@ -573,6 +586,14 @@ test.compare.linkage <- function()
   # string comparator for individual fields
   testResult=compare.linkage(data2, data3, identity1=identity2, 
     identity2=identity3, blockfld=3, strcmp=1:4, strcmpfun=jarowinkler)
+  reqResult=c(1,1,jarowinkler( c("FRANK",NA,"MUELLER",NA), 
+    c("MARTIN",NA,"MUELLER",NA)),0,0,0,0)
+  checkEquals(as.double(testResult$pairs),reqResult, msg=" (jarowinkler, selected fields)")
+
+  # string comparator with textual column ids
+  testResult=compare.linkage(data2, data3, identity1=identity2, 
+    identity2=identity3, blockfld=3, 
+    strcmp=c("fname_c1", "fname_c2", "lname_c1", "lname_c2"), strcmpfun=jarowinkler)
   reqResult=c(1,1,jarowinkler( c("FRANK",NA,"MUELLER",NA), 
     c("MARTIN",NA,"MUELLER",NA)),0,0,0,0)
   checkEquals(as.double(testResult$pairs),reqResult, msg=" (jarowinkler, selected fields)")

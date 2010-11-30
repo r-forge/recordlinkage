@@ -46,6 +46,18 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
       stop ("Illegal type for n_match!")
     if (!is.na(n_non_match) && !is.numeric(n_non_match))
       stop ("Illegal type for n_match!")
+
+    if(!identical(blockfld, FALSE))
+    {
+      if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
+      if (!all(sapply(blockfld, function(x) class(x) %in% c("character", "integer", "numeric"))))
+        stop("blockfld has wrong format!")
+      blockfld <- lapply(blockfld, 
+       function(x) {if (is.character(x)) match(x, colnames(dataset)) else (x)})
+      if(any(unlist(blockfld) <= 0 | unlist(blockfld) > nfields))
+        stop("blockfld countains out-of-bounds value!")
+    }
+
     if(!identical(identity,NA))
     {
       if(length(identity)!=nrow(dataset))
@@ -188,7 +200,6 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
 	 }
    } else
    { 
-     if (!is.list(blockfld)) blockfld=list(blockfld)
      for (blockelem in blockfld) # loop over blocking definitions
      {
       if (isTRUE(phonetic))
@@ -311,22 +322,40 @@ compare.linkage <- function(dataset1, dataset2, blockfld=FALSE, phonetic=FALSE,
     nfields=ncol(dataset1)
     if (ndata1<1 || ndata2<1) 
         stop ("empty data set")
+    if (is.character(strcmp))
+      strcmp <- match(strcmp, colnames(dataset1))
     if (!is.numeric(strcmp) && !is.logical(strcmp))
-        stop ("strcmp must be numeric or a single logical value")
+        stop ("strcmp must be numeric, character or a single logical value")
+    if (is.character(phonetic))
+      phonetic <- match(phonetic, colnames(dataset1))
     if (!is.numeric(phonetic) && !is.logical(phonetic))
-        stop ("phonetic must be numeric or a single logical value")
+        stop ("phonetic must be numeric, character or a single logical value")
     if (!isFALSE(strcmp) && any(is.na(strcmp) | strcmp <= 0 | strcmp > nfields))
         stop ("phonetic contains out of bounds index")
     if (!isFALSE(phonetic) && any(is.na(phonetic) | phonetic <= 0 | phonetic > nfields))
         stop ("phonetic contains out of bounds index")
+    if (is.character(exclude))
+      exclude <- match(exclude, colnames(dataset1))
+    if (!is.numeric(exclude) && !is.logical(exclude))
+        stop ("exclude must be numeric, character or a single logical value")
     if (!isFALSE(exclude) && any(is.na(exclude) | exclude <= 0 | exclude > nfields))
         stop ("phonetic contains out of bounds index")
-    if (!is.numeric(exclude) && !isFALSE(exclude))
-        stop ("exclude must be numeric or FALSE")
     if (!is.na(n_match) && !is.numeric(n_match))
       stop ("Illegal type for n_match!")
     if (!is.na(n_non_match) && !is.numeric(n_non_match))
       stop ("Illegal type for n_match!")
+
+    if(!identical(blockfld, FALSE))
+    {
+      if (!is.list(blockfld) && !is.null(blockfld)) blockfld <- list(blockfld)
+      if (!all(sapply(blockfld, function(x) class(x) %in% c("character", "integer", "numeric"))))
+        stop("blockfld has wrong format!")
+      blockfld <- lapply(blockfld, 
+       function(x) {if (is.character(x)) match(x, colnames(dataset1)) else (x)})
+      if(any(unlist(blockfld) <= 0 | unlist(blockfld) > nfields))
+        stop("blockfld countains out-of-bounds value!")
+    }
+
     if(!identical(identity1,NA))
     {
       if(length(identity1)!=nrow(dataset1))
