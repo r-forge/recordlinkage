@@ -30,7 +30,7 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
         stop ("phonetic must be numeric or a single logical value")
     if (!isFALSE(strcmp) && (max(strcmp)>nfields|| any(is.na(strcmp))))
         stop ("strcmp contains out of bounds index")
-    if (!isFALSE(phonetic) && (max(phonetic)>nfields || any(is.na(phonetic))))
+    if (!isFALSE(phonetic) && any(is.na(phonetic) | phonetic <= 0 | phonetic > nfields))
         stop ("phonetic contains out of bounds index")
     if (!is.numeric(exclude) && !isFALSE(exclude))
         stop ("exclude must be numeric or FALSE")
@@ -49,10 +49,10 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     }
 
     # ensure dataset is a data frame and has column names
-    dataset=as.data.frame(dataset)
     ret=list()  # return object
-    ret$data=dataset
-    full_data=as.matrix(dataset)
+    ret$data=as.data.frame(dataset)
+    dataset=as.matrix(dataset)
+    dataset[dataset==""]=NA # label missing values
 
 
 
@@ -63,7 +63,6 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     }
     if (is.numeric(exclude))
     {        
-        dataset=dataset[,-exclude]  # remove excluded columns
         # adjust indices to list of included fields
         if (is.numeric(phonetic)) 
         {
@@ -83,23 +82,12 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     {
         warning(sprintf("Both phonetics and string metric are used on some fields",length(intersect(phonetic,strcmp))))
     }
-    dataset[dataset==""]=NA # label missing values
-    full_data[full_data==""]=NA # label missing values
-    dataset=as.matrix(dataset)        
 
     if (!is.function(phonfun))
     {
       stop("phonfun is not a function!")
     }
 
-    if (!isFALSE(phonetic)) # true, if phonetic is TRUE or not a logical value
-    {
-        if (isTRUE(phonetic)) # true, if phonetic is a logical value and TRUE
-        {    
-            dataset=pho_h(dataset)
-        } else # phonetic is not a logical value
-        dataset[,phonetic]=pho_h(dataset[,phonetic])
-    }
     
     if (!is.function(strcmpfun))
     {
@@ -113,7 +101,7 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
    {
     if (is.na(n_match) || is.na(n_non_match))
    	{
-	   pair_ids=t(unorderedPairs(nrow(dataset)))
+	   pair_ids=t(unorderedPairs(ndata))
 	 } else
 	 {
 		tempdat=data.frame(id=1:ndata,identity=identity)
@@ -199,14 +187,14 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
      {
       if (isTRUE(phonetic))
       {
-        	block_data=phonfun(full_data)
+        	block_data=phonfun(dataset)
       } else if (is.numeric(phonetic))
       {
-        block_data=full_data
-        block_data[,phonetic_block]=phonfun(full_data[,phonetic_block])
+        block_data=dataset
+        block_data[,phonetic_block]=phonfun(dataset[,phonetic_block])
       } else
       {
-        block_data=full_data
+        block_data=dataset
       }
       # for each record, concatenate values in blocking fields
       blockstr=apply(block_data,1,function(x) paste(x[blockelem],collapse=" "))
@@ -230,15 +218,30 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
    } # end else
     
 
-  rm(full_data)
-  # return empty data frame if no pairs are obtained
-  if (length(pair_ids)==0)
-  {
+    # return empty data frame if no pairs are obtained
+    if (length(pair_ids)==0)
+    {
       stop("No pairs generated. Check blocking criteria.")
-  }
+    }
   
     pair_ids=as.matrix(unique(as.data.frame(pair_ids)))  # runs faster with data frame
-  
+
+    # remove excluded fields
+    if (is.numeric(exclude))
+    {        
+        dataset=dataset[,-exclude]  # remove excluded columns
+    }  
+
+    # apply phonetic code                                                         
+    if (!isFALSE(phonetic)) # true, if phonetic is TRUE or not a logical value
+    {
+        if (isTRUE(phonetic)) # true, if phonetic is a logical value and TRUE
+        {    
+            dataset=pho_h(dataset)
+        } else # phonetic is not a logical value
+        dataset[,phonetic]=pho_h(dataset[,phonetic])
+    }
+
     left=dataset[pair_ids[,1],,drop=FALSE]
     right=dataset[pair_ids[,2],,drop=FALSE]
     # matrix to hold comparison patterns
@@ -263,7 +266,13 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
                     patterns,
                     is_match)) # Matche
 
-    colnames(ret$pairs)=c("id1","id2",colnames(dataset),"is_match")
+    if (is.numeric(exclude))
+    {
+     colnames(ret$pairs)=c("id1","id2",colnames(ret$data)[-exclude],"is_match")
+    } else
+    {
+     colnames(ret$pairs)=c("id1","id2",colnames(ret$data),"is_match")
+    }
     rownames(ret$pairs)=NULL
 
     ret$frequencies=apply(dataset,2,function(x) 1/length(unique(x)))
