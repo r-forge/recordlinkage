@@ -46,8 +46,8 @@ test.compare.dedup.exceptions <- function()
   # illegal string comparator definition
   checkException(compare.dedup(data1, strcmp="fname_c1")) # wrong type
   checkException(compare.dedup(data1, strcmp=list(1,4))) # list not okay
-#  checkException(compare.dedup(data1, strcmp=-3)) # negative index
-#  checkException(compare.dedup(data1, strcmp=0))
+  checkException(compare.dedup(data1, strcmp=-3)) # negative index
+  checkException(compare.dedup(data1, strcmp=0))
 
   # illegal string comparison function
   checkException(compare.dedup(data1, strcmp=TRUE, phonfun=5)) # not a function
@@ -62,8 +62,8 @@ test.compare.dedup.exceptions <- function()
   checkException(compare.dedup(data1, exclude=c(4,10))) # out of bounds
   checkException(compare.dedup(data1, exclude="fname_c1")) # wrong type
   checkException(compare.dedup(data1, exlude=list(1,4))) # list not okay
-#  checkException(compare.dedup(data1, exclude=-3)) # negative index
-#  checkException(compare.dedup(data1, exclude=0))
+  checkException(compare.dedup(data1, exclude=-3)) # negative index
+  checkException(compare.dedup(data1, exclude=0))
 
   # illegal identity vector
   checkException(compare.dedup(data1,identity=as.list(identity1)))
@@ -344,8 +344,8 @@ test.compare.linkage.exceptions <- function()
   # illegal phonetic definition
   checkException(compare.linkage(data2, data3, phonetic="fname_c1")) # wrong type
   checkException(compare.linkage(data2, data3, phonetic=list(1,4))) # list not okay
-#  checkException(compare.linkage(data2, data3, phonetic=-3)) # negative index
-#  checkException(compare.linkage(data2, data3, phonetic=0))
+  checkException(compare.linkage(data2, data3, phonetic=-3)) # negative index
+  checkException(compare.linkage(data2, data3, phonetic=0))
     
   # illegal phonetic function
   checkException(compare.linkage(data2, data3, phonetic=TRUE, phonfun=5)) # not a function
@@ -359,8 +359,8 @@ test.compare.linkage.exceptions <- function()
   # illegal string comparator definition
   checkException(compare.linkage(data2, data3, strcmp="fname_c1")) # wrong type
   checkException(compare.linkage(data2, data3, strcmp=list(1,4))) # list not okay
-#  checkException(compare.linkage(data2, data3, strcmp=-3)) # negative index
-#  checkException(compare.linkage(data2, data3, strcmp=0))
+  checkException(compare.linkage(data2, data3, strcmp=-3)) # negative index
+  checkException(compare.linkage(data2, data3, strcmp=0))
 
   # illegal string comparison function
   checkException(compare.linkage(data2, data3, strcmp=TRUE, phonfun=5)) # not a function
