@@ -19,7 +19,7 @@
 \section{Objects from the Class}{Object of the S3 class are created by
   \code{\link{compare.dedup}} and \code{\link{compare.linkage}}. The S4 class
   is virtual and exists solely for internal usage in method signatures.
-
+}
 \section{Slots}{
   The following description refers to the S3 class. An object of class
   \code{"RecLinkData"} is a list with at least the following items:
@@ -61,8 +61,8 @@
     \item{\code{W}:}{Object of class \code{"numeric"}
       Vector of log-likelihood weights as calculated by \code{\link{emWeights}},
       corresponding to the rows of \code{pairs}.
-    }
-    
+    }    
+  }
 }
 \section{Extends}{
 Class \code{"\linkS4class{oldClass}"}, directly.

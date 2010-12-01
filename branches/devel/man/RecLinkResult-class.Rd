@@ -13,7 +13,7 @@
   classification functions, such as \code{\link{classifySupv}} and 
   \code{\link{emClassify}}. The S4 class is virtual and exists solely 
   for internal usage in method signatures.
-
+}
 \section{Slots}{
   The following description refers to the S3 class. An object of class
   \code{"RecLinkResult"} is a list with all mandatory and optional
