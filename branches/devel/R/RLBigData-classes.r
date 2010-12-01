@@ -248,14 +248,16 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
     warning("identity1 and identity2 have different types!")
   identLevels <- as.character(unique(c(identity1, identity2)))
   
+  # calculate frequencies
   # construct object  
+  frequencies = sapply(rbind(dataset1, dataset2),
+     function(x) 1/length(unique(x)))
   object <- new("RLBigDataLinkage", data1=as.data.frame(dataset1), 
     data2 = as.data.frame(dataset2), identity1=factor(identity1),
     identity2 = factor(identity2), blockFld = blockfld, 
     excludeFld = exclude, strcmpFld = strcmp, strcmpFun = strcmpfun, 
     phoneticFld = phonetic, phoneticFun = phonfun, drv = drv, con = con, 
-    frequencies = sapply(rbind(data1, data2),
-       function(x) 1/length(unique(x)))
+    frequencies = frequencies
   ) 
 
   # write records to database
