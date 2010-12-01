@@ -1,5 +1,5 @@
 Package: RecordLinkage
-Version: 0.2-3
+Version: 0.3-0
 Title: Record Linkage in R
 Author: Andreas Borg <reclinkmainz@googlemail.com>, Murat Sariyar <reclinkmainz@googlemail.com>
 Maintainer: Murat Sariyar <reclinkmainz@googlemail.com>
