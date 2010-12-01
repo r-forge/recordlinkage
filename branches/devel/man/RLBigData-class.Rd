@@ -2,7 +2,6 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{RLBigData-class}
-\alias{RLBigDataLinkage-class}
 \alias{begin,RLBigData-method}
 \alias{classifySupv,RecLinkClassif,RLBigData-method}
 \alias{classifySupv,RLBigData,RecLinkClassif-method}
