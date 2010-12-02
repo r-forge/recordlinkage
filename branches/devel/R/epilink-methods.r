@@ -59,16 +59,15 @@ setMethod(
       stop(sprintf("Upper threshold %g lower than lower threshold %g",
       threshold.upper, threshold.lower))
 
-    on.exit(clear(rpairs@data))
+    on.exit(clear(rpairs))
     rpairs <- begin(rpairs)
+    nPairs <- 0
     n <- 10000
     i = n
     links <- matrix(nrow=0, ncol=2)
     while(nrow(slice <- nextPairs(rpairs, n)) > 0)
     {
-      # auch hier vorläufiger Code! es muss noch ein tragfähiges Konzept her,
-      # auf welche Weise Links und Possible Links ausgegeben werden!
-      message(i)
+#      message(i)
       flush.console()
       slice[is.na(slice)] <- 0
       e=e+rep(0,ncol(slice)-3)
@@ -88,11 +87,15 @@ setMethod(
       S=apply(slice[,-c(1,2,ncol(slice))],1,row_sum,w)/sum(w)
       if (any(is.na(S) | S < 0 | S > 1))
         warning("Some weights have illegal values. Check error rate and frequencies!")
-      links <- rbind(links, slice[S >= threshold.upper,1:2])
+#      message(range(slice[,1]))
+#      message(range(slice[,2]))
+#      message("----------------------")      
+      links <- rbind(links, as.matrix(slice[S >= threshold.upper,1:2]))
       i <- i + n
+      nPairs <- nPairs + nrow(slice)
     }
-    links
-  
+    # TODO: possible links
+    new("RLResult", data = rpairs, links = links, nPairs = nPairs)
   }
 ) # end of setMethod
 

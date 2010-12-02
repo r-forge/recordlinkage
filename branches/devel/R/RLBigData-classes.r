@@ -127,6 +127,9 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
   # cast dataset to data.frame
   # also constructs column names
   dataset <- as.data.frame(dataset)
+  # enforce sequential row indices
+  rownames(dataset) <- 1:nrow(dataset)  
+
   # construct column names if not assigned 
 #  if (is.null(names(dataset)))
 #    names(dataset) <- paste("V", 1:nfields, sep="")
@@ -229,7 +232,10 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   # also constructs missing column names
   dataset1 <- as.data.frame(dataset1)
   dataset2 <- as.data.frame(dataset2)
-  
+
+  # enforce sequential row indices
+  rownames(dataset1) <- 1:nrow(dataset1)  
+  rownames(dataset2) <- 1:nrow(dataset2)  
   # construct column names if not assigned
 #  if (is.null(colnames(dataset1)))
 #    colnames(dataset1) <- paste("V", 1:nfields, sep="")
@@ -243,18 +249,20 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   coln <- make.db.names(con,colnames(dataset1))
 
   # convert identity to factors (so that only level indices are used in the
-  # database
+  # database), enforce same levels
   if (class(identity1) != class(identity2))
     warning("identity1 and identity2 have different types!")
   identLevels <- as.character(unique(c(identity1, identity2)))
+  identity1 <- factor(identity1, levels = identLevels)
+  identity2 <- factor(identity2, levels = identLevels)
   
   # calculate frequencies
   # construct object  
   frequencies = sapply(rbind(dataset1, dataset2),
      function(x) 1/length(unique(x)))
   object <- new("RLBigDataLinkage", data1=as.data.frame(dataset1), 
-    data2 = as.data.frame(dataset2), identity1=factor(identity1),
-    identity2 = factor(identity2), blockFld = blockfld, 
+    data2 = as.data.frame(dataset2), identity1 = identity1,
+    identity2 = identity2, blockFld = blockfld, 
     excludeFld = exclude, strcmpFld = strcmp, strcmpFun = strcmpfun, 
     phoneticFld = phonetic, phoneticFun = phonfun, drv = drv, con = con, 
     frequencies = frequencies
