@@ -114,7 +114,10 @@ setMethod(
   signature = c("RLBigData", "missing"),
   definition = function (rpairs, ...)
   {
-    n_attr <- ncol(rpairs@data)
+    u=getFrequencies(rpairs)
+    # get number of attributes from frequency vector: this way excluded
+    # columns are not counted
+    n_attr <- length(u)
     observed_count=getPatternCounts(rpairs)
     n_data <- sum(observed_count)
     patterns=bincombinations(n_attr)  # Liste der Patterns
@@ -123,7 +126,6 @@ setMethod(
     i=rep(1,nrow(patterns)) # Intercept
     X=cbind(i,x,rbind(patterns,patterns),rbind(patterns,patterns)*x) # Design Matrix
   
-    u=getFrequencies(rpairs)
     m=0.97
     # Ad-hoc-Schätzung für Anteil an Matchen (Faktor 0.1 relativ beliebig)
     prob_M=1/sqrt(n_data)*0.1

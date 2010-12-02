@@ -1,5 +1,10 @@
 # Tests for functions in file em.r
 
+
+# TODO: 
+#   Test für EMWeights-Methode
+#   Test für Berücksichtigung von exclude-Feldern (Warnung bei EMWeights-Methode?)
+
 test.emWeights.exceptions <- function()
 {
   data(RLdata500)
