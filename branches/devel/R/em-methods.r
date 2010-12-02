@@ -337,6 +337,8 @@ setMethod(
     n <- 10000
     i = n
     links <- matrix(nrow=0, ncol=2)
+    n_attr <- length(getFrequencies(rpairs@data))
+    nPairs <- 0
     while(nrow(slice <- nextPairs(rpairs@data, n)) > 0)
     {
       # auch hier vorläufiger Code! es muss noch ein tragfähiges Konzept her,
@@ -345,9 +347,10 @@ setMethod(
       flush.console()
       slice[is.na(slice)] <- 0
       indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
-      links <- rbind(links, slice[W[indices] >= threshold.upper,1:2])
+      links <- rbind(links, as.matrix(slice[rpairs@W[indices] >= threshold.upper,1:2]))
       i <- i + n
+      nPairs <- nPairs + nrow(slice)
     }
-    links
+    new("RLResult", data = rpairs@data, links = as.matrix(links), nPairs = nPairs)
   }
 ) # end of SetMethod

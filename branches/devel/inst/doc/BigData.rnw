@@ -139,6 +139,8 @@ Oder: Klassifierungsfunktion prüft, ob Gewichte vorhanden sind und erstellt sie,
 falls nicht -> Nachteil: Wenn man aus Versehen die Methode auf einem Objekt ohne
 Gewichte aufruft, wird die zeitintensive EM-Schätzung unnötig aufgerufen,
 statt durch Fehlermeldung das Versehen anzuzeigen).
+
+TODO: possible links
 )
 
 <<>>=
@@ -146,6 +148,11 @@ rpairs3 <- RLBigDataDedup(RLdata500, identity.RLdata500, blockfld=1)
 W <- emWeights(rpairs3)
 result <- emClassify(W)
 getTable(result)
+
+W <- emWeights(rpairs3)
+result <- emClassify(W, my = 0.005)
+getTable(result)
+
 @
 
 \end{document}
