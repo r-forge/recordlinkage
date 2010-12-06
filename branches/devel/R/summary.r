@@ -99,22 +99,10 @@ texSummary <- function (object)
           floating=FALSE, latex.environments=NULL)
 }
 
+# wrapper for new S4 method for backward compatibility
 errorMeasures <- function(result)
 {
   if (!("RecLinkResult" %in% class(result)))
       stop(sprintf("Wrong type for result: %s!", class(result)))
-
-  TP=length(which(result$pairs$is_match & result$prediction=="L")) # true positive
-  FP=length(which(!result$pairs$is_match & result$prediction=="L")) # false positive
-  TN=length(which(!result$pairs$is_match & result$prediction=="N")) # true negative
-  FN=length(which(result$pairs$is_match & result$prediction=="N")) # false negative
-    
-  return(list(
-    alpha=FN/(TP+FN),
-    beta=FP/(TN+FP),
-    accuracy=(TP+TN)/(TP+TN+FP+FN),
-    precision=TP/(TP+FP),
-    sensitivity=TP/(TP+FN),
-    specificity=TN/(TN+FP)
-  ))
+  getErrorMeasures(result)
 }

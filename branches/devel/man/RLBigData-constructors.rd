@@ -56,12 +56,58 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
   }
 }
 \details{
+  These functions act as constructors for the S4 classes
+  \code{"\linkS4class{RLBigDataDedup}"} and \code{"\linkS4class{RLBigDataLinkage}"}.
+  They make up the initial stage in a Record Linkage process using
+  large data sets (>= 1.000.000 record pairs) after possibly
+  normalizing the data. Two general
+  scenarios are reflected by the two functions: \code{RLBigDataDedup} works on a
+  single data set which is to be deduplicated, \code{RLBigDataLinkage} is intended
+  for linking two data sets together. Their usage follows the functions
+  \code{\link{compare.dedup}} and \code{{compare.linkage}}, which are recommended
+  for smaller amounts of data, e.g. training sets.
 
-  Works as compare.dedup or compare.linkage; record pairs are not created but
-  information on how pairs are created stored, comparison patterns are created
-  block-wise when classification is performed
-  Phonetic function: soundex only available if SQLite (embedded in package RSQLite)
-  is compiled with SQLITE_SOUNDEX, which is not the case by default.
+  Datasets are represented as data frames or matrices (typically of type
+  character), each row representing one record, each column representing one
+  field or attribute (like first name, date of birth\ldots). Row names are not
+  retained in the record pairs. If an identifier other than row number is
+  needed, it should be supplied as a designated column and excluded from
+  comparison (see note on \code{exclude} below).
+  
+  In case of \code{RLBigDataLinkage}, the two datasets must have the same number
+  of columns and it is assumed that their column classes and semantics match.
+  If present, the column names of \code{dataset1} are assigned to \code{dataset2}
+  in order two enforce a matching format. Therefore, column names used in
+  \code{blockfld} or other arguments refer to \code{dataset1}.
+
+
+  Each element of \code{blockfld} specifies a set of columns in which two
+  records must agree to be included in the output. Each blocking definition in
+  the list is applied individually, the sets obtained
+  thereby are combined by a union operation.
+  If \code{blockfld} is \code{FALSE}, no blocking will be performed,
+  which leads to a large number of record pairs
+  (\eqn{\frac{n(n-1)}{2}}{n*(n-1)/2} where \eqn{n} is the number of
+  records).
+
+  Fields can be excluded from the linkage process by supplying their column
+  index in the vector \code{exclude}, which is espacially useful for
+  external identifiers. Excluded fields can still be used for
+  blocking, also with phonetic code.
+
+  Phonetic codes and string similarity measures are supported for enhanced
+  detection of misspellings. Applying a phonetic code leads to a binary
+   values, where 1 denotes equality of the generated phonetic code.
+  A string comparator leads to a similarity value in the range \eqn{[0,1]}.
+  Using string comparison on a field for which a phonetic code
+  is generated is possible, but issues a warning.
+  
+  In contrast to the \code{compare.*} functions, phonetic coding and string
+  comparison is not carried out in R, but by database functions. Supported
+  functions are \code{"pho_h"} for phonetic coding and \code{"jarowinkler"} and
+  \code{"levenshtein"} for string comparison. See the documentation for their
+  R equivalents (\link[=phonetics]{phonetic functions},
+  \link[=strcmp]{string comparison}) for further information.
 }
 \value{
   An object of class \code{"\linkS4class{RLBigDataDedup}"} or
@@ -84,7 +130,8 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
 
 \seealso{
   \code{"\linkS4class{RLBigDataDedup}"}, \code{"\linkS4class{RLBigDataLinkage}"},
-  \code{\link{compare.dedup}}, \code{\link{compare.linkage}}
+  \code{\link{compare.dedup}}, \code{\link{compare.linkage}},
+  the vignette "Classes for record linkage of big data sets".
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

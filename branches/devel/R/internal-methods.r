@@ -185,3 +185,24 @@ setMethod(
     return(as.integer(dbGetQuery(object@con, sql_stmt)))
   }
 ) 
+
+
+# Get the number of pairs with unknown matching status
+setGeneric(
+  name = "getNACount",
+  def = function(object) standardGeneric("getNACount")
+)
+
+setMethod(
+  f = "getNACount",
+  signature = "RLBigData",
+  definition = function(object)
+  {
+    sql <- getSQLStatement(object)
+    sql_stmt <- sprintf(
+      "select count(*) from %s where %s and (t1.identity is null or t2.identity is null)",
+      sql$from_clause, sql$where_clause)
+    message(sql_stmt)
+    return(as.integer(dbGetQuery(object@con, sql_stmt)))
+  }
+)
