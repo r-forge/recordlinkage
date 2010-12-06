@@ -31,7 +31,7 @@ epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper)
 }
 
 \value{
-  A \code{\link{RecLinkResult}} object with classification results stored in 
+  A \code{\link[=RecLinkResult-class]{"RecLinkResult"}} object with classification results stored in
   component \code{prediction}, otherwise a copy of \code{rpairs}.
 }
 

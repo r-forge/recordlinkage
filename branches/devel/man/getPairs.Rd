@@ -11,7 +11,7 @@ getPairs(rpairs, max.weight = Inf, min.weight = -Inf,
 }
 
 \arguments{
-  \item{rpairs}{A \code{\link{RecLinkResult}} or \code{\link{RecLinkData}}
+  \item{rpairs}{A \code{\link[=RecLinkResult-class]{"RecLinkResult"}} or \code{\link{RecLinkData}}
     object.}
   \item{max.weight, min.weight}{Real numbers. Upper and lower threshold.}
   \item{single.rows}{Logical. Wether to print record pairs in one row instead 
@@ -23,7 +23,8 @@ getPairs(rpairs, max.weight = Inf, min.weight = -Inf,
 
 \details{
   This function extracts record pairs from a \code{\link{RecLinkData}} 
-  or \code{\link{RecLinkResult}} object for further processing such as
+  or \code{\link[=RecLinkResult-class]{"RecLinkResult"}}
+   object for further processing such as
   a review of possible links. Arguments \code{max.weight}, \code{min.weight}
   and \code{show} control which records to include in the output. If weights
   are stored in \code{rpairs$Wdata}, all records with
@@ -50,6 +51,7 @@ getPairs(rpairs, max.weight = Inf, min.weight = -Inf,
 }
 \author{Andreas Borg, Murat Sariyar}
 
-\seealso{\code{\link{RecLinkResult}}, \code{\link{RecLinkData}}}
+\seealso{Classes \code{\link[=RecLinkResult-class]{"RecLinkResult"}} and
+\code{\link{RecLinkData}}}
 
 \keyword{classif}

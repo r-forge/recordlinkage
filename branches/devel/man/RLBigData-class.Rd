@@ -2,17 +2,6 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{RLBigData-class}
-\alias{begin,RLBigData-method}
-\alias{classifySupv,RecLinkClassif,RLBigData-method}
-\alias{classifySupv,RLBigData,RecLinkClassif-method}
-\alias{clear,RLBigData-method}
-\alias{emWeights,RLBigData,missing-method}
-\alias{epiClassify,RLBigData-method}
-\alias{getFrequencies,RLBigData-method}
-\alias{getMatchCount,RLBigData-method}
-\alias{getPatternCounts,RLBigData-method}
-\alias{getSQLStatement,RLBigData-method}
-\alias{nextPairs,RLBigData,numeric-method}
 
 \title{Class "RLBigData"}
 \description{

@@ -31,8 +31,9 @@ classifyUnsup(rpairs, method, ...)
 }
 
 \value{
-  An object of class \code{\link{RecLinkResult}} with the classification
-  result stored in the \code{prediction} component, otherwise a copy of
+  An object of class \code{\link[=RecLinkResult-class]{"RecLinkResult"}}
+  with the classification result stored in the \code{prediction} component,
+  otherwise a copy of
   \code{rpairs}.
 }
 

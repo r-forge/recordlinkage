@@ -33,11 +33,6 @@ Class \code{"\linkS4class{RLBigData}"}, directly.
 \author{
   Andreas Borg
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
   \code{"\linkS4class{RLBigData}"}, \code{\link{RLBigDataLinkage}}

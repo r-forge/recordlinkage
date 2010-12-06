@@ -25,7 +25,7 @@ classifySupv(model, newdata, ...)
 }
 
 \value{
-  A \code{\link{RecLinkResult}} object which is a copy of \code{newdata},
+  An object of class \code{\link[=RecLinkResult-class]{"RecLinkResult"}}, which is a copy of \code{newdata},
   except for element \code{rpairs$prediction}, which stores the classification
   result.
 }

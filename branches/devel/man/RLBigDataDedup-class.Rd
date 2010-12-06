@@ -2,15 +2,16 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{RLBigDataDedup-class}
-\alias{getData,RLBigDataDedup-method}
 
 \title{Class "RLBigDataDedup"}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the class is. ~~
+  Represents a record linkage setup where a single dataset is to
+  be deduplicated.
 }
 \section{Objects from the Class}{
-Objects can be created by calls of the form \code{new("RLBigDataDedup", ...)}.
-%%  ~~ describe objects here ~~ 
+Objects should be created using the constructor function
+\code{\link{RLBigDataDedup}}, which does some essential error checking,
+  conversion and initialization.
 }
 \section{Slots}{
   See also \code{"\linkS4class{RLBigData}"} for inherited slots.
