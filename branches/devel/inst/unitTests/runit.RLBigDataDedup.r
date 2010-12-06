@@ -223,7 +223,29 @@ test.RLBigDataDedup <- function()
   reqResult=c(1,3,jarowinkler( c("FRANK",NA,"MUELLER",NA,1967,9,27), 
     c("MARTIN",NA,"MUELLER",NA,1950,2,4)),0)
   checkEqualsNumeric(as.matrix(testResult),reqResult, msg=" (jarowinkler, all fields)")
-  
+
+  # string comparison and phonetic code should work although warning is raised
+  testResult=testResultFun(data1, identity=identity1, blockfld=c(3,5), strcmp=TRUE,
+    phonetic=1:4, phonfun="pho_h", strcmpfun="jarowinkler")
+  reqResult=c(1,4,
+    jarowinkler(
+      c(
+        pho_h(
+          c("FRANK",NA,"MUELLER",NA)
+        ),
+        1967,9,27
+      ),
+      c(
+        pho_h(
+          c("FRANK","MARTIN","MUELER",NA)
+        ),
+        1967,8,27
+      )
+    ),
+  1)
+  checkEquals(as.double(testResult),reqResult, msg=" (jarowinkler, all fields)")
+
+
   # string comparator for individual fields
   reqResult=c(1,3,jarowinkler( c("FRANK",NA,"MUELLER",NA), 
     c("MARTIN",NA,"MUELLER",NA)),0,0,0,0)
@@ -281,7 +303,7 @@ test.RLBigDataDedup <- function()
 test.getPatternCounts <- function()
 {
   # Test für Dedup-Objekt
-  object <- RLBigDataLinkage(data2, data3) # default case: no blocking whatsoever
+  object <- RLBigDataDedup(data1) # default case: no blocking whatsoever
   result1=read.table("result1.getPatternCounts.txt")
   # Check only numeric equality. Reason: result1 is read as a data frame with
   # one column, which is not easily convertible to a vector with names

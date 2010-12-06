@@ -221,6 +221,28 @@ test.compare.dedup <- function()
   reqResult=c(1,3,jarowinkler( c("FRANK",NA,"MUELLER",NA,1967,9,27), 
     c("MARTIN",NA,"MUELLER",NA,1950,2,4)),0)
   checkEquals(as.double(testResult$pairs),reqResult, msg=" (jarowinkler, all fields)")
+
+  # string comparison and phonetic code should work although warning is raised
+  testResult=compare.dedup(data1, identity=identity1, blockfld=c(3,5), strcmp=TRUE,
+    phonetic=1:4, phonfun=pho_h, strcmpfun=jarowinkler)
+  reqResult=c(1,4,
+    jarowinkler(
+      c(
+        pho_h(
+          c("FRANK",NA,"MUELLER",NA)
+        ),
+        1967,9,27
+      ),
+      c(
+        pho_h(
+          c("FRANK","MARTIN","MUELER",NA)
+        ),
+        1967,8,27
+      )
+    ),
+  1)
+  checkEquals(as.double(testResult$pairs),reqResult, msg=" (jarowinkler, all fields)")
+
   
   # string comparator for individual fields
   reqResult=c(1,3,jarowinkler( c("FRANK",NA,"MUELLER",NA), 
@@ -554,7 +576,29 @@ test.compare.linkage <- function()
   reqResult=c(1,1,jarowinkler( c("FRANK",NA,"MUELLER",NA,1967,9,27), 
     c("MARTIN",NA,"MUELLER",NA,1950,2,4)),0)
   checkEquals(as.double(testResult$pairs),reqResult, msg=" (jarowinkler, all fields)")
-  
+
+  # string comparison and phonetic code should work although warning is raised
+  testResult=compare.linkage(data2, data3, identity1=identity2,
+  identity2=identity3, blockfld=c(3,5), strcmp=TRUE,
+    phonetic=1:4, phonfun=pho_h, strcmpfun=jarowinkler)
+  reqResult=c(2,1,
+    jarowinkler(
+      c(
+        pho_h(
+          c("FRANK",NA,"MUELLER",NA)
+        ),
+        1967,9,27
+      ),
+      c(
+        pho_h(
+          c("FRANK","MARTIN","MUELER",NA)
+        ),
+        1967,8,27
+      )
+    ),
+  1)
+  checkEquals(as.double(testResult$pairs),reqResult, msg=" (jarowinkler, all fields)")
+
   # string comparator for individual fields
   testResult=compare.linkage(data2, data3, identity1=identity2, 
     identity2=identity3, blockfld=3, strcmp=1:4, strcmpfun=jarowinkler)

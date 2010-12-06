@@ -42,16 +42,25 @@ setMethod(
       if (fldIndex %in% excludeFld)
         return(character(0))
         
+      # enclose fields in phonetic function if desired
+      if (fldIndex %in% phoneticFld)
+      {
+        fld1 <- sprintf("%s(t1.%s)", phoneticFun, coln[fldIndex])
+        fld2 <- sprintf("%s(t2.%s)", phoneticFun, coln[fldIndex])
+      } else
+      {
+        fld1 <- sprintf("t1.%s", coln[fldIndex])
+        fld2 <- sprintf("t2.%s", coln[fldIndex])
+      }
+
+
       # something like 'jarowinkler(t1.fname, t2.fname) as fname'
       if (fldIndex %in% strcmpFld)
-        return(sprintf("%1$s(t1.%2$s, t2.%2$s) as %2$s", strcmpFun, coln[fldIndex]))
+        return(sprintf("%s(%s, %s) as %s", strcmpFun, fld1, fld2, coln[fldIndex]))
 
-      # something like 'pho_h(t1.fname)=pho_h(t2.fname) as fname'
-      if (fldIndex %in% phoneticFld)
-        return(sprintf("%1$s(t1.%2$s)=%1$s(t2.%2$s) as %2$s", phoneticFun, coln[fldIndex]))
 
       # direct comparison: something like 't1.fname=t2.fname as fname'      
-      return(sprintf("t1.%1$s=t2.%1$s as %1$s", coln[fldIndex]))
+      return(sprintf("%s=%s as %s", fld1, fld2, coln[fldIndex]))
     }
     coln <- switch(class(object),
       RLBigDataDedup = make.db.names(object@con, colnames(object@data)),

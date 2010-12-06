@@ -112,9 +112,11 @@ of links and optionally possible links.
 <<>>=
 showClass("RLResult")
 @
-A contingency table can be viewed via \texttt{getTable}:
+A contingency table can be viewed via \texttt{getTable}, various error measures
+are calculated by \texttt{getErrorMeasures}.
 <<>>=
 getTable(result)
+getErrorMeasures(result)
 @
 
 (Anm.: Objekt muss evtl. noch weiter ausgebaut und ergänzende Methoden geschrieben 
@@ -155,6 +157,10 @@ getTable(result)
 
 @
 
+\section{Evaluation and results}
+
+<<>>=
+@
 \end{document}
 
 
