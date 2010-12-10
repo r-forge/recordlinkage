@@ -27,7 +27,7 @@
         \item{\code{"P"}}{for possible links,}
         \item{\code{"N"}}{for non-links.}
       }
-    }
+    \item{\code{.S3Class}:}{Object of class \code{"character"}}
   }
 }
 \section{Extends}{

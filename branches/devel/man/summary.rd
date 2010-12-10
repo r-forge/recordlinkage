@@ -6,7 +6,7 @@
 \title{Print Summary of Record Linkage Data}
 
 \description{Prints information on \code{\link{RecLinkData}} and
-  \code{\link{RecLinkResult}} objects.}
+  \code{"\linkS4Class{RecLinkResult}"} objects.}
 
 \usage{
 \method{summary}{RecLinkData}(object,...)
@@ -60,6 +60,6 @@
 
 \author{Andreas Borg}
 
-\seealso{\code{\link{RecLinkData}},\code{\link{RecLinkResult}}}
+\seealso{\code{\link{RecLinkData}},\code{"\linkS4class{RecLinkResult}"}
 
 \keyword{classif}

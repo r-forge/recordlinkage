@@ -1,4 +1,5 @@
 # internal utility function to create blocking definition in SQL
+# returns string like "t1.fname=t2.fname and pho_h(t1.lname)=pho_h(t2.lname)"
 blockfldfun <- function(blockfld, phoneticFld, phoneticFun, coln)
 {
   blockElemFun <- function(fldIndex)
@@ -63,8 +64,10 @@ setMethod(
       return(sprintf("%s=%s as %s", fld1, fld2, coln[fldIndex]))
     }
     coln <- switch(class(object),
-      RLBigDataDedup = make.db.names(object@con, colnames(object@data)),
-      RLBigDataLinkage = make.db.names(object@con, colnames(object@data1)))
+      RLBigDataDedup = make.db.names(object@con, colnames(object@data),
+        keywords = SQLKeywords(object@drv)),
+      RLBigDataLinkage = make.db.names(object@con, colnames(object@data1),
+        keywords = SQLKeywords(object@drv)))
     selectlist_id <- "t1.row_names as id1, t2.row_names as id2"
     # use unlist to delete NULLs from list
     selectlist <- paste(unlist(lapply(1:length(coln), selectListElem,

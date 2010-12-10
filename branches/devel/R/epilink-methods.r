@@ -65,6 +65,7 @@ setMethod(
     n <- 10000
     i = n
     links <- matrix(nrow=0, ncol=2)
+    possibleLinks <- matrix(nrow=0, ncol=2)
     while(nrow(slice <- nextPairs(rpairs, n)) > 0)
     {
 #      message(i)
@@ -91,11 +92,13 @@ setMethod(
 #      message(range(slice[,2]))
 #      message("----------------------")      
       links <- rbind(links, as.matrix(slice[S >= threshold.upper,1:2]))
+      possibleLinks <- rbind(possibleLinks,
+        as.matrix(slice[S >= threshold.lower & S < threshold.upper, 1:2]))
       i <- i + n
       nPairs <- nPairs + nrow(slice)
     }
-    # TODO: possible links
-    new("RLResult", data = rpairs, links = links, nPairs = nPairs)
+    new("RLResult", data = rpairs, links = links, possibleLinks = possibleLinks,
+      nPairs = nPairs)
   }
 ) # end of setMethod
 

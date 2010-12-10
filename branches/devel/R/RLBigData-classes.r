@@ -107,6 +107,8 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
         
   # check if string comparison / phonetic function is supported and
   # has the correct format
+  if (!is.character(strcmpfun)) stop(paste("Wrong type of strcmpfun:", class(strcmpfun)))
+  if (!is.character(phonfun)) stop(paste("Wrong type of phonfun:", class(phoncmpfun)))
   if (length(strcmpfun) > 1) stop("strcmpfun must have length 1!")
   if (length(phonfun) > 1) stop("phonfun must have length 1!")
   if (!(strcmpfun %in% .supportedStrcmp))
@@ -137,7 +139,7 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
   # set up database
   drv <- dbDriver("SQLite")
   con <- dbConnect(drv, dbname="")
-  coln <- make.db.names(con,colnames(dataset))
+  coln <- make.db.names(con,colnames(dataset), allow.keywords = FALSE)
 
   # construct object  
   object <- new("RLBigDataDedup", data=dataset, identity=factor(identity),
@@ -211,6 +213,8 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
         
   # check if string comparison / phonetic function is supported and
   # has the correct format
+  if (!is.character(strcmpfun)) stop(paste("Wrong type of strcmpfun:", class(strcmpfun)))
+  if (!is.character(phonfun)) stop(paste("Wrong type of phonfun:", class(phoncmpfun)))
   if (length(strcmpfun) > 1) stop("strcmpfun must have length 1!")
   if (length(phonfun) > 1) stop("phonfun must have length 1!")
   if (!(strcmpfun %in% .supportedStrcmp))
@@ -246,7 +250,7 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   # set up database
   drv <- dbDriver("SQLite")
   con <- dbConnect(drv, dbname="")
-  coln <- make.db.names(con,colnames(dataset1))
+  coln <- make.db.names(con,colnames(dataset1), allow.keywords = FALSE)
 
   # convert identity to factors (so that only level indices are used in the
   # database), enforce same levels

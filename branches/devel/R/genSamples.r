@@ -202,13 +202,13 @@ splitData <- function(dataset, prop=0.5, keep.mprop=FALSE, num.non=0,
 getMinimalTrain <- function(rpairs, nEx=1)
 {
   # catch erronous input
-  if (!(("RecLinkData" %in% class(rpairs)) || 
+  if (!(("RecLinkData" %in% class(rpairs)) ||
     "RecLinkResult" %in% class(rpairs)))
     stop("Wrong class for rpairs!")
-  
+
   if (nEx < 1)
     stop(sprintf("Illegal value for nEx: %d!", nEx))
-    
+
   p=rpairs$pairs
   # Zeilen markieren, um Paare identifizieren zu können
   rownames(p)=1:nrow(p)

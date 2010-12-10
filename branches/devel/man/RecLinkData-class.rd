@@ -61,7 +61,8 @@
     \item{\code{W}:}{Object of class \code{"numeric"}
       Vector of log-likelihood weights as calculated by \code{\link{emWeights}},
       corresponding to the rows of \code{pairs}.
-    }    
+    }
+    \item{\code{.S3Class}:}{Object of class \code{"character"}}
   }
 }
 \section{Extends}{

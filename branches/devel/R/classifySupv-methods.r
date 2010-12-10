@@ -3,18 +3,15 @@
 
 setGeneric(
   name= "classifySupv",
-  def=function(x, y, ...){standardGeneric("classifySupv")}
+  def=function(model, newdata, ...){standardGeneric("classifySupv")}
 )
 
 #' Method for old (S3-style) objects, replaces ordinary function
 setMethod(
   f = "classifySupv",
   signature = c("RecLinkClassif", "RecLinkData"),
-  definition = function (x, y, ...)
+  definition = function (model, newdata, ...)
   {
-    # redefine to improve readability
-    model <- x
-    newdata <- y
 
     # type checks from previous version omitted, now enforced by 
     # method dispatching  
@@ -38,18 +35,20 @@ setMethod(
   }
 )
 
-# Methods for big data sets, first two arguments can be switched
-setMethod(
-  f = "classifySupv",
-  signature = c("RLBigData", "RecLinkClassif"),
-  definition = function(x, y, ...) classifySupvBigData(rpairs = x, model = y, ...)
-)
-  
+# Methods for big data sets
 setMethod(
   f = "classifySupv",
   signature = c("RecLinkClassif", "RLBigData"),
-  definition = function(x, y, ...) classifySupvBigData(rpairs = y, model = x, ...)
+  definition = function(model, newdata, ...) classifySupvBigData(rpairs = newdata, model = model, ...)
 )
+
+# First two arguments can be switched
+setMethod(
+  f = "classifySupv",
+  signature = c("RLBigData", "RecLinkClassif"),
+  definition = function(model, newdata, ...) classifySupvBigData(rpairs = model, model = newdata, ...)
+)
+  
 
 #' Internal workhorse function
 classifySupvBigData <- function(rpairs, model, stepsize=10000, ...)
