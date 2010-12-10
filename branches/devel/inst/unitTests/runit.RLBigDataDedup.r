@@ -294,7 +294,10 @@ test.RLBigDataDedup <- function()
     header=TRUE)
   checkEquals(testResult, reqResult, msg=" (check reserved words in data)")
     
-  
+  # rownames attached to data should not confuse construction of pairs
+  dataRowNames <- data1
+  rownames(dataRowNames) <- sample(1:nrow
+  testResult <- testResultFun(d
 }
 
 # names of datasets differ?
