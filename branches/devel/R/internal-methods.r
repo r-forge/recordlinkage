@@ -5,9 +5,9 @@ blockfldfun <- function(blockfld, phoneticFld, phoneticFun, coln)
   blockElemFun <- function(fldIndex)
   {
     if (fldIndex %in% phoneticFld)
-      return(sprintf("%1$s(t1.%2$s)=%1$s(t2.%2$s)", phoneticFun, coln[fldIndex]))
+      return(sprintf("%1$s(t1.'%2$s')=%1$s(t2.'%2$s')", phoneticFun, coln[fldIndex]))
     else 
-      return(sprintf("t1.%1$s=t2.%1$s", coln[fldIndex]))
+      return(sprintf("t1.'%1$s'=t2.'%1$s'", coln[fldIndex]))
   }
   
  paste("(", paste(sapply(blockfld, function(blockvec)

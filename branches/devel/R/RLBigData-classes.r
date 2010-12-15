@@ -28,6 +28,7 @@ setClass(
     phoneticFun ="character",
     drv = "DBIDriver",
     con = "DBIConnection",
+    dbFile = "character",
     "VIRTUAL"
   )
 )    
@@ -137,15 +138,18 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
 #    names(dataset) <- paste("V", 1:nfields, sep="")
 
   # set up database
+  tmpfile <- tempfile()
   drv <- dbDriver("SQLite")
-  con <- dbConnect(drv, dbname="")
-  coln <- make.db.names(con,colnames(dataset), allow.keywords = FALSE)
+  con <- dbConnect(drv, dbname=tmpfile)
+  coln <- make.db.names(con,colnames(dataset))
 
   # construct object  
   object <- new("RLBigDataDedup", data=dataset, identity=factor(identity),
     blockFld = blockfld, excludeFld = exclude, strcmpFld = strcmp,
     strcmpFun = strcmpfun, phoneticFld = phonetic, phoneticFun = phonfun,
-    drv = drv, con = con, frequencies = sapply(dataset, function(x) 1/length(unique(x))) )
+    drv = drv, con = con, frequencies = sapply(dataset, function(x) 1/length(unique(x))),
+    dbFile = tmpfile
+  )
 
   # write records to database
   dbWriteTable(con, "data", data.frame(dataset, identity = identity))
@@ -153,9 +157,11 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
   # create indices to speed up blocking
   for (blockelem in blockfld)
   {
-    query <- sprintf("create index index_%s on data (%s)",
+    # include names in '' because they might be keywords
+    query <- sprintf("create index 'index_%s' on data (%s)",
      paste(coln[blockelem], collapse="_"),
-     paste(coln[blockelem], collapse=", "))
+     paste("'", coln[blockelem], "'", sep="", collapse=", "))
+message(query)
     dbGetQuery(con, query)
   }
   # create index on identity vector to speed up identifying true matches
@@ -250,7 +256,7 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   # set up database
   drv <- dbDriver("SQLite")
   con <- dbConnect(drv, dbname="")
-  coln <- make.db.names(con,colnames(dataset1), allow.keywords = FALSE)
+  coln <- make.db.names(con,colnames(dataset1))
 
   # convert identity to factors (so that only level indices are used in the
   # database), enforce same levels
@@ -281,7 +287,7 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   {
     for (blockelem in blockfld)
     {
-      query <- sprintf("create index index_%s_%s on %s (%s)",
+      query <- sprintf("create index 'index_%s_%s' on '%s' ('%s')",
        tablename,
        paste(coln[blockelem], collapse="_"),
        tablename,

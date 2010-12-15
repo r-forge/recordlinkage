@@ -9,7 +9,8 @@
 #   object: RLBigData object
 #
 getPairsSQL <- function(object, filter.match, filter.link, max.weight,
-  min.weight, withMatch = TRUE, withClass = FALSE, withWeight = FALSE)
+  min.weight, withMatch = TRUE, withClass = FALSE, withWeight = FALSE,
+  sort=FALSE)
 {
     stmtList <- getSQLStatement(object)
     select_list <- stmtList$select_list
@@ -52,6 +53,21 @@ getPairsSQL <- function(object, filter.match, filter.link, max.weight,
         sep =", ")
     }
 
+    # Include weights if desired
+    # If weights have been calculated, they are stored in table 'weights'
+    # in the database together with record ids. Include them by joining the
+    # tables.
+    if (withWeight)
+    {
+      if (!dbExistsTable(rpairs@con, "weights"))
+        stop(paste("No weights have been calculated for rpairs!"))
+      select_list <- paste(select_list,
+        "w.weight as W", sep=","
+      )
+      from_clause <- paste(from_clause,
+        "join weights w on (t1.row_names=w.id1 and t2.row_names=w.id2)"
+      )
+    }
 
     # add restrictions concerning matching status
     filterMatchFun <- function(filterElem)
@@ -94,9 +110,15 @@ getPairsSQL <- function(object, filter.match, filter.link, max.weight,
       filterLink = "1"
     }
 
+    if (sort)
+    {
+      order_clause = "order by W"
+    } else order_clause=""
+    
+
     # return result
-    sprintf("select %s from %s where %s and (%s) and (%s)", select_list,
-      from_clause, where_clause, filterMatch, filterLink)
+    sprintf("select %s from %s where %s and (%s) and (%s) %s", select_list,
+      from_clause, where_clause, filterMatch, filterLink, order_clause)
 
 }
 
@@ -190,7 +212,8 @@ setMethod(
   f = "getPairs",
   signature = "RLResult",
   definition = function(object, filter.match = c("match", "unknown", "nonmatch"),
-    filter.link = c("nonlink", "possible", "link"), max.weight = Inf, min.weight = -Inf)
+    filter.link = c("nonlink", "possible", "link"), max.weight = Inf, min.weight = -Inf,
+    withMatch = TRUE, withClass=TRUE, withWeight=FALSE, sort=withWeight)
   {
     # assing data base connection to local variable
     con <- object@data@con
@@ -216,8 +239,10 @@ setMethod(
     dbGetQuery(object@data@con, "create index index_possible on possible_links(id1, id2)")
 
     stmt <- getPairsSQL(object@data, filter.match, filter.link, max.weight,
-      min.weight, withMatch = TRUE, withClass = TRUE, withWeight = FALSE)
+      min.weight, withMatch = withMatch, withClass = withClass,
+      withWeight = withWeight, sort=sort)
 
+    message(stmt)
     result <- dbGetQuery(con, stmt)
     # make classification result (coded as a number in 1:3) to a factor
     if (nrow(result) > 0) # otherwise class(...) throws an error

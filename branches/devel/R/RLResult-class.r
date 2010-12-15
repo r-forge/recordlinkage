@@ -120,7 +120,9 @@ setMethod(
       accuracy=(TP+TN)/(TP+TN+FP+FN),
       precision=TP/(TP+FP),
       sensitivity=TP/(TP+FN),
-      specificity=TN/(TN+FP)
+      specificity=TN/(TN+FP),
+      ppv=TP/(TP+FP),
+      npv=TN/(TN+FN)
     ))
   }
 )
@@ -151,7 +153,9 @@ setMethod(
       accuracy=(TP+TN)/(TP+TN+FP+FN),
       precision=TP/(TP+FP),
       sensitivity=TP/(TP+FN),
-      specificity=TN/(TN+FP)
+      specificity=TN/(TN+FP),
+      ppv=TP/(TP+FP),
+      npv=TN/(TN+FN)
     ))
   }
 )
