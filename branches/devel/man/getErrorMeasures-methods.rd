@@ -24,13 +24,15 @@
     \item{precision}{\eqn{\frac{\mathit{TP}}{\mathit{TP}+\mathit{FP}}}{TP/(TP+FP)}}
     \item{sensitivity}{\eqn{\frac{\mathit{TP}}{\mathit{TP}+\mathit{FN}}}{TP/(TP+FN)}}
     \item{specificity}{\eqn{\frac{\mathit{TN}}{\mathit{TN}+\mathit{FP}}}{TN/(TN+FP)}}
+    \item{ppv}{Positive predictive value:}\eqn{\frac{\mathit{TP}}{\mathit{TP}+\mathit{FP}}}{TP/(TP+FP)}
+    \item{npv}{Nositive predictive value:}\eqn{\frac{\mathit{TN}}{\mathit{TN}+\mathit{FN}}}{TN/(TN+FN)}
   }
 }
 
 \value{
   A list with components \code{alpha}, \code{beta}, \code{accuracy}, 
-  \code{precision}, \code{sensitivity} and \code{specificity}, each a number in
-  the range \eqn{[0,1]}.
+  \code{precision}, \code{sensitivity}, \code{specificity}, \code{ppv} and
+  \code{npv}, each a number in the range \eqn{[0,1]}.
 }
 
 \note{Record pairs with unknown true matching status (e.g. due to missing
