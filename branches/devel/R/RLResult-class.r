@@ -160,25 +160,3 @@ setMethod(
   }
 )
 
-#
-#setMethod(
-#  f = "getTable",
-#  signature = "RLResult",
-#  definition = function(object, ...)
-#  {
-#    TP=length(which(object$pairs$is_match & object$prediction=="L")) # true positive
-#    FP=length(which(!object$pairs$is_match & object$prediction=="L")) # false positive
-#    TN=length(which(!object$pairs$is_match & object$prediction=="N")) # true negative
-#    FN=length(which(object$pairs$is_match & object$prediction=="N")) # false negative
-#
-#    return(list(
-#      alpha=FN/(TP+FN),
-#      beta=FP/(TN+FP),
-#      accuracy=(TP+TN)/(TP+TN+FP+FN),
-#      precision=TP/(TP+FP),
-#      sensitivity=TP/(TP+FN),
-#      specificity=TN/(TN+FP)
-#    ))
-#  }
-#)
-#
