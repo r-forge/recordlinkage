@@ -270,7 +270,7 @@ setMethod(
   f = "getPairs",
   signature = "RecLinkData",
   definition = function(object, max.weight = Inf, min.weight = -Inf,
-         single.rows = FALSE, show = "all", sort = !is.null(rpairs$Wdata))
+         single.rows = FALSE, show = "all", sort = !is.null(object$Wdata))
   {
     # rename object to keep old code
     rpairs <- object
