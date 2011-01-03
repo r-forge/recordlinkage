@@ -2,8 +2,6 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{RecLinkData-class}
-\alias{RecLinkData.object}
-\alias{RecLinkData}
 \alias{classifySupv,RecLinkClassif,RecLinkData-method}
 \alias{emClassify,RecLinkData-method}
 \alias{emWeights,RecLinkData,ANY-method}
@@ -11,61 +9,21 @@
 
 \title{Class "RecLinkData"}
 \description{
-  S3 class representing information about record pairs for Record
-  Linkage, as returned by functions \code{\link{compare.dedup}} and
-  \code{\link{compare.linkage}}. Registered as a S4 class so that it 
-  can appear in method signatures.
+  S4 wrapper for S3 class \code{"\link{RecLinkData}"}.
 }
-\section{Objects from the Class}{Object of the S3 class are created by
-  \code{\link{compare.dedup}} and \code{\link{compare.linkage}}. The S4 class
-  is virtual and exists solely for internal usage in method signatures.
+
+\section{Objects from the Class}{Objects of the S3 class are created by
+  the comparison functions \code{\link[=compare.dedup]{compare.*}}.
+  The S4 class is virtual and exists solely for internal usage in method signatures.
 }
+
 \section{Slots}{
-  The following description refers to the S3 class. An object of class
-  \code{"RecLinkData"} is a list with at least the following items:
   \describe{
-    \item{\code{data}:}{Object of class \code{"data.frame"} ~}
-    
-    \item{\code{pairs}:}{Object of class \code{"data.frame"}
-      Data frame of data pairs. Each row represents the comparison pattern of two records, 
-      identified by columns \code{id1} and \code{id2}. The other columns contain for each
-      considered attribute a real number in the range [0..1] representing the degree of
-      similarity. These columns are named according to the respective columns in
-      \code{data}. The last column contains the matching status of the pair,
-      coded as 1 for a match or 0 for a non-match.
-    }
-    
-    \item{\code{frequencies}:}{Object of class \code{"numeric"} 
-      Numeric vector with average frequency of values for each column 
-      included in \code{pairs} (reciprocal of number of distinct values).
-    }
-    
-    \item{\code{type}:}{Object of class \code{"character"}
-      Identifies whether a linkage
-      (\code{"linkage"}) or a deduplication (\code{"deduplication"}) project is 
-      represented.}
-    \item{\code{.S3class}:}{Internal slot.}
+    \item{\code{.S3Class}:}{Internal slot.}
   }
-  The following items are optional:
-  \describe{
-    \item{\code{M}:}{Object of class \code{"numeric"}
-      Vector of m-probabilities as calculated by \code{\link{emWeights}}.
-    }
-    \item{\code{U}:}{Object of class \code{"numeric"}
-      Vector of u-probabilities as calculated by \code{\link{emWeights}}.
-    }
-    \item{\code{W}:}{Object of class \code{"numeric"}
-      Vector of log-likelihood weights as calculated by \code{\link{emWeights}},
-      corresponding to binary comparison patterns as created by 
-      \code{\link{bincombinations}}.
-    }
-    \item{\code{W}:}{Object of class \code{"numeric"}
-      Vector of log-likelihood weights as calculated by \code{\link{emWeights}},
-      corresponding to the rows of \code{pairs}.
-    }
-    \item{\code{.S3Class}:}{Object of class \code{"character"}}
-  }
+  See \code{"\link{RecLinkData}"} for the structure of the S3 class.
 }
+
 \section{Extends}{
 Class \code{"\linkS4class{oldClass}"}, directly.
 }
@@ -84,8 +42,10 @@ Andreas Borg, Murat Sariyar
 
 
 \seealso{
-  \code{\link{compare.dedup}}, \code{\link{compare.linkage}}
-  \code{"\linkS4class{RLBigData}"}
+  \code{"\link{RecLinkData}"} for the structure of the S3 class.
+  \code{\link{compare.dedup}}, which creates objects of this class.
+  \code{"\linkS4class{RLBigData}"}, an alternative data structure
+  suitable for big data sets.
 }
 \examples{
 showClass("RecLinkData")
