@@ -59,8 +59,8 @@ getPairsSQL <- function(object, filter.match, filter.link, max.weight,
     # tables.
     if (withWeight)
     {
-      if (!dbExistsTable(rpairs@con, "weights"))
-        stop(paste("No weights have been calculated for rpairs!"))
+      if (!dbExistsTable(object@con, "weights"))
+        stop(paste("No weights have been calculated for object!"))
       select_list <- paste(select_list,
         "w.weight as W", sep=","
       )

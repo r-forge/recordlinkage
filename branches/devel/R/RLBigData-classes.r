@@ -109,7 +109,7 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
   # check if string comparison / phonetic function is supported and
   # has the correct format
   if (!is.character(strcmpfun)) stop(paste("Wrong type of strcmpfun:", class(strcmpfun)))
-  if (!is.character(phonfun)) stop(paste("Wrong type of phonfun:", class(phoncmpfun)))
+  if (!is.character(phonfun)) stop(paste("Wrong type of phonfun:", class(phonfun)))
   if (length(strcmpfun) > 1) stop("strcmpfun must have length 1!")
   if (length(phonfun) > 1) stop("phonfun must have length 1!")
   if (!(strcmpfun %in% .supportedStrcmp))
@@ -220,7 +220,7 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   # check if string comparison / phonetic function is supported and
   # has the correct format
   if (!is.character(strcmpfun)) stop(paste("Wrong type of strcmpfun:", class(strcmpfun)))
-  if (!is.character(phonfun)) stop(paste("Wrong type of phonfun:", class(phoncmpfun)))
+  if (!is.character(phonfun)) stop(paste("Wrong type of phonfun:", class(phonfun)))
   if (length(strcmpfun) > 1) stop("strcmpfun must have length 1!")
   if (length(phonfun) > 1) stop("phonfun must have length 1!")
   if (!(strcmpfun %in% .supportedStrcmp))

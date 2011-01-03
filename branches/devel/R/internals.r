@@ -1,5 +1,13 @@
-# internal utility function to create blocking definition in SQL
-# returns string like "t1.fname=t2.fname and pho_h(t1.lname)=pho_h(t2.lname)"
+# internals.r: Various utility functions which are (usually) not called from
+# outside the package
+
+
+### Functions to create SQL statements and to retreive record pairs from
+### the database
+
+# construct part of where-clause which represents blocking restrictions
+# make something like 'list(1:2, 3)' to something like
+# '(t1.field1=t2.field1 and t1.field2=t2.field2) or (t1.field3=t2.field3)'
 blockfldfun <- function(blockfld, phoneticFld, phoneticFun, coln)
 {
   blockElemFun <- function(fldIndex)
@@ -115,6 +123,7 @@ setMethod(
   }
 )
 
+# retreive next n pairs
 setGeneric(
   name = "nextPairs",
   def = function(x, n=10000, ...) standardGeneric("nextPairs")
@@ -122,7 +131,7 @@ setGeneric(
 
 setMethod(
   f = "nextPairs",
-  signature = c("RLBigData", "numeric"),
+  signature = "RLBigData",
   definition = function(x, n=10000, ...)
   {
     res <- dbListResults(x@con)[[1]]
@@ -141,6 +150,7 @@ setMethod(
   }
 )
 
+# Clean up after retreiving data pairs (close result set in database)
 setGeneric(
   name = "clear",
   def = function(x, ...) standardGeneric("clear")
@@ -153,6 +163,49 @@ setMethod(
 )
 
 
+### Functions neccessary to load extensions into SQLite database
+
+# Function body taken from init_extension, package RSQLite.extfuns
+init_sqlite_extensions <- function(db)
+{
+    ans <- FALSE
+    if (.allows_extensions(db)) {
+        res <- dbGetQuery(db, sprintf("SELECT load_extension('%s')",
+                                      .lib_path()))
+        ans <- all(dim(res) == c(1, 1))
+    } else {
+        stop("loadable extensions are not enabled for this db connection")
+    }
+    ans
+}
+
+# taken from RSQLite.extfuns
+.allows_extensions <- function(db)
+{
+    v <- dbGetInfo(db)[["loadableExtensions"]]
+    isTRUE(v) || (v == "on")
+}
+
+
+# taken from RSQLite.extfuns
+.lib_path <- function()
+{
+    ## this is a bit of a trick, but the NAMESPACE code
+    ## puts .packageName in the package environment and this
+    ## seems slightly better than hard-coding.
+    ##
+    ## This also relies on the DLL being loaded even though only SQLite
+    ## actually needs to load the library.  It does not appear that
+    ## loading it causes any harm and it makes finding the path easy
+    ## (don't have to worry about arch issues).
+    getLoadedDLLs()[[.packageName]][["path"]]
+}
+
+
+### Internal getter-functions
+
+# get count of each distinct comparison pattern
+# works only for binary comparison, NAs are converted to 0
 setGeneric(
   name = "getPatternCounts",
   def = function(x, n=10000, ...) standardGeneric("getPatternCounts")
@@ -179,6 +232,7 @@ setMethod(
   }
 )
 
+# get number of matches
 setGeneric(
   name = "getMatchCount",
   def = function(object) standardGeneric("getMatchCount")
@@ -218,3 +272,34 @@ setMethod(
     return(as.integer(dbGetQuery(object@con, sql_stmt)))
   }
 )
+
+
+### Various other utility functions
+
+# utility function to generate all unordered pairs of x[1]..x[n]
+# if x is a vector, or 1..x
+unorderedPairs <- function (x)
+{
+    if (length(x)==1)
+    {
+      if (!is.numeric(x) || x < 2)
+        stop("x must be a vector or a number >= 2")
+        return (array(unlist(lapply(1:(x-1),
+          function (k) rbind(k,(k+1):x))),dim=c(2,x*(x-1)/2)))
+    }
+    if (!is.vector(x))
+      stop ("x must be a vector or a number >= 2")
+    n=length(x)
+    return (array(unlist(lapply(1:(n-1),
+    function (k) rbind(x[k],x[(k+1):n]))),dim=c(2,n*(n-1)/2)))
+}
+
+isFALSE <- function(x) identical(x,FALSE)
+
+delete.NULLs  <-  function(x)
+    x[unlist(lapply(x, length) != 0)]
+
+# interprets a scalar x as a set with 1 element (see also man page for sample)
+resample <- function(x, size, ...)
+     if(length(x) <= 1) { if(!missing(size) && size == 0) x[FALSE] else x
+     } else sample(x, size, ...)
