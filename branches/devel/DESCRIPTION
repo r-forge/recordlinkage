@@ -13,5 +13,6 @@ LinkingTo: RSQLite
 Collate: register-S3-classes.r RLBigData-classes.r RLResult-class.r 
          accessor-methods.r evt.r               
          classify.r firstlib.r classifySupv-methods.r genSamples.r strcmp.r
-         compare.r getPairs.r summary.r em-methods.r internal-methods.r tools.r
-         em.r mygllm.r epilink.r epilink-methods.r phonetics.r  getPairs-methods.r 
+         compare.r getPairs.r summary.r em-methods.r internals.r
+         em.r mygllm.r epilink.r epilink-methods.r phonetics.r  
+				 getPairs-methods.r 
