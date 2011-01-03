@@ -99,7 +99,9 @@ void pho_h_wrapper(sqlite3_context *ctx, int n_values, sqlite3_value **value)
 	#endif
 	
 	int result;
-  result = phonet(str1, dest, str1len, 1);
+	/* Cast removes const qualifier, avoids warning. This is okay because
+	   phonet does not write to first arg unless it is equal to the second */
+  result = phonet((unsigned char) str1, dest, str1len, 1);
 	/* throw error if phonet fails (result <0) */
 	if (result < 0)
 	{
