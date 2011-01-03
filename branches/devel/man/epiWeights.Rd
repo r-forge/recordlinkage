@@ -10,7 +10,7 @@ Calculate EpiLink weights
   (see references).
 }
 \usage{
-epiWeights(rpairs, e = 0.01, f = rpairs$frequencies)
+epiWeights(rpairs, e = 0.01, f = getFrequencies(rpairs))
 }
 
 \arguments{

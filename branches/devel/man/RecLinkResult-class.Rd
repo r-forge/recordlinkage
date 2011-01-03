@@ -2,6 +2,7 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{RecLinkResult-class}
+\alias{RecLinkResult}
 
 \title{Class "RecLinkResult"}
 \description{
@@ -26,7 +27,7 @@
         \item{\code{"L"}}{for links,}
         \item{\code{"P"}}{for possible links,}
         \item{\code{"N"}}{for non-links.}
-      }
+      }}
     \item{\code{.S3Class}:}{Object of class \code{"character"}}
   }
 }

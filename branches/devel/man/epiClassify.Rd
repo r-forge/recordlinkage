@@ -11,7 +11,7 @@
 }
 
 \usage{
-epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper)
+epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper, ...)
 }
 
 \arguments{

@@ -8,7 +8,7 @@
 A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-  \S4method{getPairs}{RLBigData}(filter.match = c("match", "possible", "non-match"),
+  \S4method{getPairs}{RLBigData}(object, filter.match = c("match", "unknown", "nonmatch"),
     single.rows = FALSE)
 }
 

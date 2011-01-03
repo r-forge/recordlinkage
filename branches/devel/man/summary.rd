@@ -6,7 +6,7 @@
 \title{Print Summary of Record Linkage Data}
 
 \description{Prints information on \code{\link{RecLinkData}} and
-  \code{"\linkS4Class{RecLinkResult}"} objects.}
+  \code{"\linkS4class{RecLinkResult}"} objects.}
 
 \usage{
 \method{summary}{RecLinkData}(object,...)
@@ -32,7 +32,7 @@
         \item If weights have been calculated for this object, a textual histogram
           of the weight distribution.            
        }
-       Information on \code{\link{RecLinkResult}} objects includes all of the
+       Information on \code{"\linkS4class{RecLinkResult}"} objects includes all of the
        above and the following:
        \itemize{
           \item The number of detected links, non-links and possible links.
@@ -60,6 +60,6 @@
 
 \author{Andreas Borg}
 
-\seealso{\code{\link{RecLinkData}},\code{"\linkS4class{RecLinkResult}"}
+\seealso{\code{\link{RecLinkData}},\code{"\linkS4class{RecLinkResult}"}}
 
 \keyword{classif}

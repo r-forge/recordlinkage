@@ -44,6 +44,7 @@
       Identifies whether a linkage
       (\code{"linkage"}) or a deduplication (\code{"deduplication"}) project is 
       represented.}
+    \item{\code{.S3class}:}{Internal slot.}
   }
   The following items are optional:
   \describe{
