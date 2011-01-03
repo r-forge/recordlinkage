@@ -20,7 +20,7 @@ SQLITE_EXTENSION_INIT1
 #endif
 /* Prototypes of functions found in other source files */
 
-double jarowinkler_core(char * str_1, char * str_2,
+double jarowinkler_core(const char * str_1, const char * str_2,
              double W_1, double W_2, double W_t,
              double r);
 

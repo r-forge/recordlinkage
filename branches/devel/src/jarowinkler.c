@@ -20,7 +20,7 @@ int getCommonCharacters(char * common, const char * str_1,
   
 int getTranspositions(char * common_1, char * common_2, int radius);
 
-double jaro(char * str_1, char * str_2, 
+double jaro(const char * str_1, const char * str_2, 
              double W_1, double W_2, double W_t,
              double r, int use_transpos_radius);
 
@@ -29,7 +29,7 @@ void jarowinkler(const char ** strvec_1, const char ** strvec_2,
              double * W_1, double * W_2, double * W_t,
              double * r, double * ans);
 
-double jarowinkler_core(char * str_1, char * str_2,
+double jarowinkler_core(const char * str_1, const char * str_2,
              double W_1, double W_2, double W_t,
              double r);
 						  
@@ -45,8 +45,8 @@ void jarowinkler(const char ** strvec_1, const char ** strvec_2,
   int max_length= *length_1 > *length_2 ? *length_1 : *length_2;  
   for (int str_ind=0; str_ind < max_length; str_ind++)
   {
-    char * str_1=strvec_1[str_ind % *length_1];
-    char * str_2=strvec_2[str_ind % *length_2];
+    const char * str_1=strvec_1[str_ind % *length_1];
+    const char * str_2=strvec_2[str_ind % *length_2];
     ans[str_ind]=jarowinkler_core(str_1, str_2, *W_1, *W_2, *W_t, *r);
 //     int str_len_1=strlen(str_1);
 //     int str_len_2=strlen(str_2);
@@ -74,7 +74,7 @@ void jarowinkler(const char ** strvec_1, const char ** strvec_2,
 } 
 
 
-double jarowinkler_core(char * str_1, char * str_2,
+double jarowinkler_core(const char * str_1, const char * str_2,
              double W_1, double W_2, double W_t,
              double r)
 {
@@ -104,7 +104,7 @@ double jarowinkler_core(char * str_1, char * str_2,
 }
 
  
- double jaro(char * str_1, char * str_2, 
+ double jaro(const char * str_1, const char * str_2, 
              double W_1, double W_2, double W_t,
              double r, int use_transpos_radius)
 {
