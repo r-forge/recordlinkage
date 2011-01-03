@@ -3,6 +3,7 @@
 \docType{class}
 \alias{RLBigData-class}
 
+
 \title{Class "RLBigData"}
 \description{
 Abstract class for big data sets.
@@ -50,7 +51,7 @@ Abstract class for big data sets.
     \item{clear}{\code{signature(x = "RLBigData")}: ... }
     \item{emWeights}{\code{signature(rpairs = "RLBigData", cutoff = "missing")}: ... }
     \item{epiClassify}{\code{signature(rpairs = "RLBigData")}: ... }
-    \item{getFrequencies}{\code{signature(x = "RLBigData")}: ... }
+    \item{getFrequencies}{\code{signature(x = "RLBigData")}: Get average frequencies of attribute values.}
     \item{getMatchCount}{\code{signature(object = "RLBigData")}: ... }
     \item{getPatternCounts}{\code{signature(x = "RLBigData")}: ... }
     \item{getSQLStatement}{\code{signature(object = "RLBigData")}: ... }

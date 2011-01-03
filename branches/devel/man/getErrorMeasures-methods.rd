@@ -1,5 +1,6 @@
 \name{getErrorMeasures-methods}
 \docType{methods}
+\alias{getErrorMeasures}
 \alias{getErrorMeasures-methods}
 \alias{getErrorMeasures,RecLinkResult-method}
 \alias{getErrorMeasures,RLResult-method}
