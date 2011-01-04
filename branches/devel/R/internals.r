@@ -225,10 +225,10 @@ setMethod(
     message(i)
     flush.console()
     # discard ids and matching status
-    slice <- slice[,-c(1,2,ncol(slice)]
+    slice <- slice[,-c(1,2,ncol(slice))]
     slice[is.na(slice)] <- 0
     slice[slice < cutoff] <- 0
-    slice[slice >= cutoff)] <- 1
+    slice[slice >= cutoff] <- 1
     patternCounts <- patternCounts + countpattern(slice)
      i <- i + n
    }      

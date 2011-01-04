@@ -363,7 +363,7 @@ setMethod(
 
 setGeneric(
   name = "getEMWeights",
-  def = function(object)
+  def = function(object) standardGeneric("getEMWeights")
 )
 
 setMethod(

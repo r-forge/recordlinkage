@@ -130,8 +130,8 @@ setGeneric(
 setMethod(
   f = "getPairs",
   signature = "RLBigData",
-  definition = function(object, filter.match = c("match", "unknown", "nonmatch"),
-                        single.rows = FALSE)
+  definition = function(object, max.weight = Inf, min.weight = -Inf,
+    filter.match = c("match", "unknown", "nonmatch"), single.rows = FALSE)
   {
   
     # check arguments
@@ -195,14 +195,6 @@ setMethod(
     result$is_match <- as.logical(result$is_match)
 
     result
-  }
-)
-
-setMethod(
-  f = "getPairs",
-  signature = "EMWeights",
-  definition = function(object, max.weight = Inf, min.weight = -Inf)
-  {
   }
 )
 
