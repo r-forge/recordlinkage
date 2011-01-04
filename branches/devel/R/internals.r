@@ -117,7 +117,6 @@ setMethod(
     sql <- getSQLStatement(x)  
     query <- sprintf("select %s from %s where %s", sql$select_list, 
       sql$from_clause, sql$where_clause)
-    message(query)
     dbSendQuery(x@con, query) # can be retreived via dbListResults(x@con)[[1]]
     return(x)
   }
@@ -205,16 +204,17 @@ init_sqlite_extensions <- function(db)
 ### Internal getter-functions
 
 # get count of each distinct comparison pattern
-# works only for binary comparison, NAs are converted to 0
+# Fuzzy values above cutoff are converted to 1, below cutoff to 0
+# NAs are converted to 0
 setGeneric(
   name = "getPatternCounts",
-  def = function(x, n=10000, ...) standardGeneric("getPatternCounts")
+  def = function(x, n=10000, cutoff=1) standardGeneric("getPatternCounts")
 )
 
 setMethod(
   f = "getPatternCounts",
   signature = "RLBigData",
-  definition = function(x, n=10000, ...)
+  definition = function(x, n=10000, cutoff=1)
   {
    on.exit(clear(x))
    x <- begin(x)
@@ -224,8 +224,12 @@ setMethod(
    {
     message(i)
     flush.console()
+    # discard ids and matching status
+    slice <- slice[,-c(1,2,ncol(slice)]
     slice[is.na(slice)] <- 0
-    patternCounts <- patternCounts + countpattern(slice[,-c(1,2,ncol(slice))])
+    slice[slice < cutoff] <- 0
+    slice[slice >= cutoff)] <- 1
+    patternCounts <- patternCounts + countpattern(slice)
      i <- i + n
    }      
    patternCounts

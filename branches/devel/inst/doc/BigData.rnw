@@ -18,7 +18,8 @@ options(width=50)
 
 As of version 0.3, the package RecordLinkage includes extensions to overcome
 the problem of high memory consumption which arises when processing a large
-number of record pairs (>= 1 million). This is achieved by a concept where
+number of records (ca. >=1000 without blocking, >=10000 with one blocking
+variable). This is achieved by a concept where
 the whole set of record pairs is not created at once, but block-wise during
 classification. In addition, an embedded SQLite database is used through
 package RSQLite to perform blocking, application of phonetic codes or string
@@ -34,9 +35,6 @@ This approach combines two advantages: First, existing code using the package
 still works, second, the new classes and methods offer (nearly) the same
 interface, i.e. the necessary function calls for a linkage task differ only
 slightly.
-
-(TODO: exception: getPairs redesigned. should be okay because it is mainly intended
-for interactive use and output of results)
 
 \section{Defining data and comparison parameters}
 

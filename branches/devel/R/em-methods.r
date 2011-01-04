@@ -14,7 +14,7 @@
 setMethod(
   f = "emWeights",
   signature = "RecLinkData",
-  definition = function (rpairs, cutoff=0.95,...)
+  definition = function (rpairs, cutoff=0.95, ...)
   {
     # check for erronous input
     
@@ -97,33 +97,23 @@ setMethod(
 ) # end of setMethod 
 
 
-# Prototyp, vorläufig!
-
-setClass(
-  Class = "EMWeights",
-  representation = representation(
-    M = "numeric",
-    U = "numeric",
-    W = "numeric",
-    data = "RLBigData"
-  )
-)
 
 setMethod(  
   f = "emWeights",
-  signature = c("RLBigData", "missing"),
-  definition = function (rpairs, ...)
+  signature = "RLBigData",
+  definition = function (rpairs, cutoff=0.95, ...)
   {
     u=getFrequencies(rpairs)
     # get number of attributes from frequency vector: this way excluded
     # columns are not counted
     n_attr <- length(u)
-    observed_count=getPatternCounts(rpairs)
+    observed_count <- getPatternCounts(rpairs, cutoff=cutoff)
+    n_patterns <- length(observed_count)
     n_data <- sum(observed_count)
     patterns=bincombinations(n_attr)  # Liste der Patterns
-    x=c(rep(0,nrow(patterns)),rep(1,nrow(patterns)))
-    s=c(1:length(observed_count), 1:length(observed_count))
-    i=rep(1,nrow(patterns)) # Intercept
+    x=c(rep(0,n_patterns),rep(1,n_patterns))
+    s=c(1:n_patterns, 1:n_patterns)
+    i=rep(1,n_patterns) # Intercept
     X=cbind(i,x,rbind(patterns,patterns),rbind(patterns,patterns)*x) # Design Matrix
   
     m=0.97
@@ -136,8 +126,7 @@ setMethod(
   
     res=mygllm(observed_count,s,X,E=expected_count,...)
 
-    n_patterns=length(res)/2
-  
+
     # Anteil Matche/Non_Matche in einem Pattern
     matchrate=res[(n_patterns+1):(2*n_patterns)]/res[1:n_patterns]
     #matchrate=round(res[(n_patterns+1):(2*n_patterns)])/round(res[1:n_patterns])
@@ -149,7 +138,10 @@ setMethod(
     M=res[(n_patterns+1):(2*n_patterns)]/n_matches
     W=log(M/U, base=2)
     
-    return(new("EMWeights", M = M, U = U, W = W, data = rpairs))
+    dbWriteTable(rpairs@con, "M", data.frame(id = 1:n_patterns, M = M), row.names = FALSE, overwrite = TRUE)
+    dbWriteTable(rpairs@con, "U", data.frame(id = 1:n_patterns, U=U), row.names = FALSE, overwrite = TRUE)
+    dbWriteTable(rpairs@con, "W", data.frame(id = 1:n_patterns, W=W), row.names = FALSE, overwrite = TRUE)
+    return(rpairs)
   }
 ) # end of setMethod
 
@@ -257,40 +249,48 @@ setMethod(
 ) # end of setMethod
 
 
+
 setMethod(
   f = "emClassify",
-  signature = "EMWeights",
-  definition = function (rpairs, threshold.upper = Inf, 
-                        threshold.lower = threshold.upper, my = Inf, 
+  signature = "RLBigData",
+  definition = function (rpairs, threshold.upper = Inf,
+                        threshold.lower = threshold.upper, my = Inf,
                         ny = Inf)
-  {    
-  
+  {
+
+    if(!dbExistsTable(rpairs@con, "W"))
+      stop("No EM weights have been calculated for rpairs! Call emWeights first.")
+
+    W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
+    M <- dbGetQuery(rpairs@con, "select M from M order by id")$M
+    U <- dbGetQuery(rpairs@con, "select U from U order by id asc")$U
+
     if (!is.numeric(threshold.upper))
       stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
-  
+
     if (!is.numeric(threshold.lower))
       stop(sprintf("Illegal type for threshold.lower: %s", class(threshold.lower)))
-  
+
     if (threshold.upper < threshold.lower)
       stop(sprintf("Upper threshold %g lower than lower threshold %g",
         threshold.upper, threshold.lower))
-        
+
     if (!is.numeric(my))
       stop(sprintf("Illegal type for my: %s", class(my)))
     if (!missing(my) && (my < 0 || my > 1))
       stop(sprintf("Illegal value for my: %g", my))
-  
+
     if (!is.numeric(ny))
       stop(sprintf("Illegal type for ny: %s", class(ny)))
     if (!missing(ny) && (ny < 0 || ny > 1))
       stop(sprintf("Illegal value for ny: %g", ny))
-  
+
     # if no threshold was given, compute them according to the error bounds
     if (missing(threshold.upper) && missing(threshold.lower))
     {
-      o=order(rpairs@W,decreasing=TRUE) # order Weights decreasing
-      FN=rev(cumsum(rev(rpairs@M[o]))) 
-      FP=cumsum(rpairs@U[o])
+      o=order(W,decreasing=TRUE) # order Weights decreasing
+      FN=rev(cumsum(rev(M[o])))
+      FP=cumsum(U[o])
       if (my==Inf && ny==Inf)
       {
           # no error bound given: minimize overall error
@@ -298,15 +298,15 @@ setMethod(
           if (length(cutoff_upper)==0)
               cutoff_upper=0
           cutoff_lower=cutoff_upper
-          
+
       } else if (my==Inf)
-      {  
+      {
           # only rate of false matches relevant
           cutoff_lower=head(which(FN<=ny),1)
           if (length(cutoff_lower)==0)
               cutoff_lower=length(o)
           cutoff_upper=cutoff_lower
-      
+
       } else if (ny==Inf)
       {
           # only rate of false non-matches relevant
@@ -326,21 +326,21 @@ setMethod(
               cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
               cutoff_lower=cutoff_upper
           }
-      } 
+      }
       print("Threshold berechnen und Klassifikation zuweisen")
       threshold.upper <- rpairs@W[o][cutoff_upper]
       threshold.lower <- rpairs@W[o][cutoff_lower]
     } # end if
-     
-    on.exit(clear(rpairs@data))
-    x <- begin(rpairs@data)
+
+    on.exit(clear(rpairs))
+    rpairs <- begin(rpairs)
     n <- 10000
     i = n
     links <- matrix(nrow=0, ncol=2)
     possibleLinks <- matrix(nrow=0, ncol=2)
-    n_attr <- length(getFrequencies(rpairs@data))
+    n_attr <- length(getFrequencies(rpairs))
     nPairs <- 0
-    while(nrow(slice <- nextPairs(rpairs@data, n)) > 0)
+    while(nrow(slice <- nextPairs(rpairs, n)) > 0)
     {
       # auch hier vorläufiger Code! es muss noch ein tragfähiges Konzept her,
       # auf welche Weise Links und Possible Links ausgegeben werden!
@@ -348,14 +348,28 @@ setMethod(
       flush.console()
       slice[is.na(slice)] <- 0
       indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
-      links <- rbind(links, as.matrix(slice[rpairs@W[indices] >= threshold.upper,1:2]))
+      links <- rbind(links, as.matrix(slice[W[indices] >= threshold.upper,1:2]))
       possibleLinks <- rbind(possibleLinks,
-        as.matrix(slice[rpairs@W[indices] < threshold.upper &
-        rpairs@W[indices] >= threshold.lower ,1:2]))
+        as.matrix(slice[W[indices] < threshold.upper &
+        W[indices] >= threshold.lower ,1:2]))
       i <- i + n
       nPairs <- nPairs + nrow(slice)
     }
-    new("RLResult", data = rpairs@data, links = as.matrix(links),
+    new("RLResult", data = rpairs, links = as.matrix(links),
       possibleLinks = possibleLinks, nPairs = nPairs)
   }
 ) # end of SetMethod
+
+
+setGeneric(
+  name = "getEMWeights",
+  def = function(object)
+)
+
+setMethod(
+  f = "getEMWeights",
+  signature = "RLBigData",
+  definition = function(object)
+  {
+
+  }
