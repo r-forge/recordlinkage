@@ -247,7 +247,6 @@ setMethod(
     sql_stmt <- sprintf(
       "select count(*) from %s where %s and t1.identity==t2.identity",
       sql$from_clause, sql$where_clause)
-    message(sql_stmt)
     return(as.integer(dbGetQuery(object@con, sql_stmt)))
   }
 ) 
@@ -268,7 +267,6 @@ setMethod(
     sql_stmt <- sprintf(
       "select count(*) from %s where %s and (t1.identity is null or t2.identity is null)",
       sql$from_clause, sql$where_clause)
-    message(sql_stmt)
     return(as.integer(dbGetQuery(object@con, sql_stmt)))
   }
 )

@@ -86,14 +86,14 @@ setMethod(
     NANonLink <- getNACount(object@data) - NALink - NAPossible
     TN <- object@nPairs - sum(TP, FP, NALink, matchPossible, nonmatchPossible,
       NAPossible, FN, NANonLink)
-    tab <- as.table(matrix(c(TN, NANonLink, FN, nonmatchPossible,
+    tab <- matrix(c(TN, NANonLink, FN, nonmatchPossible,
       NAPossible, matchPossible, FP, NALink, TP), ncol=3, nrow=3,
       dimnames = list('true status' = c("FALSE", NA, "TRUE"),
-                          'classification' = c("N", "P", "L"))))
+                          'classification' = c("N", "P", "L")))
     # remove row with NAs (unknown matching status) if there are no such pairs
     if (all(tab[2,]==0))
       tab <- tab[-2,]
-    tab
+    as.table(tab)
   }
 )
 
