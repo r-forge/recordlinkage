@@ -163,6 +163,9 @@ setMethod(
     select_list <- paste(select_list, "t1.identity=t2.identity as is_match",
       sep =", ")
 
+    # if weights were calculated, include them in the output
+    if(dbExistsTable(rpairs@con, "emWeights"))
+      select_list <- paste(select_list, "w.W as Weight", sep=", ")
     # add restrictions concerning matching status
     filterFun <- function(filterElem)
     {
@@ -182,19 +185,62 @@ setMethod(
       filterClause = "1"
     }
 
+    if (is.finite(max.weight) || is.finite(min.weight))
+    {
+      from_clause <- paste(stmtList$from_clause,
+        "join emWeights w on t1.row_names = w.id1 and t2.row_names = w.id2", sep=" ")
+      weightClause <- "w.W between :min and :max"
+    } else
+    {
+      from_clause <- stmt$from_clause
+      weightClause <- "1"
+    }
 
 
-
-    stmt <- sprintf("select %s from %s where %s and (%s)", select_list,
-      stmtList$from_clause, stmtList$where_clause, filterClause)
+    stmt <- sprintf("select %s from %s where %s and (%s) and %s", select_list,
+      from_clause, stmtList$where_clause, filterClause, weightClause)
 #    message(stmt)
-    result <- dbGetQuery(object@con, stmt)
+    result <- dbGetPreparedQuery(object@con, stmt, data.frame(min=min.weight, max=max.weight))
     colnames(result) <- c("id.1", paste(colN, ".1", sep=""), "id.2",
       paste(colN, ".2", sep=""), "is_match")
     # convert SQLite coding of boolean (0 / 1) to real logical values
     result$is_match <- as.logical(result$is_match)
 
-    result
+    if(single.rows)
+      result
+    else
+    {
+
+      # if pairs are to be printed on consecutive lines, some formatting is
+      # necassery
+      
+      # This function inserts some white space:
+      #   1. The second row of every pair has weight and matching result,
+      #       the other one blank fields
+      #   2. A line of white space seperates record pairs
+      
+      # TODO: Fall berücksichtigen, dass es keine Gewichte gibt!
+    	printfun=function(x)
+      {
+        c(c(x[1:((length(x)-2)/2)],"",""),x[((length(x))/2):length(x)], rep("", length(x)/2 + 1))
+
+      }
+
+      # Apply helper function to every line
+      m=apply(pairs,1,printfun)
+      # reshape result into a table of suitable format
+      m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
+
+      colnames(m)=c("id", colnames(object@data), "is_match", "Weight")
+    	# if no pairs at all meet the restrictions, empty frame
+      if (is.na(ind) || length(ind)==0)
+      {
+        m <- m[0,]
+      }
+
+      return(m)
+
+    }
   }
 )
 
