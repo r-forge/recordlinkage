@@ -61,6 +61,12 @@ test.getMinimalTrain <- function()
       
     }
   }
+  
+  # test the bug that pairs with unknown status become non-matches
+  rpairs2 <- compare.dedup(RLdata500)
+  minTrain <- getMinimalTrain(rpairs2)
+  checkTrue(all(is.na(minTrain$pairs$is_match)),
+    msg = " Test for bug: conversion of unknown to non-match")
 }
 
 test.splitData.exceptions <- function()
