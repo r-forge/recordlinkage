@@ -124,7 +124,9 @@ setMethod(
     # create table where weights are stored
     dbGetQuery(rpairs@con, "drop table if exists Wdata")
     dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W real)")
-    dbGetQuery(rpairs@con, "create index index_Wdata on Wdata(id1, id2)")
+    # create index, this speeds up the join operation of getPairs
+    # significantly
+    dbGetQuery(rpairs@con, "create index index_Wdata on Wdata (id1, id2)")
 #    dbGetQuery(rpairs@con, "begin transaction")
     rpairs <- begin(rpairs)
     nPairs <- 0

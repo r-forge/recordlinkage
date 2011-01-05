@@ -143,9 +143,11 @@ setMethod(
     dbWriteTable(rpairs@con, "W", data.frame(id = 1:n_patterns, W=W), row.names = FALSE, overwrite = TRUE)
 
     # get weights for individual records and store in database
-
     dbGetQuery(rpairs@con, "drop table if exists Wdata")
     dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W double)")
+    # create index, this speeds up the join operation of getPairs
+    # significantly
+    dbGetQuery(rpairs@con, "create index index_Wdata on Wdata (id1, id2)")
 
 #    clear(rpairs)
     rpairs <- begin(rpairs)

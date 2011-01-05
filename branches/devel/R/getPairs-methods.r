@@ -10,10 +10,11 @@
 #
 # The returned statement is a prepared statement if weight limits are used
 # (i.e. a finite value for at least one of max.weight and min.weight)
-getPairsSQL <- function(object, filter.match,
+
+getPairsBackend <- function(object, filter.match,
   filter.link=c("nonlink", "possible", "link"), max.weight=Inf,
   min.weight=-Inf, withMatch = TRUE, withClass = FALSE, withWeight = FALSE,
-  sort=FALSE)
+  sort=FALSE, single.rows=FALSE)
 {
     stmtList <- getSQLStatement(object)
     select_list <- stmtList$select_list
@@ -47,13 +48,23 @@ getPairsSQL <- function(object, filter.match,
     # columns of the corresponding table. A column "class" will be included in
     # the output which can take the values 1 (non-link), 2 (possible) and 3
     # (link), which corresponds to the factor levels "N", "P", "L"
-    if (withClass)
+
+    # The join is necessary for filtering of a distinct classification
+    # and for displaying the result
+    if (withClass || any(is.na(match(c("link", "nonlink", "possible"),filter.link))))
     {
       from_clause <- paste(from_clause,
         "left join links l on (t1.row_names=l.id1 and t2.row_names=l.id2)",
       	"left join possible_links p on (t1.row_names=p.id1 and t2.row_names=p.id2)"
       )
+    }
 
+    if (withClass)
+    {
+      # This expression evaluates to 1 for non-matches, 2 (=1+1) for possible
+      # matches and 3 (=1+2) for matches under the constraint that a pair can
+      # not be a possible match and a match at one time.
+      # The values can later easily be transformed to factor levels "N", "P", "L"
       select_list <- paste(select_list,
         "1 + (p.id1 is not null) + (l.id1 is not null) * 2 as class",
         sep =", ")
@@ -61,7 +72,7 @@ getPairsSQL <- function(object, filter.match,
 
     # Join with table of weights necessary if a weight range is given
     # or weights are to be included in the output
-    if (withWeight || is.finite(max.weights) || is.finite(min.weight))
+    if (withWeight || is.finite(max.weight) || is.finite(min.weight))
     {
       from_clause <- paste(from_clause,
         "join Wdata weights on (t1.row_names=weights.id1 and t2.row_names=weights.id2)",
@@ -131,12 +142,73 @@ getPairsSQL <- function(object, filter.match,
       order_clause = "order by Weight desc"
     } else order_clause=""
     
-
-    # return result
-    sprintf("select %s from %s where %s and (%s) and (%s) and %s %s", select_list,
+    # construct statement
+    stmt <- sprintf("select %s from %s where %s and (%s) and (%s) and %s %s", select_list,
       from_clause, where_clause, filterMatch, filterLink, weight_clause, order_clause)
+    result <- dbGetPreparedQuery(object@con, stmt, data.frame(min=min.weight, max=max.weight))
 
+    if(nrow(result)==0)
+      return (NULL)
+
+    cnames <- c("id.1", paste(colN, ".1", sep=""), "id.2",
+      paste(colN, ".2", sep=""), "is_match")
+
+    if (withClass)
+      cnames <- c(cnames, "Class")
+    if (withWeight)
+      cnames <- c(cnames, "Weight")
+
+    colnames(result) <- cnames
+    # converion of SQLite coding to more apropriate types
+    result$is_match <- as.logical(result$is_match)
+    if (withClass)
+    {
+      result$Class <- factor(result$Class, levels=1:3)
+      levels(result$Class) <- c("N", "P", "L")
+    }
+
+
+    if(single.rows)
+      result
+    else
+    {
+
+      # if pairs are to be printed on consecutive lines, some formatting is
+      # necassery
+
+      # This function inserts some white space:
+      #   1. The second row of every pair has the matching status and possibly
+      #       classification and weight, the other one blank fields
+      #   2. A line of white space seperates record pairs
+
+      # compute number of additional fields (weight etc)
+      nAdditional <- 1 + as.numeric(withWeight) + as.numeric(withClass)
+    	printfun=function(x)
+      {
+        c(x[1:((length(x)-nAdditional)/2)],rep("", nAdditional),
+          x[((length(x)-nAdditional)/2 + 1):length(x)],
+          rep("", (length(x)+nAdditional)/2)) # blank line
+
+      }
+
+      # Apply helper function to every line
+      m=apply(result,1,printfun)
+      # reshape result into a table of suitable format
+      m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
+
+      cnames=c("id", colnames(object@data), "is_match")
+      if (withClass)
+        cnames <- c(cnames, "Class")
+      if (withWeight)
+        cnames <- c(cnames, "Weight")
+
+      colnames(m) <- cnames
+
+
+      return(m)
+  } # end else
 }
+
 
 setGeneric(
   name = "getPairs",
@@ -163,53 +235,10 @@ setMethod(
       stop(paste("Illegal value in filter.match:", filter.match[naind]))
 
 
-
-    stmt <- getPairsSQL(rpairs, filter.match=filter.match, max.weight = max.weight,
-      min.weight = min.weight, withWeight = withWeight, sort = withWeight)
-    
-    result <- dbGetPreparedQuery(object@con, stmt, data.frame(min=min.weight, max=max.weight))
-    if(nrow(result)==0)
-      return (NULL)
-    colnames(result) <- c("id.1", paste(colN, ".1", sep=""), "id.2",
-      paste(colN, ".2", sep=""), "is_match")
-    # convert SQLite coding of boolean (0 / 1) to real logical values
-    result$is_match <- as.logical(result$is_match)
-
-    if(single.rows)
-      result
-    else
-    {
-
-      # if pairs are to be printed on consecutive lines, some formatting is
-      # necassery
-      
-      # This function inserts some white space:
-      #   1. The second row of every pair has weight and matching result,
-      #       the other one blank fields
-      #   2. A line of white space seperates record pairs
-      
-      # TODO: Fall berücksichtigen, dass es keine Gewichte gibt!
-    	printfun=function(x)
-      {
-        c(c(x[1:((length(x)-2)/2)],"",""),x[((length(x))/2):length(x)], rep("", length(x)/2 + 1))
-
-      }
-
-      # Apply helper function to every line
-      m=apply(result,1,printfun)
-      # reshape result into a table of suitable format
-      m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
-
-      cnames=c("id", colnames(object@data), "is_match")
-      if (withWeight)
-        cnames <- c(cnames, "Weight")
-        
-      colnames(m) <- cnames
-
-
-      return(m)
-
-    }
+    # call backend function
+    getPairsBackend(rpairs, filter.match=filter.match, max.weight = max.weight,
+      min.weight = min.weight, withWeight = withWeight, sort = withWeight,
+      single.rows = single.rows)
   }
 )
 
@@ -220,7 +249,8 @@ setMethod(
   signature = "RLResult",
   definition = function(object, filter.match = c("match", "unknown", "nonmatch"),
     filter.link = c("nonlink", "possible", "link"), max.weight = Inf, min.weight = -Inf,
-    withMatch = TRUE, withClass=TRUE, withWeight=FALSE, sort=withWeight)
+    withMatch = TRUE, withClass=TRUE, withWeight=dbExistsTable(object@data@con, "Wdata"),
+    single.rows = FALSE, sort=withWeight)
   {
     # assing data base connection to local variable
     con <- object@data@con
@@ -245,32 +275,15 @@ setMethod(
     dbGetQuery(object@data@con, "create index index_links on links(id1, id2)")
     dbGetQuery(object@data@con, "create index index_possible on possible_links(id1, id2)")
 
-    stmt <- getPairsSQL(object@data, filter.match, filter.link, max.weight,
-      min.weight, withMatch = withMatch, withClass = withClass,
-      withWeight = withWeight, sort=sort)
-
-    message(stmt)
-    result <- dbGetQuery(con, stmt)
-    # make classification result (coded as a number in 1:3) to a factor
-    if (nrow(result) > 0) # otherwise class(...) throws an error
-    {
-      class(result$class) <- "factor"
-      levels(result$class) <- c("N", "P", "L")
-    }
-    # make is_match logical
-    result$is_match <- as.logical(result$is_match)
-
-    # make sure column names match original names
-    colN <- switch(class(object@data), RLBigDataDedup = colnames(object@data@data),
-      RLBigDataLinkage = colnames(object@data@data1),
-      stop(paste("Unexpected class of object:", class(object))))
-
-    colnames(result) <- c("id.1", paste(colN, ".1", sep=""), "id.2",
-      paste(colN, ".2", sep=""), "is_match", "classification")
-
-    result
+    # call backend function
+    getPairsBackend(rpairs, filter.match=filter.match, filter.link = filter.link,
+      max.weight = max.weight, min.weight = min.weight, withMatch = withMatch,
+      withClass = withClass, withWeight = withWeight,
+      sort = withWeight, single.rows = single.rows)
   }
 )
+
+
 
 # traditional function
 setMethod(
@@ -381,3 +394,24 @@ setMethod(
 )
 
 
+# shortcuts for retreiving pairs with wrong classification
+
+getFalsePos <- function(object, single.rows=FALSE)
+{
+  getPairs(object, filter.link = "link", filter.match = "nonmatch",
+    single.rows = single.rows)
+}
+
+getFalseNeg <- function(object, single.rows=FALSE)
+{
+  getPairs(object, filter.link = "nonlink", filter.match = "match",
+    single.rows = single.rows)
+}
+
+getFalse <- function(object, single.rows=FALSE)
+{
+  rbind(
+    getFalsePos(object, single.rows = single.rows),
+    getFalseNeg(object, single.rows = single.rows)
+  )
+}

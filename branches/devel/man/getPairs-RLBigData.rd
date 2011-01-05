@@ -10,18 +10,19 @@ A concise (1-5 lines) description of what the function does. ~~
 \usage{
   \S4method{getPairs}{RLBigData}(object, max.weight = Inf, min.weight = -Inf,
     filter.match = c("match", "unknown", "nonmatch"),
-    withWeight <- dbExistsTable(rpairs@con, "Wdata"), single.rows = FALSE,
+    withWeight = dbExistsTable(rpairs@con, "Wdata"), single.rows = FALSE,
     sort = TRUE)
 }
 
 \arguments{
   \item{object}{The object from which to extract pairs.}
-  \item{max.weight} Maximum weight of pairs to include in the output.
-  \item{min.weight} Minimum weight of pairs to include in the output.
+  \item{max.weight}{Maximum weight of pairs to include in the output.}
+  \item{min.weight}{Minimum weight of pairs to include in the output.}
   \item{filter.match}{Character vector, specifies which pairs appear in the output.}
   \item{withWeight}{Logical. Wether to include weights in the output.}
   \item{single.rows}{Logical. Wether to print record pairs in one row instead
     of two consecutive rows.}
+  \item{sort}{Logical. Wether to sort descending by weights.}
 }
 \details{
   This function extracts record pairs from a \code{"\linkS4class{RLBigDataDedup}"}
@@ -30,12 +31,13 @@ A concise (1-5 lines) description of what the function does. ~~
   thereof by passing a corresponding character vector as \code{filter.match}.
   
   If weights have been calculated for \code{object} by
-  \code\link[=emWeights,RLBigData-method]{emWeights}} or
-  \code\link[=epiWeights,RLBigData-method]{epiWeights}}, the range of records
+  \code{\link[=emWeights,RLBigData-method]{emWeights}} or
+  \code{\link[=epiWeights,RLBigData-method]{epiWeights}}, the range of records
   to include in the output can be limited to those with a weight in the interval
   \eqn{[max.weight, min.weight]}. Also, the weight of each record pair will
   be printed in the last column if \code{withWeight} is \code{TRUE} (the default
-  if weights are present).
+  if weights are present). Setting \code{sort = TRUE} causes the output to
+  be sorted by descending weight.
 
   If \code{single.rows} is not \code{TRUE}, pairs are output on two consecutive
   lines to allow easy comparison of corresponding attributes. This format is
