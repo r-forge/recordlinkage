@@ -220,7 +220,7 @@ setMethod(
   signature = "RLBigData",
   definition = function(object, max.weight = Inf, min.weight = -Inf,
     filter.match = c("match", "unknown", "nonmatch"),
-    withWeight = dbExistsTable(rpairs@con, "Wdata"), single.rows = FALSE,
+    withWeight = dbExistsTable(object@con, "Wdata"), single.rows = FALSE,
     sort = TRUE)
   {
   
@@ -236,7 +236,7 @@ setMethod(
 
 
     # call backend function
-    getPairsBackend(rpairs, filter.match=filter.match, max.weight = max.weight,
+    getPairsBackend(object, filter.match=filter.match, max.weight = max.weight,
       min.weight = min.weight, withWeight = withWeight, sort = withWeight,
       single.rows = single.rows)
   }
@@ -276,7 +276,7 @@ setMethod(
     dbGetQuery(object@data@con, "create index index_possible on possible_links(id1, id2)")
 
     # call backend function
-    getPairsBackend(rpairs, filter.match=filter.match, filter.link = filter.link,
+    getPairsBackend(object, filter.match=filter.match, filter.link = filter.link,
       max.weight = max.weight, min.weight = min.weight, withMatch = withMatch,
       withClass = withClass, withWeight = withWeight,
       sort = withWeight, single.rows = single.rows)
