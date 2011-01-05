@@ -122,9 +122,9 @@ setMethod(
     )
 
     # create table where weights are stored
-    dbGetQuery(rpairs@con, "drop table if exists weights")
-    dbGetQuery(rpairs@con, "create table weights (id1 integer, id2 integer, weight real)")
-    dbGetQuery(rpairs@con, "create index index_weights on weights(id1, id2)")
+    dbGetQuery(rpairs@con, "drop table if exists Wdata")
+    dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W real)")
+    dbGetQuery(rpairs@con, "create index index_Wdata on Wdata(id1, id2)")
 #    dbGetQuery(rpairs@con, "begin transaction")
     rpairs <- begin(rpairs)
     nPairs <- 0
@@ -161,7 +161,7 @@ setMethod(
         warning("Some weights have illegal values. Check error rate and frequencies!")
 
 #      weightTable <- rbind(weightTable, cbind(slice[,1:2], S))
-      dbWriteTable(con2, "weights",
+      dbWriteTable(con2, "Wdata",
         cbind(slice[,1:2], S), row.names=FALSE, append=TRUE)
 #      message(range(slice[,1]))
 #      message(range(slice[,2]))

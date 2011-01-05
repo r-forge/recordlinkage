@@ -144,8 +144,8 @@ setMethod(
 
     # get weights for individual records and store in database
 
-    dbGetQuery(rpairs@con, "drop table if exists emWeights")
-    dbGetQuery(rpairs@con, "create table emWeights (id1 integer, id2 integer, W double)")
+    dbGetQuery(rpairs@con, "drop table if exists Wdata")
+    dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W double)")
 
 #    clear(rpairs)
     rpairs <- begin(rpairs)
@@ -163,8 +163,10 @@ setMethod(
       message(i)
       flush.console()
       slice[is.na(slice)] <- 0
+      slice[slice < cutoff] <- 0
+      slice[slice >= cutoff & slice < 1] <- 1
       indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
-      dbWriteTable(con2, "emWeights", data.frame(slice[,1:2], W[indices]),
+      dbWriteTable(con2, "Wdata", data.frame(slice[,1:2], W[indices]),
         row.names = FALSE, append = TRUE)
       i <- i + n
     }
@@ -384,12 +386,12 @@ setMethod(
 #      nPairs <- nPairs + nrow(slice)
 #    }
 
-    query <- "select id1, id2 from emWeights where W >= :upper"
+    query <- "select id1, id2 from Wdata where W >= :upper"
     links <- dbGetPreparedQuery(rpairs@con, query, data.frame(upper = threshold.upper))
-    query <- "select id1, id2 from emWeights where W < :upper and W >= :lower"
+    query <- "select id1, id2 from Wdata where W < :upper and W >= :lower"
     possibleLinks <- dbGetPreparedQuery(rpairs@con, query,
       data.frame(upper = threshold.upper, lower = threshold.lower))
-    nPairs <- dbGetQuery(rpairs@con, "select count(*) from emWeights")[1,1]
+    nPairs <- dbGetQuery(rpairs@con, "select count(*) from Wdata")[1,1]
     new("RLResult", data = rpairs, links = as.matrix(links),
       possibleLinks = as.matrix(possibleLinks), nPairs = nPairs)
   }

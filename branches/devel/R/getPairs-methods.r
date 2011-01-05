@@ -112,7 +112,7 @@ getPairsSQL <- function(object, filter.match, filter.link, max.weight,
 
     if (sort)
     {
-      order_clause = "order by W"
+      order_clause = "order by W desc"
     } else order_clause=""
     
 
@@ -131,7 +131,8 @@ setMethod(
   f = "getPairs",
   signature = "RLBigData",
   definition = function(object, max.weight = Inf, min.weight = -Inf,
-    filter.match = c("match", "unknown", "nonmatch"), single.rows = FALSE)
+    filter.match = c("match", "unknown", "nonmatch"), single.rows = FALSE,
+    sort = TRUE)
   {
   
     # check arguments
@@ -164,8 +165,11 @@ setMethod(
       sep =", ")
 
     # if weights were calculated, include them in the output
-    if(dbExistsTable(rpairs@con, "emWeights"))
+    if(dbExistsTable(rpairs@con, "Wdata"))
+    {
       select_list <- paste(select_list, "w.W as Weight", sep=", ")
+      order_clause <- "order by Weight desc"
+    }
     # add restrictions concerning matching status
     filterFun <- function(filterElem)
     {
@@ -188,7 +192,7 @@ setMethod(
     if (is.finite(max.weight) || is.finite(min.weight))
     {
       from_clause <- paste(stmtList$from_clause,
-        "join emWeights w on t1.row_names = w.id1 and t2.row_names = w.id2", sep=" ")
+        "join Wdata w on t1.row_names = w.id1 and t2.row_names = w.id2", sep=" ")
       weightClause <- "w.W between :min and :max"
     } else
     {
@@ -197,10 +201,12 @@ setMethod(
     }
 
 
-    stmt <- sprintf("select %s from %s where %s and (%s) and %s", select_list,
-      from_clause, stmtList$where_clause, filterClause, weightClause)
+    stmt <- sprintf("select %s from %s where %s and (%s) and %s %s", select_list,
+      from_clause, stmtList$where_clause, filterClause, weightClause, order_clause)
 #    message(stmt)
     result <- dbGetPreparedQuery(object@con, stmt, data.frame(min=min.weight, max=max.weight))
+    if(nrow(result)==0)
+      return (NULL)
     colnames(result) <- c("id.1", paste(colN, ".1", sep=""), "id.2",
       paste(colN, ".2", sep=""), "is_match")
     # convert SQLite coding of boolean (0 / 1) to real logical values
@@ -227,16 +233,11 @@ setMethod(
       }
 
       # Apply helper function to every line
-      m=apply(pairs,1,printfun)
+      m=apply(result,1,printfun)
       # reshape result into a table of suitable format
       m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
 
       colnames(m)=c("id", colnames(object@data), "is_match", "Weight")
-    	# if no pairs at all meet the restrictions, empty frame
-      if (is.na(ind) || length(ind)==0)
-      {
-        m <- m[0,]
-      }
 
       return(m)
 
