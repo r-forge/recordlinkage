@@ -8,22 +8,28 @@
 # Args:
 #   object: RLBigData object
 #
-getPairsSQL <- function(object, filter.match, filter.link, max.weight,
-  min.weight, withMatch = TRUE, withClass = FALSE, withWeight = FALSE,
+# The returned statement is a prepared statement if weight limits are used
+# (i.e. a finite value for at least one of max.weight and min.weight)
+getPairsSQL <- function(object, filter.match,
+  filter.link=c("nonlink", "possible", "link"), max.weight=Inf,
+  min.weight=-Inf, withMatch = TRUE, withClass = FALSE, withWeight = FALSE,
   sort=FALSE)
 {
     stmtList <- getSQLStatement(object)
     select_list <- stmtList$select_list
     from_clause <- stmtList$from_clause
     where_clause <- stmtList$where_clause
+
     # get column names either from slot data or data1, depending on the class
     # (a more robust way would be good)
     colN <- switch(class(object), RLBigDataDedup = colnames(object@data),
       RLBigDataLinkage = colnames(object@data1),
       stop(paste("Unexpected class of object:", class(object))))
+
     # convert to database column names and add ids
     dbNames <- make.db.names(object@drv, colN, allow.keywords = FALSE)
     dbNames <- c("row_names", dbNames)
+
     # concatenate fields of first table, fields of second table
     # in the format t1.field1, t1.field2, ..., t2.field1, t2.field2, ...
     select_list <- paste(sapply(c("t1", "t2"), function(tableName)
@@ -53,20 +59,22 @@ getPairsSQL <- function(object, filter.match, filter.link, max.weight,
         sep =", ")
     }
 
-    # Include weights if desired
-    # If weights have been calculated, they are stored in table 'weights'
-    # in the database together with record ids. Include them by joining the
-    # tables.
+    # Join with table of weights necessary if a weight range is given
+    # or weights are to be included in the output
+    if (withWeight || is.finite(max.weights) || is.finite(min.weight))
+    {
+      from_clause <- paste(from_clause,
+        "join Wdata weights on (t1.row_names=weights.id1 and t2.row_names=weights.id2)",
+        sep = " ")
+    }
+
     if (withWeight)
     {
-      if (!dbExistsTable(object@con, "weights"))
+      if (!dbExistsTable(object@con, "Wdata"))
         stop(paste("No weights have been calculated for object!"))
       select_list <- paste(select_list,
-        "w.weight as W", sep=","
-      )
-      from_clause <- paste(from_clause,
-        "join weights w on (t1.row_names=w.id1 and t2.row_names=w.id2)"
-      )
+        "weights.W as Weight", sep=",")
+
     }
 
     # add restrictions concerning matching status
@@ -88,6 +96,14 @@ getPairsSQL <- function(object, filter.match, filter.link, max.weight,
       filterMatch = "1"
     }
 
+    if (is.finite(max.weight) || is.finite(min.weight))
+    {
+      weight_clause <- "weights.W between :min and :max"
+    } else
+    {
+      weight_clause <- "1"
+    }
+
 
     # Add restrictions concerning classification
     # A pair is a link if the left join with the table of links gives null
@@ -102,7 +118,7 @@ getPairsSQL <- function(object, filter.match, filter.link, max.weight,
     }
     # if no restriction is made (show matches, nonmatches and unknown),
     # do not add any clause
-    if (any(is.na(match(c("links", "nonlink", "possible"), filter.link))))
+    if (any(is.na(match(c("link", "nonlink", "possible"), filter.link))))
     {
       filterLink <- paste(sapply(filter.link, filterLinkFun), collapse=" or ")
     } else
@@ -112,13 +128,13 @@ getPairsSQL <- function(object, filter.match, filter.link, max.weight,
 
     if (sort)
     {
-      order_clause = "order by W desc"
+      order_clause = "order by Weight desc"
     } else order_clause=""
     
 
     # return result
-    sprintf("select %s from %s where %s and (%s) and (%s) %s", select_list,
-      from_clause, where_clause, filterMatch, filterLink, order_clause)
+    sprintf("select %s from %s where %s and (%s) and (%s) and %s %s", select_list,
+      from_clause, where_clause, filterMatch, filterLink, weight_clause, order_clause)
 
 }
 
@@ -131,7 +147,8 @@ setMethod(
   f = "getPairs",
   signature = "RLBigData",
   definition = function(object, max.weight = Inf, min.weight = -Inf,
-    filter.match = c("match", "unknown", "nonmatch"), single.rows = FALSE,
+    filter.match = c("match", "unknown", "nonmatch"),
+    withWeight = dbExistsTable(rpairs@con, "Wdata"), single.rows = FALSE,
     sort = TRUE)
   {
   
@@ -145,65 +162,11 @@ setMethod(
     if (any(naind <- is.na(match(filter.match, c("match", "unknown", "nonmatch")))))
       stop(paste("Illegal value in filter.match:", filter.match[naind]))
 
-    # create SQL (only from and where clause will be used)
-    stmtList <- getSQLStatement(object)
-    # get column names either from slot data or data1, depending on the class
-    # (a more robust way would be good)
-    colN <- switch(class(object), RLBigDataDedup = colnames(object@data),
-      RLBigDataLinkage = colnames(object@data1),
-      stop(paste("Unexpected class of object:", class(object))))
-    # convert to database column names and add ids
-    dbNames <- make.db.names(object@drv, colN, allow.keywords = FALSE)
-    dbNames <- c("row_names", dbNames)
-    # concatenate fields of first table, fields of second table
-    # in the format t1.field1, t1.field2, ..., t2.field1, t2.field2, ...
-    select_list <- paste(sapply(c("t1", "t2"), function(tableName)
-        sapply(dbNames, function(fieldName) sprintf("%s.%s", tableName, fieldName))
-      ), collapse=", "
-    )
-    select_list <- paste(select_list, "t1.identity=t2.identity as is_match",
-      sep =", ")
-
-    # if weights were calculated, include them in the output
-    if(dbExistsTable(rpairs@con, "Wdata"))
-    {
-      select_list <- paste(select_list, "w.W as Weight", sep=", ")
-      order_clause <- "order by Weight desc"
-    }
-    # add restrictions concerning matching status
-    filterFun <- function(filterElem)
-    {
-      switch(filterElem,
-        match = "t1.identity=t2.identity",
-        nonmatch = "t1.identity!=t2.identity",
-        unknown = "t1.identity is null or t2.identity is null"
-      )
-    }
-    # if no restriction is made (show matches, nonmatches and unknown),
-    # do not add any clause
-    if (any(is.na(match(c("match", "nonmatch", "unknown"), filter.match))))
-    {
-      filterClause <- paste(sapply(filter.match, filterFun), collapse=" or ")
-    } else
-    {
-      filterClause = "1"
-    }
-
-    if (is.finite(max.weight) || is.finite(min.weight))
-    {
-      from_clause <- paste(stmtList$from_clause,
-        "join Wdata w on t1.row_names = w.id1 and t2.row_names = w.id2", sep=" ")
-      weightClause <- "w.W between :min and :max"
-    } else
-    {
-      from_clause <- stmt$from_clause
-      weightClause <- "1"
-    }
 
 
-    stmt <- sprintf("select %s from %s where %s and (%s) and %s %s", select_list,
-      from_clause, stmtList$where_clause, filterClause, weightClause, order_clause)
-#    message(stmt)
+    stmt <- getPairsSQL(rpairs, filter.match=filter.match, max.weight = max.weight,
+      min.weight = min.weight, withWeight = withWeight, sort = withWeight)
+    
     result <- dbGetPreparedQuery(object@con, stmt, data.frame(min=min.weight, max=max.weight))
     if(nrow(result)==0)
       return (NULL)
@@ -237,7 +200,12 @@ setMethod(
       # reshape result into a table of suitable format
       m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
 
-      colnames(m)=c("id", colnames(object@data), "is_match", "Weight")
+      cnames=c("id", colnames(object@data), "is_match")
+      if (withWeight)
+        cnames <- c(cnames, "Weight")
+        
+      colnames(m) <- cnames
+
 
       return(m)
 
