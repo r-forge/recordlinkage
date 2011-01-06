@@ -14,8 +14,8 @@ epiWeights(rpairs, e = 0.01, f = getFrequencies(rpairs))
 }
 
 \arguments{
-  \item{rpairs}{\code{\link{RecLinkData}} object. Record pairs for which
-    weights are to be calculated.}
+  \item{rpairs}{\code{\link{RecLinkData}} The record pairs for which to
+    compute weights. See details.}
   \item{e}{
     Numeric vector. Estimated error rate(s).
 }
@@ -27,7 +27,12 @@ epiWeights(rpairs, e = 0.01, f = getFrequencies(rpairs))
 \details{
   This function calculates weights for record pairs based on the approach
   used by Contiero et al. in the EpiLink record linkage software (see references).
-  
+
+  Since package version 0.3, this is a generic functions with methods for
+  S3 objects of class \code{"\link[=RecLinkData.object]{RecLinkData}"}
+  as well as S4 objects of classes \code{"\linkS4class{RLBigDataDedup}"} and
+  \code{"\linkS4class{RLBigDataLinkage}"}.
+
   The weight for a record pair \eqn{(x^{1},x^{2})}{(x1,x2)} is computed by
   the formula 
   \deqn{\frac{\sum_{i}w_{i}s(x^{1}_{i},x^{2}_{i})}{\sum_{i}w_{i}}}{sum_i (w_1 * s(x1_i, x2_i)) / sum_i w_i}
@@ -55,8 +60,9 @@ epiWeights(rpairs, e = 0.01, f = getFrequencies(rpairs))
   warning is issued.  
 }
 \value{
-  A copy of \code{rpairs} with the calculated weights stored in component
-  \code{rpairs$Wdata}.
+  A copy of \code{rpairs} with the weights attached. See the class documentation
+  (\code{"\link[=RecLinkData.object]{RecLinkData}"}, \code{"\linkS4class{RLBigDataDedup}"} and
+  \code{"\linkS4class{RLBigDataLinkage}"}) on how weights are stored.
 }
 
 \references{
@@ -68,7 +74,8 @@ Andreas Borg, Murat Sariyar
 }
 
 \seealso{
-\code{\link{epiClassify}} for classification based on EpiLink weights.
+  \code{\link{epiClassify}} for classification based on EpiLink weights.
+  \code{\link{emWeights}} for a different approach for weight calculation.
 }
 \examples{
 # generate record pairs

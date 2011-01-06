@@ -1,4 +1,5 @@
 \name{RecLinkData.object}
+\alias{RecLinkData.object}
 \alias{RecLinkData}
 \title{
   Record Linkage Data Object 

@@ -6,16 +6,21 @@
   Calculates weights for Record Linkage based on an EM algorithm.
 }
 \usage{
-emWeights(rpairs, cutoff = 0.95, ...)
+  emWeights(rpairs, cutoff = 0.95, ...)
 }
 \arguments{
-  \item{rpairs}{\code{\link{RecLinkData}} object. The record pairs for which to
-    compute weights.}
+  \item{rpairs}{The record pairs for which to
+    compute weights. See details.}
   \item{cutoff}{Either a numeric value in the range [0,1] or a vector with the same 
   length as the number of attributes in the data. Cutoff value for string comparator.}
   \item{\dots}{Additional arguments for \code{\link{mygllm}}.}
 }
 \details{
+  Since package version 0.3, this is a generic functions with methods for
+  S3 objects of class \code{"\link[=RecLinkData.object]{RecLinkData}"} as well as S4 objects
+  of classes \code{"\linkS4class{RLBigDataDedup}"} and
+  \code{"\linkS4class{RLBigDataLinkage}"}.
+  
   The weight of a record pair is calculated by \eqn{\log_{2}\frac{M}{U}}{
   log(M/U,base=2)}, where \eqn{M} and \eqn{U} are estimated m- and u-probabilities
   for the present comparison pattern. If a string comparator is used, weights
@@ -41,21 +46,20 @@ emWeights(rpairs, cutoff = 0.95, ...)
 }
 
 \value{
-  A \code{\link{RecLinkData}} object containing all components of \code{rpairs}
-  plus the following:
-  \item{M}{Estimated m-probabilities}
-  \item{U}{Estimated u-probabilities}
-  \item{W,Wdata}{Calculated weights}
-  
-  \code{M}, \code{U} and \code{W} correspond to a list of all binary comparison
-  patterns, sorted ascending from all zeroes to all ones. \code{Wdata} 
-  corresponds directly to the record pairs in \code{rpairs$pairs}.  
+  A copy of \code{rpairs} with the weights attached. See the class documentation
+  (\code{"\link[=RecLinkData.object]{RecLinkData}"}, \code{"\linkS4class{RLBigDataDedup}"} and
+  \code{"\linkS4class{RLBigDataLinkage}"}) on how weights are stored.
+  \code{\link{epiWeights}} for a different approach for weight calculation.
 }
+
 \references{William E. Winkler: Using the EM Algorithm for Weight Computation 
   in the Fellegi-Sunter Model of Record Linkage, in: Proceedings of the Section 
   on Survey Research Methods, American Statistical Association 1988, 
   pp. 667--671.}
 \author{Andreas Borg, Murat Sariyar}
-\seealso{\code{\link{emClassify}} for classification of weighted pairs.}
+
+\seealso{\code{\link{emClassify}} for classification of weighted pairs.
+  \code{\link{emWeights-methods}}
+}
 
 \keyword{classif}
