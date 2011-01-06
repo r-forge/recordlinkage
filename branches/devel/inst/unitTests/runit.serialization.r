@@ -84,6 +84,8 @@ test.saveLoad.RLBigDataDedup <- function()
 {
   # save object
   file <- tempfile()
+  on.exit(unlink(file))
+
   saveRLObject(rpairsDedup, file = file)
 
   # reload into different variable
@@ -91,4 +93,27 @@ test.saveLoad.RLBigDataDedup <- function()
   
   # compare objects
   compareRLBigData(rpairsDedup, rpairsDedupReload)
+}
+
+test.saveLoad.RLBigDataLinkage <- function()
+{
+
+  # save object
+  file <- tempfile()
+  on.exit(unlink(file))
+
+  saveRLObject(rpairsLinkage, file = file)
+
+  # reload into different variable
+  rpairsLinkageReload <- loadRLObject(tempfile())
+
+  # compare objects
+  compareRLBigData(rpairsLinkage, rpairsLinkageReload)
+}
+
+test.loadRLObject.exceptions <- function()
+{
+  # check that loading from a non-existing file throws an error
+  checkException(loadRLObject(tempfile()), msg = paste(" check that loading",
+    "from a non-existing file throws an error"))
 }
