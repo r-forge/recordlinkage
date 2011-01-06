@@ -86,26 +86,35 @@ test.saveLoad.RLBigDataDedup <- function()
   file <- tempfile()
   on.exit(unlink(file))
 
+
   saveRLObject(rpairsDedup, file = file)
 
+    # check that file exists
+  checkTrue(file.exists(file), msg = " check that file was created on save")
+
   # reload into different variable
-  rpairsDedupReload <- loadRLObject(tempfile())
+  rpairsDedupReload <- loadRLObject(file)
   
   # compare objects
   compareRLBigData(rpairsDedup, rpairsDedupReload)
 }
 
+
+
 test.saveLoad.RLBigDataLinkage <- function()
 {
-
   # save object
   file <- tempfile()
   on.exit(unlink(file))
 
+
   saveRLObject(rpairsLinkage, file = file)
 
+    # check that file exists
+  checkTrue(file.exists(file), msg = " check that file was created on save")
+
   # reload into different variable
-  rpairsLinkageReload <- loadRLObject(tempfile())
+  rpairsLinkageReload <- loadRLObject(file)
 
   # compare objects
   compareRLBigData(rpairsLinkage, rpairsLinkageReload)

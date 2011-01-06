@@ -12,12 +12,12 @@
 }
 \usage{
   clone(object, ...)
-  saveRLObject(object, ...)
+  saveRLObject(object, file, ...)
   loadRLObject(file)
 }
 \arguments{
   \item{object}{The object to save.}
-  \item{file}{The name of a (writable) file to save the object into.}
+  \item{file}{The name of the file to save to or load from.}
   \item{\dots}{Optional arguments for possible additions, currently not used.}
 }
 \details{
