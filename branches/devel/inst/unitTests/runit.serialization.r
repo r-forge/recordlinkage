@@ -1,16 +1,16 @@
 .setUp <- function()
 {
   data(RLdata500)
-  assign("rpairsDedup", RLBigDataDedup(RLdata500, identity = identity.RLdata500,
-    blockfld = c(1,3)), parent.frame())
+  rpairsDedup <<- RLBigDataDedup(RLdata500, identity = identity.RLdata500,
+    blockfld = c(1,3))
   # use a subsample of RLdata500 as second data set in a linkage procedure
   s <- sample(500, 200)
-  assign("rpairsLinkage", RLBigDataLinkage(RLdata500, RLdata500[s,],
+  rpairsLinkage <<- RLBigDataLinkage(RLdata500, RLdata500[s,],
     identity1 = identity.RLdata500, identity2 = identity.RLdata500[s],
-    blockfld = 1), parent.frame())
+    blockfld = 1)
 }
 
-test.clone-RLBigDataDedup <- function()
+test.clone.RLBigDataDedup <- function()
 {
   rpairsDedupClone <- clone(rpairsDedup)
   # check if all slots of the copy have the same value except the
@@ -18,13 +18,18 @@ test.clone-RLBigDataDedup <- function()
   slotN <- slotNames("RLBigDataDedup")
   for (s in slotN)
   {
-    if (s %in% c("con", "dbFile")
+    if (s %in% c("con", "dbFile"))
     {
-      checkTrue(!identical(getSlot(rpairsDedup, s), getSlot(rpairsDedupClone, s)),
+      checkTrue(!identical(slot(rpairsDedup, s), slot(rpairsDedupClone, s)),
         msg = sprintf(" check that slot %s differs in copy", s))
+    } else if (s=="drv")
+    {
+      # no all.equal method for external pointers - use identical instead
+      checkTrue(identical(slot(rpairsDedup, s), slot(rpairsDedupClone, s)),
+        msg = sprintf(" check that slot %s is equal in copy", s))
     } else
     {
-      checkEquals(getSlot(rpairsDedup, s), getSlot(rpairsDedupClone, s),
+      checkEquals(slot(rpairsDedup, s), slot(rpairsDedupClone, s),
         msg = sprintf(" check that slot %s is equal in copy", s))
 
     }
@@ -43,6 +48,6 @@ test.clone-RLBigDataDedup <- function()
   tabBefore <- dbReadTable(rpairsDedup@con, "data")
   dbGetQuery(rpairsDedupClone@con, "update data set 'bm'='bm' + 1")
   tabAfter <- dbReadTable(rpairsDedup@con, "data")
-  checkEquals(tabBefor, tabAfter, msg = paste(" check that original database",
+  checkEquals(tabBefore, tabAfter, msg = paste(" check that original database",
     "is not affected by change in copy"))
 }

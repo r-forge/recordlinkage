@@ -12,6 +12,11 @@ setMethod(
   signature = "RLBigData",
   definition = function(object, ...)
   {
+    result <- object
+    result@dbFile <- tempfile()
+    sqliteCopyDatabase(from = object@con, to = result@dbFile)
+    result@con <- dbConnect(result@drv, dbname = result@dbFile)
+    result
   }
 )
 
