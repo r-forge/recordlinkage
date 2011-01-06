@@ -10,7 +10,7 @@ A concise (1-5 lines) description of what the function does. ~~
 \usage{
   \S4method{getPairs}{RLBigData}(object, max.weight = Inf, min.weight = -Inf,
     filter.match = c("match", "unknown", "nonmatch"),
-    withWeight = dbExistsTable(rpairs@con, "Wdata"), single.rows = FALSE,
+    withWeight = dbExistsTable(object@con, "Wdata"), single.rows = FALSE,
     sort = TRUE)
 }
 
