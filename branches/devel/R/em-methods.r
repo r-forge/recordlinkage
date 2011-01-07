@@ -70,11 +70,6 @@ setMethod(
   
     n_patterns=length(res)/2
   
-    # Anteil Matche/Non_Matche in einem Pattern
-    matchrate=res[(n_patterns+1):(2*n_patterns)]/res[1:n_patterns]
-    #matchrate=round(res[(n_patterns+1):(2*n_patterns)])/round(res[1:n_patterns])
-  #    o=order(matchrate,res[(n_patterns+1):(2*n_patterns)],decreasing=T)
-  
     n_matches=sum(res[(n_patterns+1):(2*n_patterns)])
     n_nonmatches=sum(res[1:n_patterns])
     U=res[1:n_patterns]/n_nonmatches
@@ -127,11 +122,7 @@ setMethod(
     res=mygllm(observed_count,s,X,E=expected_count,...)
 
 
-    # Anteil Matche/Non_Matche in einem Pattern
-    matchrate=res[(n_patterns+1):(2*n_patterns)]/res[1:n_patterns]
-    #matchrate=round(res[(n_patterns+1):(2*n_patterns)])/round(res[1:n_patterns])
-  #    o=order(matchrate,res[(n_patterns+1):(2*n_patterns)],decreasing=T)
-  
+
     n_matches=sum(res[(n_patterns+1):(2*n_patterns)])
     n_nonmatches=sum(res[1:n_patterns])
     U=res[1:n_patterns]/n_nonmatches
@@ -142,12 +133,15 @@ setMethod(
     dbWriteTable(rpairs@con, "U", data.frame(id = 1:n_patterns, U=U), row.names = FALSE, overwrite = TRUE)
     dbWriteTable(rpairs@con, "W", data.frame(id = 1:n_patterns, W=W), row.names = FALSE, overwrite = TRUE)
 
-    # get weights for individual records and store in database
+    # Create table for individual weights
     dbGetQuery(rpairs@con, "drop table if exists Wdata")
     dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W double)")
-    # create index, this speeds up the join operation of getPairs
+
+    # Create index, this speeds up the join operation of getPairs
     # significantly
-    dbGetQuery(rpairs@con, "create index index_Wdata on Wdata (id1, id2)")
+    # The index for W helps when only a small range of weights is selected
+    dbGetQuery(rpairs@con, "create index index_Wdata_id on Wdata (id1, id2)")
+    dbGetQuery(rpairs@con, "create index index_Wdata_W on Wdata (W)")
 
 #    clear(rpairs)
     rpairs <- begin(rpairs)
@@ -162,8 +156,6 @@ setMethod(
     {
       # auch hier vorläufiger Code! es muss noch ein tragfähiges Konzept her,
       # auf welche Weise Links und Possible Links ausgegeben werden!
-      message(i)
-      flush.console()
       slice[is.na(slice)] <- 0
       slice[slice < cutoff] <- 0
       slice[slice >= cutoff & slice < 1] <- 1

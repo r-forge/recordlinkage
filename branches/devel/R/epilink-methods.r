@@ -68,7 +68,6 @@ setMethod(
     possibleLinks <- matrix(nrow=0, ncol=2)
     while(nrow(slice <- nextPairs(rpairs, n)) > 0)
     {
-#      message(i)
       flush.console()
       slice[is.na(slice)] <- 0
       e=e+rep(0,ncol(slice)-3)
@@ -76,8 +75,7 @@ setMethod(
       # adjust error rate 
       # error rate
       w=log((1-e)/f, base=2)
-      # 
-      
+
       
       # weight computation
       row_sum <- function(r,w)
@@ -88,9 +86,6 @@ setMethod(
       S=apply(slice[,-c(1,2,ncol(slice))],1,row_sum,w)/sum(w)
       if (any(is.na(S) | S < 0 | S > 1))
         warning("Some weights have illegal values. Check error rate and frequencies!")
-#      message(range(slice[,1]))
-#      message(range(slice[,2]))
-#      message("----------------------")      
       links <- rbind(links, as.matrix(slice[S >= threshold.upper,1:2]))
       possibleLinks <- rbind(possibleLinks,
         as.matrix(slice[S >= threshold.lower & S < threshold.upper, 1:2]))
@@ -124,10 +119,12 @@ setMethod(
     # create table where weights are stored
     dbGetQuery(rpairs@con, "drop table if exists Wdata")
     dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W real)")
+
     # create index, this speeds up the join operation of getPairs
     # significantly
-    dbGetQuery(rpairs@con, "create index index_Wdata on Wdata (id1, id2)")
-#    dbGetQuery(rpairs@con, "begin transaction")
+    # The index for W helps when only a small range of weights is selected
+    dbGetQuery(rpairs@con, "create index index_Wdata_id on Wdata (id1, id2)")
+    dbGetQuery(rpairs@con, "create index index_Wdata_W on Wdata (W)")
     rpairs <- begin(rpairs)
     nPairs <- 0
     n <- 10000
@@ -137,12 +134,8 @@ setMethod(
     con2 <- dbConnect(rpairs@drv, rpairs@dbFile)
     dbGetQuery(con2, "pragma journal_mode=wal")
 
-#    dbGetQuery(con2, "pragma synchronous=off")
-#    weightTable <- matrix(numeric(), ncol=3)
     while(nrow(slice <- nextPairs(rpairs, n)) > 0)
     {
-#      message(i)
-      flush.console()
       slice[is.na(slice)] <- 0
       e=e+rep(0,ncol(slice)-3)
       f=f+rep(0,ncol(slice)-3)
@@ -162,16 +155,11 @@ setMethod(
       if (any(is.na(S) | S < 0 | S > 1))
         warning("Some weights have illegal values. Check error rate and frequencies!")
 
-#      weightTable <- rbind(weightTable, cbind(slice[,1:2], S))
       dbWriteTable(con2, "Wdata",
         cbind(slice[,1:2], S), row.names=FALSE, append=TRUE)
-#      message(range(slice[,1]))
-#      message(range(slice[,2]))
-#      message("----------------------")
 
       nPairs <- nPairs + nrow(slice)
     }
-#    browser()
     rpairs
   }
 ) # end of setMethod
