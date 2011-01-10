@@ -59,41 +59,48 @@ setMethod(
       stop(sprintf("Upper threshold %g lower than lower threshold %g",
       threshold.upper, threshold.lower))
 
-    on.exit(clear(rpairs))
-    rpairs <- begin(rpairs)
-    nPairs <- 0
-    n <- 10000
-    i = n
-    links <- matrix(nrow=0, ncol=2)
-    possibleLinks <- matrix(nrow=0, ncol=2)
-    while(nrow(slice <- nextPairs(rpairs, n)) > 0)
-    {
-      flush.console()
-      slice[is.na(slice)] <- 0
-      e=e+rep(0,ncol(slice)-3)
-      f=f+rep(0,ncol(slice)-3)
-      # adjust error rate 
-      # error rate
-      w=log((1-e)/f, base=2)
+#    on.exit(clear(rpairs))
+#    rpairs <- begin(rpairs)
+#    nPairs <- 0
+#    n <- 10000
+#    i = n
+#    links <- matrix(nrow=0, ncol=2)
+#    possibleLinks <- matrix(nrow=0, ncol=2)
+#    while(nrow(slice <- nextPairs(rpairs, n)) > 0)
+#    {
+#      flush.console()
+#      slice[is.na(slice)] <- 0
+#      e=e+rep(0,ncol(slice)-3)
+#      f=f+rep(0,ncol(slice)-3)
+#      # adjust error rate
+#      # error rate
+#      w=log((1-e)/f, base=2)
+#
+#
+#      # weight computation
+#      row_sum <- function(r,w)
+#      {
+#        return(sum(r*w,na.rm=TRUE))
+#      }
+#
+#      S=apply(slice[,-c(1,2,ncol(slice))],1,row_sum,w)/sum(w)
+#      if (any(is.na(S) | S < 0 | S > 1))
+#        warning("Some weights have illegal values. Check error rate and frequencies!")
+#      links <- rbind(links, as.matrix(slice[S >= threshold.upper,1:2]))
+#      possibleLinks <- rbind(possibleLinks,
+#        as.matrix(slice[S >= threshold.lower & S < threshold.upper, 1:2]))
+#      i <- i + n
+#      nPairs <- nPairs + nrow(slice)
+#    }
 
-      
-      # weight computation
-      row_sum <- function(r,w)
-      {
-        return(sum(r*w,na.rm=TRUE))
-      }
-    
-      S=apply(slice[,-c(1,2,ncol(slice))],1,row_sum,w)/sum(w)
-      if (any(is.na(S) | S < 0 | S > 1))
-        warning("Some weights have illegal values. Check error rate and frequencies!")
-      links <- rbind(links, as.matrix(slice[S >= threshold.upper,1:2]))
-      possibleLinks <- rbind(possibleLinks,
-        as.matrix(slice[S >= threshold.lower & S < threshold.upper, 1:2]))
-      i <- i + n
-      nPairs <- nPairs + nrow(slice)
-    }
-    new("RLResult", data = rpairs, links = links, possibleLinks = possibleLinks,
-      nPairs = nPairs)
+    query <- "select id1, id2 from Wdata where W >= :upper"
+    links <- dbGetPreparedQuery(rpairs@con, query, data.frame(upper = threshold.upper))
+    query <- "select id1, id2 from Wdata where W < :upper and W >= :lower"
+    possibleLinks <- dbGetPreparedQuery(rpairs@con, query,
+      data.frame(upper = threshold.upper, lower = threshold.lower))
+    nPairs <- dbGetQuery(rpairs@con, "select count(*) from Wdata")[1,1]
+    new("RLResult", data = rpairs, links = as.matrix(links),
+      possibleLinks = as.matrix(possibleLinks), nPairs = nPairs)
   }
 ) # end of setMethod
 
