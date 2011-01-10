@@ -12,12 +12,13 @@
 }
 \usage{
   clone(object, ...)
-  saveRLObject(object, file, ...)
-  loadRLObject(file)
+  saveRLObject(object, file = "", inPlace = FALSE, ...)
+  loadRLObject(file, inPlave = FALSE)
 }
 \arguments{
   \item{object}{The object to save.}
   \item{file}{The name of the file to save to or load from.}
+  \item{inPlace}{Logical. Wether to store in exisiting file. See details.}
   \item{\dots}{Optional arguments for possible additions, currently not used.}
 }
 \details{
@@ -40,6 +41,14 @@
   \code{clone} and \code{saveRLObject} are generic functions with methods for
   \code{"\linkS4class{RLBigData}"} and \code{"\linkS4class{RLResult}"}.
 
+  If \code{loadRLObject} is called with \code{inPlace = FALSE} (the default),
+  a working copy of the database is made in a temporary file and the original
+  file left untouched. To avoid copying (to reduce overhead in the case of
+  large files), calling with \code{inPlace = TRUE} sets the provided file as
+  working copy and changes made to the database are persistent. Even in this
+  case, \code{saveRLObject} should be used to save changes of the R object.
+  
+  
 }
 \value{
   \code{clone} returns a deep copy of \code{object}.
@@ -56,6 +65,11 @@
   \code{saveRLObject} Writes to the specified file.
 }
 
+\note{
+  Some methods write to the database and may even create temporary files
+  in the same directory (e.g. \code{\link{epiWeights}}), so the file and its
+  directory should be writeable.
+}
 \seealso{\link{clone-methods}, \link{saveRLObject-methods}}
 
 
