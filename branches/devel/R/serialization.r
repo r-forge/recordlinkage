@@ -131,6 +131,6 @@ setMethod(
 
 setMethod(
   f = "getDbFile",
-  signature = "RLBigData",
+  signature = "RLResult",
   definition = function(object) object@data@dbFile
 )

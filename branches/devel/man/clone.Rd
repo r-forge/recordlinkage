@@ -12,13 +12,14 @@
 }
 \usage{
   clone(object, ...)
-  saveRLObject(object, file = "", inPlace = FALSE, ...)
-  loadRLObject(file, inPlave = FALSE)
+  saveRLObject(object, file = getDbFile(object), ...)
+  loadRLObject(file, inPlace = FALSE)
 }
 \arguments{
   \item{object}{The object to save.}
   \item{file}{The name of the file to save to or load from.}
-  \item{inPlace}{Logical. Wether to store in exisiting file. See details.}
+  \item{inPlace}{Logical. Wether to use the exisiting file as working copy.
+    See details.}
   \item{\dots}{Optional arguments for possible additions, currently not used.}
 }
 \details{
@@ -34,7 +35,7 @@
   
   \code{saveRLObject} saves an object to a SQLite database file containing
     a representation of the R object as well as the associated database
-    tables.
+    tables. By default the current working copy is used.
 
   \code{loadRLObject} loads an object from a file saved by \code{saveRLObject}.
   
@@ -43,10 +44,13 @@
 
   If \code{loadRLObject} is called with \code{inPlace = FALSE} (the default),
   a working copy of the database is made in a temporary file and the original
-  file left untouched. To avoid copying (to reduce overhead in the case of
-  large files), calling with \code{inPlace = TRUE} sets the provided file as
-  working copy and changes made to the database are persistent. Even in this
-  case, \code{saveRLObject} should be used to save changes of the R object.
+  file left untouched. Calling with \code{inPlace = TRUE} sets the provided file as
+  working copy and changes made to the database are persistent. This option is
+  useful when working with large files which would cause a lot of disk usage
+  overhead.
+
+  Objects loaded with \code{inPlace = TRUE} should still be saved with
+  \code{saveRLObject}, as the R object might be altered.
   
   
 }
@@ -66,10 +70,11 @@
 }
 
 \note{
-  Some methods write to the database and may even create temporary files
-  in the same directory (e.g. \code{\link{epiWeights}}), so the file and its
-  directory should be writeable.
+  The constructors \code{\link[=RLBigDataDedup]{RLBigData*}} create database
+  files in a temporary directory by default. Be careful to save to a persistent
+  directory when objects should be loaded in a different R session.
 }
+
 \seealso{\link{clone-methods}, \link{saveRLObject-methods}}
 
 
@@ -77,7 +82,6 @@
   Andreas Borg, Murat Sariyar
 }
 
-\examples{
-  % TODO
 }
 \keyword{classif}
+\keyword{file}
