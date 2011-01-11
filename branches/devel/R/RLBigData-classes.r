@@ -254,8 +254,9 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   names(dataset2) <- names(dataset1)
 
   # set up database
+  tmpfile <- tempfile()
   drv <- dbDriver("SQLite")
-  con <- dbConnect(drv, dbname="")
+  con <- dbConnect(drv, dbname=tmpfile)
   coln <- make.db.names(con,colnames(dataset1))
 
   # convert identity to factors (so that only level indices are used in the
@@ -275,7 +276,7 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
     identity2 = identity2, blockFld = blockfld, 
     excludeFld = exclude, strcmpFld = strcmp, strcmpFun = strcmpfun, 
     phoneticFld = phonetic, phoneticFun = phonfun, drv = drv, con = con, 
-    frequencies = frequencies
+    frequencies = frequencies, dbFile = tmpfile
   ) 
 
   # write records to database
