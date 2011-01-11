@@ -161,7 +161,6 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
     query <- sprintf("create index 'index_%s' on data (%s)",
      paste(coln[blockelem], collapse="_"),
      paste("'", coln[blockelem], "'", sep="", collapse=", "))
-message(query)
     dbGetQuery(con, query)
   }
   # create index on identity vector to speed up identifying true matches
