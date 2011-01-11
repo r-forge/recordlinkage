@@ -50,10 +50,14 @@ compareRLBigData <- function(org, copy, samefile=FALSE)
   # check that databases have the same content after copying
   for (tab in dbListTables(org@con))
   {
-    tabOrg <- dbReadTable(org@con, tab)
-    tabClone <- dbReadTable(copy@con, tab)
-    checkEquals(tabOrg, tabClone,
-      msg = sprintf(" check that table %s has same content in copy", tab))
+    # "serialization" may not exist in a copy
+    if (tab!="serialization")
+    {
+      tabOrg <- dbReadTable(org@con, tab)
+      tabClone <- dbReadTable(copy@con, tab)
+      checkEquals(tabOrg, tabClone,
+        msg = sprintf(" check that table %s has same content in copy", tab))
+    }
   }
 
   # check that extension functions have been copied and return the same value
