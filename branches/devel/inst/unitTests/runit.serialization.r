@@ -11,7 +11,9 @@
 }
 
 # utility function to compare an object with its clone
-compareRLBigData <- function(org, copy)
+# if samefile=TRUE, check for a copy with the same database file
+# (which is created by calling saveRLObject() with argument file missing)
+compareRLBigData <- function(org, copy, samefile=FALSE)
 {
   # check if all slots of the copy have the same value except the
   # database connection and file
@@ -19,11 +21,20 @@ compareRLBigData <- function(org, copy)
   slotN <- slotNames(class(org))
   for (s in slotN)
   {
-    if (s %in% c("con", "dbFile"))
+    # the connection should be different in every case
+    if (s == "con")
     {
       checkTrue(!identical(slot(org, s), slot(copy, s)),
         msg = sprintf(" check that slot %s differs in copy", s))
-    } else if (s=="drv")
+    } else if(s == "dbFile" && !samefile)
+    {
+      checkTrue(!identical(slot(org, s), slot(copy, s)),
+        msg = sprintf(" check that slot %s differs in copy", s))
+    } else if(s == "dbFile" && samefile)
+    {
+      checkEquals(slot(org, s), slot(copy, s),
+        msg = sprintf(" check that slot %s is equal in copy", s))
+    }else if (s=="drv")
     {
       # no all.equal method for external pointers - use identical instead
       checkTrue(identical(slot(org, s), slot(copy, s)),
@@ -45,6 +56,13 @@ compareRLBigData <- function(org, copy)
       msg = sprintf(" check that table %s has same content in copy", tab))
   }
 
+  # check that extension functions have been copied and return the same value
+  query <- paste("select jarowinkler('string', 'sting'),",
+                 "       levenshtein('string', 'sting'),",
+                 "       pho_h('zeichenkette')")
+
+  checkEquals(dbGetQuery(org@con, query), dbGetQuery(copy@con, query),
+    msg = " check extension functions in copy")
 }
 
 test.clone.RLBigDataDedup <- function()
@@ -97,6 +115,20 @@ test.saveLoad.RLBigDataDedup <- function()
   
   # compare objects
   compareRLBigData(rpairsDedup, rpairsDedupReload)
+
+  # save file without filename specified and reload
+  saveRLObject(rpairsDedup)
+
+  # reload into different variable
+  rpairsDedupReload <- loadRLObject(rpairsDedup@dbFile)
+
+  # compare objects
+  compareRLBigData(rpairsDedup, rpairsDedupReload)
+
+  # reload "in place" -> files should be equal
+  rpairsDedupReload <- loadRLObject(rpairsDedup@dbFile, inPlace=TRUE)
+  compareRLBigData(rpairsDedup, rpairsDedupReload, samefile=TRUE)
+
 }
 
 
@@ -110,7 +142,7 @@ test.saveLoad.RLBigDataLinkage <- function()
 
   saveRLObject(rpairsLinkage, file = file)
 
-    # check that file exists
+  # check that file exists
   checkTrue(file.exists(file), msg = " check that file was created on save")
 
   # reload into different variable
@@ -118,6 +150,19 @@ test.saveLoad.RLBigDataLinkage <- function()
 
   # compare objects
   compareRLBigData(rpairsLinkage, rpairsLinkageReload)
+
+  # save file without filename specified and reload
+  saveRLObject(rpairsLinkage)
+
+  # reload into different variable
+  rpairsLinkageReload <- loadRLObject(rpairsLinkage@dbFile)
+
+  # compare objects
+  compareRLBigData(rpairsLinkage, rpairsLinkageReload)
+  
+  # reload "in place" -> files should be equal
+  rpairsLinkageReload <- loadRLObject(rpairsLinkage@dbFile, inPlace=TRUE)
+  compareRLBigData(rpairsLinkage, rpairsLinkageReload, samefile=TRUE)
 }
 
 test.loadRLObject.exceptions <- function()
