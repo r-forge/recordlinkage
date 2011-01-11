@@ -16,9 +16,13 @@ getPairsBackend <- function(object, filter.match,
   min.weight=-Inf, withMatch = TRUE, withClass = FALSE, withWeight = FALSE,
   sort=FALSE, single.rows=FALSE)
 {
+    if (is(object, "RLResult"))
+      object <- object@data
+      
     stmtList <- getSQLStatement(object)
     select_list <- stmtList$select_list
     from_clause <- stmtList$from_clause
+#    from_clause <- gsub("join", "cross join", stmtList$from_clause)
     where_clause <- stmtList$where_clause
 
     # get column names either from slot data or data1, depending on the class
@@ -74,9 +78,12 @@ getPairsBackend <- function(object, filter.match,
     # or weights are to be included in the output
     if (withWeight || is.finite(max.weight) || is.finite(min.weight))
     {
-      from_clause <- paste(from_clause,
-        "join Wdata weights on (t1.row_names=weights.id1 and t2.row_names=weights.id2)",
-        sep = " ")
+      from_clause <- paste(
+        from_clause, "Wdata weights",
+        sep = ", ")
+      where_clause <- paste( "t1.row_names=weights.id1",
+        "and t2.row_names=weights.id2 and",
+        where_clause)
     }
 
     if (withWeight)
@@ -145,6 +152,9 @@ getPairsBackend <- function(object, filter.match,
     # construct statement
     stmt <- sprintf("select %s from %s where %s and (%s) and (%s) and %s %s", select_list,
       from_clause, where_clause, filterMatch, filterLink, weight_clause, order_clause)
+    print(dbGetPreparedQuery(object@con, paste("explain query plan", stmt),
+      data.frame(min=min.weight, max=max.weight)))
+
     result <- dbGetPreparedQuery(object@con, stmt, data.frame(min=min.weight, max=max.weight))
 
     if(nrow(result)==0)
@@ -159,6 +169,7 @@ getPairsBackend <- function(object, filter.match,
       cnames <- c(cnames, "Weight")
 
     colnames(result) <- cnames
+
     # converion of SQLite coding to more apropriate types
     result$is_match <- as.logical(result$is_match)
     if (withClass)
@@ -239,6 +250,7 @@ setMethod(
     getPairsBackend(object, filter.match=filter.match, max.weight = max.weight,
       min.weight = min.weight, withWeight = withWeight, sort = withWeight,
       single.rows = single.rows)
+
   }
 )
 
@@ -276,10 +288,16 @@ setMethod(
     dbGetQuery(object@data@con, "create index index_possible on possible_links(id1, id2)")
 
     # call backend function
-    getPairsBackend(object, filter.match=filter.match, filter.link = filter.link,
+    res <- getPairsBackend(object, filter.match=filter.match, filter.link = filter.link,
       max.weight = max.weight, min.weight = min.weight, withMatch = withMatch,
       withClass = withClass, withWeight = withWeight,
       sort = withWeight, single.rows = single.rows)
+
+    # clean up temporary tables
+    dbGetQuery(object@data@con, "drop table links")
+    dbGetQuery(object@data@con, "drop table possible_links")
+    
+    res
   }
 )
 
