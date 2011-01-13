@@ -162,12 +162,6 @@ setMethod(
   definition = function (rpairs, e=0.01, f=getFrequencies(rpairs))
   {
 
-  # besser mit try / catch o.ä. ?
-    on.exit({
-        if(length(dbListResults(rpairs_copy@con)) > 0)
-          clear(rpairs_copy)
-      }
-    )
 
     # Delete old weights if they exist
     # vacuum to keep file compact
@@ -247,23 +241,11 @@ setMethod(
     close(pgb)
     dbCommit(rpairs@con)
 
-##    dbGetQuery(rpairs@con, "pragma journal_mode=delete")
-#    # Copy other tables to database with weights
-#    dbGetQuery(con2, sprintf("attach '%s' as sourceDb", rpairs@dbFile))
-#    # copy tables
-#    for (tab in dbListTables(rpairs@con))
-#    {
-#      dbGetQuery(con2, sprintf("create table %s as select * from sourceDb.%s",
-#        tab, tab))
-#    }
-#
-#    dbDis1connect(rpairs@con)
-#    dbDisconnect(con2)
-#    unlink(rpairs@dbFile)
-#    file.rename(from = dbFile2, to = rpairs@dbFile)
-#    rpairs@con <- dbConnect(rpairs@drv, dbname = rpairs@dbFile)
-#    rpairs@con <- con2
-    # restore extension functions
+    # remove copied database
+    clear(rpairs_copy)
+    dbDisconnect(rpairs_copy@con)
+    unlink(rpairs_copy@dbFile)
+
     rpairs
   }
 ) # end of setMethod
