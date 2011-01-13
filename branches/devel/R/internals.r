@@ -305,3 +305,82 @@ delete.NULLs  <-  function(x)
 resample <- function(x, size, ...)
      if(length(x) <= 1) { if(!missing(size) && size == 0) x[FALSE] else x
      } else sample(x, size, ...)
+
+# estimate the number of record pairs
+setGeneric(
+  name = "getExpectedSize",
+  def = function(object, ...) standardGeneric("getExpectedSize")
+)
+
+setMethod(
+  f = "getExpectedSize",
+  signature = "data.frame",
+  definition = function(object, blockfld=list())
+  {
+    if(!is.list(blockfld)) blockfld = list(blockfld)
+    rpairs <- RLBigDataDedup(object)
+    nData <- nrow(object)
+    nAll <- nData * (nData - 1) / 2
+    if (length(blockfld)==0) return(nAll)
+    coln <- make.db.names(rpairs@con, colnames(object))
+
+    # ergibt Wahrscheinlichkeit, dass mit gegebenen Blockingfeldern
+    # ein Paar nicht gezogen wird
+    blockelemFun <- function(blockelem)
+    {
+      if(is.character(blockelem)) blockelem <- match(blockelem, colnames(object))
+      freq <- dbGetQuery(rpairs@con,
+        sprintf("select count(*) as c from data group by %s having c > 1 and %s",
+          paste("\"", coln[blockelem], "\"", sep="", collapse=", "),
+          paste(
+            sapply(coln[blockelem], sprintf, fmt = "\"%s\" is not null"),
+            collapse = " and "
+          )
+        )
+      )
+      1 - (sum(sapply(freq,  function(x) x * (x-1) /2)) / nAll)
+    }
+    res <- nAll * (1-prod(sapply(blockfld, blockelemFun)))
+
+    # avoid clutter from temporary files
+    dbDisconnect(rpairs@con)
+    unlink(rpairs@dbFile)
+
+    res
+  }
+)
+
+setMethod(
+  f = "getExpectedSize",
+  signature = "RLBigDataDedup",
+  definition = function(object)
+  {
+    if(!is.list(blockfld)) blockfld = list(blockfld)
+    nData <- nrow(object@data)
+    nAll <- nData * (nData - 1) / 2
+    if (length(blockfld)==0) return(nAll)
+    coln <- make.db.names(object@con, colnames(object@data))
+
+    # ergibt Wahrscheinlichkeit, dass mit gegebenen Blockingfeldern
+    # ein Paar nicht gezogen wird
+    blockelemFun <- function(blockelem)
+    {
+      if(is.character(blockelem)) blockelem <- match(blockelem, colnames(object@data))
+      freq <- dbGetQuery(object@con,
+        sprintf("select count(*) as c from data group by %s having c > 1 and %s",
+          paste("\"", coln[blockelem], "\"", sep="", collapse=", "),
+          paste(
+            sapply(coln[blockelem], sprintf, fmt = "\"%s\" is not null"),
+            collapse = " and "
+          )
+        )
+      )
+      1 - (sum(sapply(freq,  function(x) x * (x-1) /2)) / nAll)
+    }
+    res <- nAll * (1-prod(sapply(blockfld, blockelemFun)))
+
+
+    res
+  }
+)
+

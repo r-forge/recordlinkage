@@ -1,36 +1,3 @@
-getExpectedSize <- function(dataset, blockfld=list())
-{
-  if(!is.list(blockfld)) blockfld = list(blockfld)
-  rpairs <- RLBigDataDedup(dataset)
-  nData <- nrow(dataset)
-  nAll <- nData * (nData - 1) / 2
-  if (length(blockfld)==0) return(nAll)
-  coln <- make.db.names(rpairs@con, colnames(dataset))
-
-  # ergibt Wahrscheinlichkeit, dass mit gegebenen Blockingfeldern
-  # ein Paar nicht gezogen wird
-  blockelemFun <- function(blockelem)
-  {
-    if(is.character(blockelem)) blockelem <- match(blockelem, colnames(dataset))
-    freq <- dbGetQuery(rpairs@con,
-      sprintf("select count(*) as c from data group by %s having c > 1 and %s",
-        paste("\"", coln[blockelem], "\"", sep="", collapse=", "),
-        paste(
-          sapply(coln[blockelem], sprintf, fmt = "\"%s\" is not null"),
-          collapse = " and "
-        )
-      )
-    )
-    1 - (sum(sapply(freq,  function(x) x * (x-1) /2)) / nAll)
-  }
-  res <- nAll * (1-prod(sapply(blockfld, blockelemFun)))
-
-  # avoid clutter from temporary files
-  dbDisconnect(rpairs@con)
-  unlink(rpairs@dbFile)
-
-  res
-}
 
 setGeneric(
   name = "epiClassify",

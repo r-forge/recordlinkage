@@ -96,7 +96,7 @@ setMethod(
 setMethod(  
   f = "emWeights",
   signature = "RLBigData",
-  definition = function (rpairs, cutoff=0.95, ...)
+  definition = function (rpairs, cutoff=0.95, store.weights = TRUE, ...)
   {
     u=getFrequencies(rpairs)
     # get number of attributes from frequency vector: this way excluded
@@ -128,43 +128,60 @@ setMethod(
     U=res[1:n_patterns]/n_nonmatches
     M=res[(n_patterns+1):(2*n_patterns)]/n_matches
     W=log(M/U, base=2)
-    
+
+    # Delete old weights if they exist
+    # vacuum to keep file compact
+    dbGetQuery(rpairs@con, "drop table if exists Wdata")
+    dbGetQuery(rpairs@con, "vacuum")
+
+    # store probabilities and weights per comparison patterns
     dbWriteTable(rpairs@con, "M", data.frame(id = 1:n_patterns, M = M), row.names = FALSE, overwrite = TRUE)
     dbWriteTable(rpairs@con, "U", data.frame(id = 1:n_patterns, U=U), row.names = FALSE, overwrite = TRUE)
     dbWriteTable(rpairs@con, "W", data.frame(id = 1:n_patterns, W=W), row.names = FALSE, overwrite = TRUE)
 
-    # Create table for individual weights
-    dbGetQuery(rpairs@con, "drop table if exists Wdata")
-    dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W double)")
-
-    # Create index, this speeds up the join operation of getPairs
-    # significantly
-    # The index for W helps when only a small range of weights is selected
-    dbGetQuery(rpairs@con, "create index index_Wdata_id on Wdata (id1, id2)")
-    dbGetQuery(rpairs@con, "create index index_Wdata_W on Wdata (W)")
-
-#    clear(rpairs)
-    rpairs <- begin(rpairs)
-
-    # open a second connection to the database file
-    con2 <- dbConnect(rpairs@drv, rpairs@dbFile)
-    dbGetQuery(con2, "pragma journal_mode=wal")
-
-    n <- 10000
-    i = n
-    while(nrow(slice <- nextPairs(rpairs, n)) > 0)
+    if (store.weights) # by default, a table of individual weights is stored in the database
     {
-      # auch hier vorläufiger Code! es muss noch ein tragfähiges Konzept her,
-      # auf welche Weise Links und Possible Links ausgegeben werden!
-      slice[is.na(slice)] <- 0
-      slice[slice < cutoff] <- 0
-      slice[slice >= cutoff & slice < 1] <- 1
-      indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
-      dbWriteTable(con2, "Wdata", data.frame(slice[,1:2], W[indices]),
-        row.names = FALSE, append = TRUE)
-      i <- i + n
-    }
-    dbDisconnect(con2)
+      # Create a copy of the record pairs from which comparison patterns will
+      # be generated. This allows concurrent writing of calculated weights.
+      rpairs_copy <- clone(rpairs)
+
+
+
+      dbBeginTransaction(rpairs@con)
+
+      # Create table for individual weights
+      dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W double)")
+
+      # Create index, this speeds up the join operation of getPairs
+      # significantly
+      # The index for W helps when only a small range of weights is selected
+      dbGetQuery(rpairs@con, "create index index_Wdata_id on Wdata (id1, id2)")
+      dbGetQuery(rpairs@con, "create index index_Wdata_W on Wdata (W)")
+
+      rpairs_copy <- begin(rpairs_copy)
+
+
+      n <- 10000
+      i = n
+      while(nrow(slice <- nextPairs(rpairs_copy, n)) > 0)
+      {
+        # auch hier vorläufiger Code! es muss noch ein tragfähiges Konzept her,
+        # auf welche Weise Links und Possible Links ausgegeben werden!
+        slice[is.na(slice)] <- 0
+        slice[slice < cutoff] <- 0
+        slice[slice >= cutoff & slice < 1] <- 1
+        indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
+        dbGetPreparedQuery(rpairs@con, "insert into Wdata values (?, ?, ?)",
+          data.frame(slice[,1:2], W[indices]))
+        i <- i + n
+      }
+      dbCommit(rpairs@con)
+
+      # remove copied database
+      clear(rpairs_copy)
+      dbDisconnect(rpairs_copy@con)
+      unlink(rpairs_copy@dbFile)
+    } # end if (store.weights)
     return(rpairs)
   }
 ) # end of setMethod
@@ -356,53 +373,45 @@ setMethod(
       threshold.lower <- rpairs@W[o][cutoff_lower]
     } # end if
 
-#    on.exit(clear(rpairs))
-#    rpairs <- begin(rpairs)
-#    n <- 10000
-#    i = n
-#    links <- matrix(nrow=0, ncol=2)
-#    possibleLinks <- matrix(nrow=0, ncol=2)
-#    n_attr <- length(getFrequencies(rpairs))
-#    nPairs <- 0
-#    while(nrow(slice <- nextPairs(rpairs, n)) > 0)
-#    {
-#      # auch hier vorläufiger Code! es muss noch ein tragfähiges Konzept her,
-#      # auf welche Weise Links und Possible Links ausgegeben werden!
-#      message(i)
-#      flush.console()
-#      slice[is.na(slice)] <- 0
-#      indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
-#      links <- rbind(links, as.matrix(slice[W[indices] >= threshold.upper,1:2]))
-#      possibleLinks <- rbind(possibleLinks,
-#        as.matrix(slice[W[indices] < threshold.upper &
-#        W[indices] >= threshold.lower ,1:2]))
-#      i <- i + n
-#      nPairs <- nPairs + nrow(slice)
-#    }
 
-    query <- "select id1, id2 from Wdata where W >= :upper"
-    links <- dbGetPreparedQuery(rpairs@con, query, data.frame(upper = threshold.upper))
-    query <- "select id1, id2 from Wdata where W < :upper and W >= :lower"
-    possibleLinks <- dbGetPreparedQuery(rpairs@con, query,
-      data.frame(upper = threshold.upper, lower = threshold.lower))
-    nPairs <- dbGetQuery(rpairs@con, "select count(*) from Wdata")[1,1]
+    # check if weights are stored in database
+    if (dbExistsTable(rpairs@con, "Wdata"))
+    { # if true, a simple query is sufficent
+      query <- "select id1, id2 from Wdata where W >= :upper"
+      links <- dbGetPreparedQuery(rpairs@con, query, data.frame(upper = threshold.upper))
+      query <- "select id1, id2 from Wdata where W < :upper and W >= :lower"
+      possibleLinks <- dbGetPreparedQuery(rpairs@con, query,
+        data.frame(upper = threshold.upper, lower = threshold.lower))
+      nPairs <- dbGetQuery(rpairs@con, "select count(*) from Wdata")[1,1]
+    }
+    else
+    { # otherwise iterate through pairs and calculate on the fly
+      on.exit(clear(rpairs))
+      rpairs <- begin(rpairs)
+      n <- 10000
+      i = n
+      links <- matrix(nrow=0, ncol=2)
+      possibleLinks <- matrix(nrow=0, ncol=2)
+      n_attr <- length(getFrequencies(rpairs))
+      nPairs <- 0
+      while(nrow(slice <- nextPairs(rpairs, n)) > 0)
+      {
+#        message(i)
+#        flush.console()
+        slice[is.na(slice)] <- 0
+        indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
+        links <- rbind(links, as.matrix(slice[W[indices] >= threshold.upper,1:2]))
+        possibleLinks <- rbind(possibleLinks,
+          as.matrix(slice[W[indices] < threshold.upper &
+          W[indices] >= threshold.lower ,1:2]))
+        i <- i + n
+        nPairs <- nPairs + nrow(slice)
+      }
+    }
+    
     new("RLResult", data = rpairs, links = as.matrix(links),
       possibleLinks = as.matrix(possibleLinks), nPairs = nPairs)
   }
 ) # end of SetMethod
 
 
-#setGeneric(
-#  name = "getEMWeights",
-#  def = function(object) standardGeneric("getEMWeights")
-#)
-#
-#setMethod(
-#  f = "getEMWeights",
-#  signature = "RLBigData",
-#  definition = function(object)
-#  {
-#
-#  }
-#)
-#
