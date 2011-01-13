@@ -82,6 +82,6 @@
   Andreas Borg, Murat Sariyar
 }
 
-}
+
 \keyword{classif}
 \keyword{file}

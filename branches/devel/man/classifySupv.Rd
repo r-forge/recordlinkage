@@ -1,19 +1,26 @@
 \name{classifySupv}
 \alias{classifySupv}
+\alias{classifySupv-methods}
+\alias{classifySupv,RecLinkClassif,RecLinkData-method}
+\alias{classifySupv,RecLinkClassif,RLBigData-method}
 
 \title{Supervised Classification}
 \description{
   Supervised classification of record pairs based on a trained model.
 }
 \usage{
-classifySupv(model, newdata, ...)
+  classifySupv(model, newdata, ...)
+
+  \S4method{classifySupv}{RecLinkClassif,RecLinkData}(model, newdata, ...)
+
+  \S4method{classifySupv}{RecLinkClassif,RLBigData}(model, newdata, ...)
 }
 
 \arguments{
-  \item{model}{Object of type \code{RecLinkClassif}. The
+  \item{model}{Object of class \code{RecLinkClassif}. The
     calibrated model. See \code{\link{trainSupv}}.}
-  \item{newdata}{Object of type \code{\link{RecLinkData}}. The data to
-    classify.}
+  \item{newdata}{Object of class \code{"{RecLinkData}"}
+    or \code{"\linkS4class{RLBigData}"}. The data to classify.}
   \item{\dots}{Further arguments for the \code{\link{predict}} function.}
 }
 
@@ -25,9 +32,13 @@ classifySupv(model, newdata, ...)
 }
 
 \value{
-  An object of class \code{\link[=RecLinkResult-class]{"RecLinkResult"}}, which is a copy of \code{newdata},
-  except for element \code{rpairs$prediction}, which stores the classification
-  result.
+  For the \code{"\link{RecLinkData}"} method, an S3 object
+  of class \code{"\link{RecLinkResult}"}, which is a copy
+  of \code{newdata}, except for element \code{rpairs$prediction}, which stores
+  the classification result.
+
+  For the \code{"\linkS4class{RLBigData}"} method, an S4 object of class
+  \code{"\linkS4class{RLResult}"}.
 }
 
 \author{Andreas Borg, Murat Sariyar}

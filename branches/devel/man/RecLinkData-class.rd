@@ -2,10 +2,6 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{RecLinkData-class}
-\alias{classifySupv,RecLinkClassif,RecLinkData-method}
-\alias{emClassify,RecLinkData-method}
-\alias{emWeights,RecLinkData,ANY-method}
-\alias{epiClassify,RecLinkData-method}
 
 \title{Class "RecLinkData"}
 \description{
