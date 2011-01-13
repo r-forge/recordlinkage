@@ -14,13 +14,3 @@ setMethod(
     else x@frequencies
 )
 
-setGeneric(
-  name = "getData",
-  def = function(x, ...) standardGeneric("getData")
-)
-
-setMethod(
-  f = "getData",
-  signature = "RLBigDataDedup",
-  definition = function(x) x@data
-)
