@@ -14,10 +14,10 @@ blockfldfun <- function(blockfld, phoneticFld, phoneticFun, coln)
   {
     if (fldIndex %in% phoneticFld)
       return(sprintf("%1$s(t1.'%2$s')=%1$s(t2.'%2$s')", phoneticFun, coln[fldIndex]))
-    else 
+    else
       return(sprintf("t1.'%1$s'=t2.'%1$s'", coln[fldIndex]))
   }
-  
+
  paste("(", paste(sapply(blockfld, function(blockvec)
                   paste(sapply(blockvec, blockElemFun),
                         collapse=" and ")),

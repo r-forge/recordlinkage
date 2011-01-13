@@ -392,16 +392,17 @@ setMethod(
 ) # end of SetMethod
 
 
-setGeneric(
-  name = "getEMWeights",
-  def = function(object) standardGeneric("getEMWeights")
-)
-
-setMethod(
-  f = "getEMWeights",
-  signature = "RLBigData",
-  definition = function(object)
-  {
-
-  }
-)
+#setGeneric(
+#  name = "getEMWeights",
+#  def = function(object) standardGeneric("getEMWeights")
+#)
+#
+#setMethod(
+#  f = "getEMWeights",
+#  signature = "RLBigData",
+#  definition = function(object)
+#  {
+#
+#  }
+#)
+#

@@ -42,7 +42,7 @@ setMethod(
   f = "epiClassify",
   signature = "RecLinkData",
   definition = function (rpairs,threshold.upper, 
-                        threshold.lower=threshold.upper, ...)
+                        threshold.lower=threshold.upper)
   {    
   
     if (!("RecLinkData" %in% class(rpairs) || "RecLinkResult" %in% class(rpairs)))
@@ -166,8 +166,6 @@ setMethod(
     on.exit({
         if(length(dbListResults(rpairs_copy@con)) > 0)
           clear(rpairs_copy)
-#        dbDisconnect(con2)
-#        dbGetQuery(rpairs@con, "pragma journal_mode=DELETE")
       }
     )
 
