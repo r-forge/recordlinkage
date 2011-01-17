@@ -51,6 +51,20 @@ test.jarowinkler <- function()
   checkEquals(jarowinkler(matrix(testData1, 2, 2), 
     matrix(testData2, 2, 2)), matrix( c(0.8842593, 0.9714286, 
     0.8944444, 0.95), 2, 2), tolerance=1e-7)
+
+  # check that database function gives same results
+
+  con <- dbConnect(dbDriver("SQLite"))
+  init_sqlite_extensions(con)
+  teststr1 <- replicate(10, paste(sample(toupper(letters), 5), collapse=""))
+  teststr2 <- sapply(teststr1, function(x) paste(sample(unlist(strsplit(x, split=""))), collapse=""))
+
+  dbWriteTable(con, "teststr", data.frame(str1 = teststr1, str2 = teststr2))
+  resDb <- dbGetQuery(con, "select jarowinkler(str1, str2) as strcmp from teststr")$strcmp
+  resR <- jarowinkler(teststr1, teststr2)
+  checkEqualsNumeric(resDb, resR,
+    msg = "Check that database and R function give the same result")
+
 }
 
 test.levenshteinDist.exceptions <- function()
@@ -169,4 +183,17 @@ test.levenshteinSim <- function()
   # switched to PostgreSQL implementation on Mar 8, 2010
   checkEqualsNumeric(levenshteinSim("christian","stefan"),3/9,
     msg="check case-sensitive comparison")
+
+  # check that database function gives same results
+
+  con <- dbConnect(dbDriver("SQLite"))
+  init_sqlite_extensions(con)
+  teststr1 <- replicate(10, paste(sample(toupper(letters), 5), collapse=""))
+  teststr2 <- sapply(teststr1, function(x) paste(sample(unlist(strsplit(x, split=""))), collapse=""))
+
+  dbWriteTable(con, "teststr", data.frame(str1 = teststr1, str2 = teststr2))
+  resDb <- dbGetQuery(con, "select levenshtein(str1, str2) as strcmp from teststr")$strcmp
+  resR <- levenshteinSim(teststr1, teststr2)
+  checkEqualsNumeric(resDb, resR,
+    msg = "Check that database and R function give the same result")
 }
