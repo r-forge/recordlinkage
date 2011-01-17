@@ -2,6 +2,7 @@
 \alias{getExpectedSize}
 \alias{getExpectedSize-methods}
 \alias{getExpectedSize,RLBigDataDedup-method}
+\alias{getExpectedSize,RLBigDataLinkage-method}
 \alias{getExpectedSize,data.frame-method}
 
 \title{
@@ -15,6 +16,8 @@
   getExpectedSize(object, ...)
 
   \S4method{getExpectedSize}{RLBigDataDedup}(object)
+
+  \S4method{getExpectedSize}{RLBigDataLinkage}(object)
 
   \S4method{getExpectedSize}{data.frame}(object, blockfld = list())
 }
@@ -31,6 +34,9 @@
 \details{
   Estimation is based on the assumption that agreement or disagreement of one
   attribute is independent of the other attributes.
+  
+  For the \code{"data.frame"} method, the blocking definition has to be
+  provided, for the other methods, it is taken from the object.
 }
 \value{
   The expected number of record pairs.

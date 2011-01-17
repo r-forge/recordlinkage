@@ -384,3 +384,36 @@ setMethod(
   }
 )
 
+setMethod(
+  f = "getExpectedSize",
+  signature = "RLBigDataLinkage",
+  definition = function(object)
+  {
+    blockfld <- object@blockFld
+    if(!is.list(blockfld)) blockfld <- list(blockfld)
+    nData1 <- nrow(object@data1)
+    nData2 <- nrow(object@data2)
+    nAll <- nData1 * nData2
+    if (length(blockfld)==0) return(nAll)
+    coln <- make.db.names(object@con, colnames(object@data1))
+
+    # ergibt Wahrscheinlichkeit, dass mit gegebenen Blockingfeldern
+    # ein Paar nicht gezogen wird
+    blockelemFun <- function(blockelem)
+    {
+      if(is.character(blockelem)) blockelem <- match(blockelem, colnames(object@data))
+      freq <- dbGetQuery(object@con,
+        sprintf("select count(*) as c from data1 t1, data2 t2 where %s",
+          paste(
+            sapply(coln[blockelem], sprintf, fmt = "t1.\"%1$s\"=t2.\"%1$s\""),
+            collapse = " and "
+          )
+        )
+      )$c
+      1 - (freq / nAll)
+    }
+    res <- nAll * (1-prod(sapply(blockfld, blockelemFun)))
+    res
+  }
+)
+

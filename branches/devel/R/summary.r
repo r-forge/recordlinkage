@@ -106,3 +106,62 @@ errorMeasures <- function(result)
       stop(sprintf("Wrong type for result: %s!", class(result)))
   getErrorMeasures(result)
 }
+
+setMethod(
+  f = "show",
+  signature = "RLBigData",
+  definition = function(object)
+  {
+    # shortcut to database connection
+    con <- object@con
+    if (class(object)=="RLBigDataDedup")
+    {
+      cat("\nDeduplication Data Set for large number of data\n\n")
+      cat(sprintf("%d records",nrow(object@data)),"\n")
+    }
+
+    if (class(object)=="RLBigDataLinkage")
+    {
+      cat("\nLinkage Data Set for large number of data\n\n")
+      cat(sprintf("%d records in first data set",nrow(object@data1)),"\n")
+      cat(sprintf("%d records in second data set",nrow(object@data2)),"\n")
+    }
+
+
+    # TODO: blocking information
+
+    # if weights are stored in DB, the exact number of pairs is readily available
+    if (dbExistsTable(con, "Wdata"))
+    {
+      npairs <- dbGetQuery(con, "select count(*) as c from Wdata")$c
+      cat(sprintf("%d record pairs\n",npairs))
+    } else
+    {
+#      npairs <- getExpectedSize(object@data, object@blockFld)
+ #     cat(sprintf("Approximately %d record pairs\n", round(npairs)))
+    }
+
+    cat("\n")
+
+  	cat(sprintf("%d matches\n",
+          getMatchCount(object)))
+    	cat(sprintf("%d pairs with unknown status\n",
+            getNACount(object)))
+    cat("\n")
+
+  	if (dbExistsTable(con, "Wdata"))
+  	{
+    # TODO: check performance for very large sets
+      Wdata <- dbGetQuery(con, "select W from Wdata")$W
+  		cat("Weight distribution:\n\n")
+  		h=hist(Wdata,plot=FALSE)
+  		c=h$counts
+  		# nehme Gewichtsintervalle als Indizes, um Histogrammansicht zu erhalten
+      names(c)=sapply(1:(length(h$breaks)-1),
+        function(x) sprintf("(%g,%g]",h$breaks[x],h$breaks[x+1]))
+      # erstes Intervall ist auch links geschlossen
+      names(c)[1]=sprintf("[%g,%g]", h$breaks[1], h$breaks[2])
+  		print(c)
+    }
+   }
+)
