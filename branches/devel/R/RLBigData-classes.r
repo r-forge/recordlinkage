@@ -130,8 +130,6 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
   # cast dataset to data.frame
   # also constructs column names
   dataset <- as.data.frame(dataset)
-  # enforce sequential row indices
-  rownames(dataset) <- 1:nrow(dataset)  
 
   # construct column names if not assigned 
 #  if (is.null(names(dataset)))
@@ -152,7 +150,8 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
   )
 
   # write records to database
-  dbWriteTable(con, "data", data.frame(dataset, identity = identity))
+  dbWriteTable(con, "data", data.frame(row_names = 1:nrow(dataset), dataset, identity = identity),
+    row.names=FALSE)
 
   # create indices to speed up blocking
   for (blockelem in blockfld)
@@ -242,12 +241,6 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   dataset1 <- as.data.frame(dataset1)
   dataset2 <- as.data.frame(dataset2)
 
-  # enforce sequential row indices
-  rownames(dataset1) <- 1:nrow(dataset1)  
-  rownames(dataset2) <- 1:nrow(dataset2)  
-  # construct column names if not assigned
-#  if (is.null(colnames(dataset1)))
-#    colnames(dataset1) <- paste("V", 1:nfields, sep="")
 
   # enforce same column names for dataset2
   names(dataset2) <- names(dataset1)
@@ -279,19 +272,23 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   ) 
 
   # write records to database
-  dbWriteTable(con, "data1", data.frame(dataset1, identity = identity1))
-  dbWriteTable(con, "data2", data.frame(dataset2, identity = identity2))
-
+  dbWriteTable(con, "data1", data.frame(row_names = 1:nrow(dataset1), dataset1,
+    identity = identity1), row.names=FALSE)
+  dbWriteTable(con, "data2", data.frame(row_names = 1:nrow(dataset2), dataset2,
+    identity = identity2), row.names=FALSE)
+#  dbWriteTable(con, "data1", data.frame(dataset1, identity = identity1))
+#  dbWriteTable(con, "data2", data.frame(dataset2, identity = identity2))
+#
   # create indices to speed up blocking
   for (tablename in c("data1", "data2"))
   {
     for (blockelem in blockfld)
     {
-      query <- sprintf("create index 'index_%s_%s' on '%s' ('%s')",
+      query <- sprintf("create index 'index_%s_%s' on '%s' (%s)",
        tablename,
        paste(coln[blockelem], collapse="_"),
        tablename,
-       paste(coln[blockelem], collapse=", "))
+      paste("'", coln[blockelem], "'", sep="", collapse=", "))
       dbGetQuery(con, query)
     }
     # create index on identity vector to speed up identifying true matches
