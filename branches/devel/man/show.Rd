@@ -13,49 +13,26 @@
 \usage{
   \S4method{show}{RLBigData}(object)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{
-%%     ~~Describe \code{object} here~~
-}
+  \item{object}{The object for which to show a summary.}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+  Object will be shown automatically by a call to \code{show}.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+  \code{show} returns an invisible \code{NULL}.
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+\author{
+  Andreas Borg, Murat Sariyar
+}
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+  \code{\link[methods]{show}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-structure(function (object) 
-standardGeneric("show"), generic = structure("show", package = "methods"), package = "methods", group = list(), valueClass = character(0), signature = structure("object", simpleOnly = TRUE), default = structure(function (object) 
-showDefault(object, FALSE), target = structure(character(0), .Names = character(0), class = structure("signature", package = "methods")), defined = structure(character(0), .Names = character(0), class = structure("signature", package = "methods")), generic = structure("show", package = "methods"), class = structure("derivedDefaultMethod", package = "methods")), skeleton = structure(function (object) 
-showDefault(object, FALSE), target = structure(character(0), .Names = character(0), class = structure("signature", package = "methods")), defined = structure(character(0), .Names = character(0), class = structure("signature", package = "methods")), generic = structure("show", package = "methods"), class = structure("derivedDefaultMethod", package = "methods"))(object), class = structure("standardGeneric", package = "methods"))
+  data(RLdata500)
+  rpairs <- RLBigDataDedup(RLdata500)
+  rpairs
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{methods}
