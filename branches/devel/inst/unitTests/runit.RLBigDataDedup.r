@@ -296,8 +296,18 @@ test.RLBigDataDedup <- function()
     
   # rownames attached to data should not confuse construction of pairs
   dataRowNames <- data1
-  rownames(dataRowNames) <- sample(1:nrow
-  testResult <- testResultFun(d
+  rownames(dataRowNames) <- nrow(data1):1
+  testResult <- testResultFun(dataRowNames)
+  reqResult <- testResultFun(data1)
+  checkEquals(testResult, reqResult,
+    msg = "Check that row names are ignored")
+    
+  # Check for bug that row names were stored as strings, resulting in an
+  # unexpected ordering
+  rpairs <- RLBigDataDedup(data1)
+  testResult <- dbGetQuery(rpairs@con, "select row_names as id from data")
+  checkTrue(is.numeric(testResult$id),
+    msg = "Check that record ids are stored as numbers")
 }
 
 # names of datasets differ?

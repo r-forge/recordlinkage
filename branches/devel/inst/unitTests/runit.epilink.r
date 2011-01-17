@@ -1,6 +1,16 @@
-test.epiWeights.exceptions <- function()
+.setUp <- function()
 {
   data(RLdata500)
+}
+
+
+getWeights <<- function(object)
+{
+  dbReadTable(object@con, "Wdata")$W
+}
+
+test.epiWeights.exceptions <- function()
+{
   rpairs <- compare.dedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
 
   # errors concering argument rpairs
@@ -161,7 +171,6 @@ test.epiClassify.exceptions <- function()
 
 test.epiClassify <- function()
 {
-  data(RLdata500)
   rpairs <- compare.dedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
   rpairs <- epiWeights(rpairs)
   minWeight <- min(rpairs$Wdata)
@@ -198,5 +207,22 @@ test.epiClassify <- function()
   # check case with only possible links
   result <- epiClassify(rpairs, maxWeight+0.1, minWeight)
   checkTrue(all(result$prediction=="P"))
+  
+}
+
+test.epiWeights.RLBigDataDedup <- function()
+{
+  rpairs <- RLBigDataDedup(RLdata500, blockfld=list(1,3,5,6,7), strcmp=1:4)
+  rpairs <- epiWeights(rpairs)
+
+  W <- getWeights(rpairs)
+
+  # epilink should only generate weights in the range [0,1]
+  checkTrue(all(W >= 0 && W <= 1), msg = "Check range of weights")
+
+  # Record pairs should be identified by id1, id2 with id1 < id2
+  ids <- dbReadTable(rpairs@con, "Wdata")[,1:2]
+  checkTrue(all(ids[,1] < ids[,2]),
+    msg = "Check id1 < id2 for all entries in Wdata")
   
 }

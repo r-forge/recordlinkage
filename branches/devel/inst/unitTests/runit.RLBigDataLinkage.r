@@ -184,15 +184,15 @@ test.RLBigDataLinkage <- function()
   checkEquals(testResult, reqResult, msg=" (blocking with phonetic code")
 
   # blocking on two components
-  testResult=testResultFun(data2, data3, identity1=identity2, 
+  testResult=testResultFun(data2, data3, identity1=identity2,
     identity2=identity3, blockfld=c(5,6))
   reqResult=read.table("result12.compare.txt",sep=",",colClasses="double",
     header=TRUE)
   checkEquals(testResult, reqResult, msg=" (blocking with two components")
-  # repeat with textual column id 
-  testResult=testResultFun(data2, data3, identity1=identity2, 
+  # repeat with textual column id
+  testResult=testResultFun(data2, data3, identity1=identity2,
     identity2=identity3, blockfld=c("by", "bm"))
-  checkEquals(testResult, reqResult, 
+  checkEquals(testResult, reqResult,
     msg=" (blocking with two components, text id)")
 
   # combine blocking on data components with blocking on last name
@@ -306,5 +306,18 @@ test.RLBigDataLinkage <- function()
   reqResult <- read.table("resultNA2.compare.txt",sep=",",colClasses="double",
     header=TRUE)
   checkEquals(testResult, reqResult, msg=" (check reserved words in data)")
+
+  # Check for bug that row names were stored as strings, resulting in an
+  # unexpected ordering
+  rpairs <- RLBigDataLinkage(data1, data2)
+  testResult <- dbGetQuery(rpairs@con, "select row_names as id from data1")
+  checkTrue(is.numeric(testResult$id),
+    msg = "Check that record ids are stored as numbers")
+
+  testResult <- dbGetQuery(rpairs@con, "select row_names as id from data2")
+  checkTrue(is.numeric(testResult$id),
+    msg = "Check that record ids are stored as numbers")
+
 }
+
 
