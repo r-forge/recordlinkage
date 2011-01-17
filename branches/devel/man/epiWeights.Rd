@@ -1,6 +1,9 @@
 \name{epiWeights}
 \Rdversion{1.1}
 \alias{epiWeights}
+\alias{epiWeights-methods}
+\alias{epiWeights,RecLinkData-method}
+\alias{epiWeights,RLBigData-method}
 
 \title{
 Calculate EpiLink weights
@@ -10,7 +13,12 @@ Calculate EpiLink weights
   (see references).
 }
 \usage{
-epiWeights(rpairs, e = 0.01, f = getFrequencies(rpairs))
+  epiWeights(rpairs, e = 0.01, f, ...)
+
+  \S4method{epiWeights}{RecLinkData}(rpairs, e = 0.01, f = rpairs$frequencies)
+
+  \S4method{epiWeights}{RLBigData}(rpairs, e = 0.01, f = getFrequencies(rpairs),
+    withProgressBar = (sink.number()==0))
 }
 
 \arguments{
@@ -18,10 +26,12 @@ epiWeights(rpairs, e = 0.01, f = getFrequencies(rpairs))
     compute weights. See details.}
   \item{e}{
     Numeric vector. Estimated error rate(s).
-}
+  }
   \item{f}{
     Numeric vector. Average frequency of attribute values.
-}
+  }
+  \item{withProgressBar}{Wether to display a progress bar}
+  \item{...}{Placeholder for method-specific arguments.}
 }
 
 \details{
@@ -58,7 +68,12 @@ epiWeights(rpairs, e = 0.01, f = getFrequencies(rpairs))
   the functions fails. Also, some other rare combinations can result in weights
   with illegal values (NaN, less than 0 or greater than 1). In this case a
   warning is issued.  
+  
+  By default, the \code{"\linkS4class{RLBigDataDedup}"} method displays a
+  progress bar unless output is diverted by \code{sink}, e.g. when processing
+  a Sweave file.
 }
+
 \value{
   A copy of \code{rpairs} with the weights attached. See the class documentation
   (\code{"\link[=RecLinkData.object]{RecLinkData}"}, \code{"\linkS4class{RLBigDataDedup}"} and
