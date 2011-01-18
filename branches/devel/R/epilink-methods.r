@@ -213,19 +213,24 @@ setMethod(
     dbGetQuery(rpairs@con, "create index index_Wdata_id on Wdata (id1, id2)")
     dbGetQuery(rpairs@con, "create index index_Wdata_W on Wdata (W)")
 
+    if (withProgressBar)
+    {
+      expPairs <- getExpectedSize(rpairs_copy)
+      pgb <- txtProgressBar(max=expPairs)
+    }
+
     rpairs_copy <- begin(rpairs_copy)
     nPairs <- 0
     n <- 10000
     i = n
 
-    if (withProgressBar)
-    {
-      expPairs <- getExpectedSize(rpairs_copy@data, rpairs@blockFld)
-      pgb <- txtProgressBar(max=expPairs)
-    }
 
 
-    nAttr <- ncol(rpairs_copy@data) - length(rpairs_copy@excludeFld)
+    if (class(rpairs_copy)=="RLBigDataDedup")
+      nAttr <- ncol(rpairs_copy@data) - length(rpairs_copy@excludeFld)
+    else # RLBigDataLinkage
+      nAttr <- ncol(rpairs_copy@data1) - length(rpairs_copy@excludeFld)
+
     e=e+rep(0,nAttr)
     f=f+rep(0,nAttr)
     # adjust error rate

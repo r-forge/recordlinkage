@@ -355,7 +355,8 @@ setMethod(
   signature = "RLBigDataDedup",
   definition = function(object)
   {
-    if(!is.list(blockfld)) blockfld = list(blockfld)
+    blockfld <- object@blockFld
+    if(!is.list(blockfld)) blockfld <- list(blockfld)
     nData <- nrow(object@data)
     nAll <- nData * (nData - 1) / 2
     if (length(blockfld)==0) return(nAll)
