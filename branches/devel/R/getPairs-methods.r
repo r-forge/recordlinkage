@@ -27,9 +27,11 @@ getPairsBackend <- function(object, filter.match,
 
     # get column names either from slot data or data1, depending on the class
     # (a more robust way would be good)
-    colN <- switch(class(object), RLBigDataDedup = colnames(object@data),
+    colN <- switch(class(object),
+      RLBigDataDedup = colnames(object@data),
       RLBigDataLinkage = colnames(object@data1),
-      stop(paste("Unexpected class of object:", class(object))))
+      stop(paste("Unexpected class of object:", class(object)))
+    )
 
     # convert to database column names and add ids
     dbNames <- make.db.names(object@drv, colN, allow.keywords = FALSE)
@@ -207,7 +209,12 @@ getPairsBackend <- function(object, filter.match,
       # reshape result into a table of suitable format
       m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
 
-      cnames=c("id", colnames(object@data), "is_match")
+      cnames=c("id",
+        colnames(switch(class(object),
+          RLBigDataDedup = object@data,
+          RLBigDataLinkage = object@data1,
+          stop(paste("Unexpected class of object:", class(object)))
+        )), "is_match")
       if (withClass)
         cnames <- c(cnames, "Class")
       if (withWeight)

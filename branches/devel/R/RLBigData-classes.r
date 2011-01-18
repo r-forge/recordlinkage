@@ -164,6 +164,10 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
   }
   # create index on identity vector to speed up identifying true matches
   dbGetQuery(con, "create index index_identity on data (identity)")
+
+  # create index on id to speed up join operations (in getTable)
+  dbGetQuery(con, "create index index_data_id on data (row_names)")
+
   # init extension functions (string comparison, phonetic code) for SQLite
   init_sqlite_extensions(con)
   return(object)
@@ -295,6 +299,10 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
     dbGetQuery(con, sprintf("create index index_identity_%s on %s (identity)",
         tablename, tablename))
   }
+
+  # create index on id to speed up join operations (in getTable)
+  dbGetQuery(con, "create index index_data1_id on data1 (row_names)")
+  dbGetQuery(con, "create index index_data2_id on data2 (row_names)")
 
   # init extension functions (string comparison, phonetic code) for SQLite
   init_sqlite_extensions(con)
