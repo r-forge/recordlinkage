@@ -99,13 +99,6 @@ texSummary <- function (object)
           floating=FALSE, latex.environments=NULL)
 }
 
-# wrapper for new S4 method for backward compatibility
-errorMeasures <- function(result)
-{
-  if (!("RecLinkResult" %in% class(result)))
-      stop(sprintf("Wrong type for result: %s!", class(result)))
-  getErrorMeasures(result)
-}
 
 setMethod(
   f = "show",
@@ -165,3 +158,75 @@ setMethod(
     }
    }
 )
+
+
+# get accuracy, alpha-error, beta-error etc. from result object
+setGeneric(
+  name = "getErrorMeasures",
+  def = function(object, ...) standardGeneric("getErrorMeasures")
+)
+
+# method for 'old' S3 class
+setMethod(
+  f = "getErrorMeasures",
+  signature = "RecLinkResult",
+  definition = function(object, ...)
+  {
+    TP=length(which(object$pairs$is_match & object$prediction=="L")) # true positive
+    FP=length(which(!object$pairs$is_match & object$prediction=="L")) # false positive
+    TN=length(which(!object$pairs$is_match & object$prediction=="N")) # true negative
+    FN=length(which(object$pairs$is_match & object$prediction=="N")) # false negative
+
+    return(list(
+      alpha=FN/(TP+FN),
+      beta=FP/(TN+FP),
+      accuracy=(TP+TN)/(TP+TN+FP+FN),
+      precision=TP/(TP+FP),
+      sensitivity=TP/(TP+FN),
+      specificity=TN/(TN+FP),
+      ppv=TP/(TP+FP),
+      npv=TN/(TN+FN)
+    ))
+  }
+)
+
+# method for 'new' S4 class (for big data objects)
+setMethod(
+  f = "getErrorMeasures",
+  signature = "RLResult",
+  definition = function(object, ...)
+  {
+    identity1 <- switch(class(object@data),
+      RLBigDataDedup = object@data@identity,
+      RLBigDataLinkage = object@data@identity1)
+
+    identity2 <- switch(class(object@data),
+      RLBigDataDedup = object@data@identity,
+      RLBigDataLinkage = object@data@identity2)
+    # TP: true positive, FP: false positive, TN: true negative,
+    # FN: false negative
+    TP <- sum(identity1[object@links[,1]]==identity2[object@links[,2]], na.rm=TRUE)
+    FP <- sum(identity1[object@links[,1]]!=identity2[object@links[,2]], na.rm=TRUE)
+    nMatch <- getMatchCount(object@data)
+    FN <- nMatch - TP
+    TN <- object@nPairs - TP - FN - FP
+    return(list(
+      alpha=FN/(TP+FN),
+      beta=FP/(TN+FP),
+      accuracy=(TP+TN)/(TP+TN+FP+FN),
+      precision=TP/(TP+FP),
+      sensitivity=TP/(TP+FN),
+      specificity=TN/(TN+FP),
+      ppv=TP/(TP+FP),
+      npv=TN/(TN+FN)
+    ))
+  }
+)
+
+# wrapper for new S4 method for backward compatibility
+errorMeasures <- function(result)
+{
+  if (!("RecLinkResult" %in% class(result)))
+      stop(sprintf("Wrong type for result: %s!", class(result)))
+  getErrorMeasures(result)
+}
