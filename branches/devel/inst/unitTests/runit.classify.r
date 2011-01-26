@@ -168,8 +168,12 @@ test.trainSupv <- function()
       msg=sprintf("check class of generated model"))
     checkEquals(classif$method, "rpart",
       msg=sprintf("check method component"))
+
     # check class only once
     checkEquals(class(classif), "RecLinkClassif")
+    # check attribute names
+    checkEquals(classif$attrNames, colnames(rpairs$pairs)[-c(1,2,ncol(rpairs$pairs))],
+      msg = "Check attribute names")
 
     classif <- trainSupv(rpairs, method="bagging")
     checkEquals(class(classif$model), "classbagg",

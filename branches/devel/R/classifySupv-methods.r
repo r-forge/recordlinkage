@@ -18,7 +18,12 @@ setMethod(
         
   	ret=newdata
   
-      x=newdata$pairs[,-c(1,2,ncol(newdata$pairs))]
+    x=newdata$pairs[,-c(1,2,ncol(newdata$pairs))]
+    if(any(colnames(x)!=model$attrNames))
+    {
+      warning("Attribute names in newdata differ from training set!")
+      colnames(x)=model$attrNames
+    }
   	x[is.na(x)]=0
   
       predict=switch(model$method,
@@ -48,9 +53,9 @@ setMethod(
     nPairs <- 0
     while(nrow(slice <- nextPairs(newdata)) > 0)
     {
-     # Spaltennamen angleichen
+     # Spaltennamen angleichen -> funktioniert so nicht!
      # TODO: Fehlerbehandlung für ungleiche Attributanzahl
-     colnames(slice) <- c("id1", "id2", levels(model$model$frame$var)[-1])
+  #     colnames(slice) <- c("id1", "id2", levels(model$model$frame$var)[-1])
       prediction=switch(model$method,
     	  svm=predict(model$model, newdata=slice,...),
           rpart=predict(model$model, newdata=slice,type="class",...),

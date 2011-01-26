@@ -50,6 +50,7 @@ trainSupv <- function(rpairs,method,use.pred=FALSE,omit.possible=TRUE,
   ret=list()
  	if (isTRUE(include.data))
 	   ret$train=rpairs
+  ret$attrNames <- colnames(rpairs$pairs)[-c(1,2,ncol(rpairs$pairs))]
   ret$model=model
   ret$method=as.character(method)[1]
 	class(ret)="RecLinkClassif"
