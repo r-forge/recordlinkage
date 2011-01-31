@@ -418,3 +418,20 @@ setMethod(
   }
 )
 
+
+
+# Subscript operator for RecLinkData and RecLinkResult objects
+"[.RecLinkData" <- function(x,i)
+{
+  ret <- x
+  ret$pairs <- x$pairs[i,]
+  ret$Wdata <- x$Wdata[i]
+  ret
+}
+
+"[.RecLinkResult" <- function(x,i)
+{
+  ret <- "[.RecLinkData"(x, i)
+  ret$prediction <- x$prediction[i]
+  ret
+}
