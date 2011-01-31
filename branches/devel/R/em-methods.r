@@ -303,7 +303,7 @@ setMethod(
       stop("No EM weights have been calculated for rpairs! Call emWeights first.")
 
     W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
-    M <- dbGetQuery(rpairs@con, "select M from M order by id")$M
+    M <- dbGetQuery(rpairs@con, "select M from M order by id asc")$M
     U <- dbGetQuery(rpairs@con, "select U from U order by id asc")$U
 
     if (!is.numeric(threshold.upper))
