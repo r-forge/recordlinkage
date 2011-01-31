@@ -1,5 +1,9 @@
 Changes in version 0.2-5
 
+	- added subset operator [ for RecLinkData and RecLinkPairs objects#
+
+Changes in version 0.2-5
+
 	- Fixed a bug in getMinimalTrain which caused the function to fail
 
 Changes in version 0.2-4
