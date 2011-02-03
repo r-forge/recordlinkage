@@ -156,25 +156,17 @@ setMethod(
       stop("Condition e <= 1-f does not hold, adjust error rate!")
 
     # leave out ids and matching status
-    pairs=rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))]
+    # weights are computed on transposed matrix of comparison patterns
+    # (each column is an observation) to allow vectorization
+    pairs=t(as.matrix(rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))]))
     pairs[is.na(pairs)]=0
 
-    # dummy operation to achieve recycling of values
-    e=e+rep(0,ncol(pairs))
-    f=f+rep(0,ncol(pairs))
-    # adjust error rate
-    # error rate
+    # multiply each pattern with the epilink weights
     w=log((1-e)/f, base=2)
-    #
 
+    # the weight for each pattern is the sum of its attribute weights
+    S <- colSums(pairs * w)/sum(w)
 
-    # weight computation
-    row_sum <- function(r,w)
-    {
-    return(sum(r*w,na.rm=TRUE))
-    }
-
-    S=apply(pairs,1,row_sum,w)/sum(w)
     if (any(is.na(S) | S < 0 | S > 1))
       warning("Some weights have illegal values. Check error rate and frequencies!")
     rpairs$Wdata=S
@@ -233,8 +225,6 @@ setMethod(
 
     e=e+rep(0,nAttr)
     f=f+rep(0,nAttr)
-    # adjust error rate
-    # error rate
     w=log((1-e)/f, base=2)
     sumW <- sum(w)
       # weight computation
@@ -246,28 +236,20 @@ setMethod(
 
     while(nrow(slice <- nextPairs(rpairs_copy, n)) > 0)
     {
-#      message(i)
+    ids <- slice[,1:2]
+    slice <- t(slice[,-c(1,2,ncol(slice))])
       slice[is.na(slice)] <- 0
       #
+    S <- colSums(slice * w)/sumW
 
-
-      S=apply(slice[,-c(1,2,ncol(slice))],1,row_sum,w)/sumW
-#      S=apply(slice[,-c(1,2,ncol(slice))],1,row_sum,w)/sum(w)
       if (any(is.na(S) | S < 0 | S > 1))
         warning("Some weights have illegal values. Check error rate and frequencies!")
 
-#      weightTable <- rbind(weightTable, cbind(slice[,1:2], S))
-#      dbWriteTable(con2, "Wdata", cbind(slice[,1:2], S), row.names=FALSE,
-#        append=TRUE)
 
       dbGetPreparedQuery(rpairs@con, "insert into Wdata values (?, ?, ?)",
-        cbind(slice[,1:2], S))
-#      message(range(slice[,1]))
-#      message(range(slice[,2]))
-#      message("----------------------")
-#     dbGetQuery(rpairs@con, "pragma wal_checkpoint")
+        cbind(ids, S))
 
-      nPairs <- nPairs + nrow(slice)
+      nPairs <- nPairs + length(S)
       if (withProgressBar)
       {
         setTxtProgressBar(pgb, nPairs)
