@@ -1,6 +1,7 @@
 Changes in version 0.2-5
 
-	- added subset operator [ for RecLinkData and RecLinkPairs objects#
+	- added subset operator [ for RecLinkData and RecLinkPairs objects
+	- improved running time of epiWeights significantly
 
 Changes in version 0.2-5
 
