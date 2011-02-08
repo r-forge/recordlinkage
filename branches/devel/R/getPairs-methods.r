@@ -78,7 +78,15 @@ getPairsBackend <- function(object, filter.match,
 
     # Join with table of weights necessary if a weight range is given
     # or weights are to be included in the output
-    if (withWeight || is.finite(max.weight) || is.finite(min.weight))
+    # For a given weight range, force evaluation of the weight index by
+    # using cross join
+    if (is.finite(max.weight) || is.finite(min.weight))
+    {
+      from_clause <- paste("Wdata weights cross join", from_clause)
+      where_clause <- paste( "t1.row_names=weights.id1",
+        "and t2.row_names=weights.id2 and",
+        where_clause)
+    } else if (withWeight)
     {
       from_clause <- paste(
         from_clause, "Wdata weights",
@@ -154,6 +162,7 @@ getPairsBackend <- function(object, filter.match,
     # construct statement
     stmt <- sprintf("select %s from %s where %s and (%s) and (%s) and %s %s", select_list,
       from_clause, where_clause, filterMatch, filterLink, weight_clause, order_clause)
+#    message(stmt  )
     print(dbGetPreparedQuery(object@con, paste("explain query plan", stmt),
       data.frame(min=min.weight, max=max.weight)))
 
