@@ -9,4 +9,4 @@ Description: Provides functions for linking and deduplicating data sets.
 License: GPL (>=2)
 Depends: R (>= 2.8.0), e1071, rpart, ada, ipred, stats, evd
 Suggests: xtable
-URL:https://r-forge.r-project.org/projects/recordlinkage/;http://journal.r-project.org/archive/2010-2/RJournal_2010-2_Sariyar+Borg.pdf
+URL:https://r-forge.r-project.org/projects/recordlinkage/, http://journal.r-project.org/archive/2010-2/RJournal_2010-2_Sariyar+Borg.pdf
