@@ -163,8 +163,8 @@ getPairsBackend <- function(object, filter.match,
     stmt <- sprintf("select %s from %s where %s and (%s) and (%s) and %s %s", select_list,
       from_clause, where_clause, filterMatch, filterLink, weight_clause, order_clause)
 #    message(stmt  )
-    print(dbGetPreparedQuery(object@con, paste("explain query plan", stmt),
-      data.frame(min=min.weight, max=max.weight)))
+#    print(dbGetPreparedQuery(object@con, paste("explain query plan", stmt),
+#      data.frame(min=min.weight, max=max.weight)))
 
     result <- dbGetPreparedQuery(object@con, stmt, data.frame(min=min.weight, max=max.weight))
 
