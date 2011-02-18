@@ -47,15 +47,13 @@ test.RLBigDataDedup.exceptions <- function()
   checkException(RLBigDataDedup(data1, phonetic=0))
     
   # illegal phonetic function
-  # TODO
   checkException(RLBigDataDedup(data1, phonetic=TRUE, phonfun=5)) # not a function
-  checkException(RLBigDataDedup(data1, phonetic=TRUE, phonfun="jarowinkler")) # not a function
+  checkException(RLBigDataDedup(data1, phonetic=TRUE, phonfun="jarowinkler"))
   checkException(RLBigDataDedup(data1, phonetic=TRUE, 
-    phonfun=list(pho_h, soundex))) # neither list...
+    phonfun=list("pho_h", "soundex"))) # neither list...
   checkException(RLBigDataDedup(data1, phonetic=TRUE, 
-    phonfun=c(pho_h, soundex))) # ...nor vector makes sense
-  # how to test if function returns the right thing?
-    
+    phonfun=c("pho_h", "soundex"))) # ...nor vector makes sense
+
   # illegal string comparator definition
   checkException(RLBigDataDedup(data1, strcmp=list(1,4))) # list not okay
   checkException(RLBigDataDedup(data1, strcmp=-3)) # negative index
@@ -137,7 +135,7 @@ test.RLBigDataDedup <- function()
 
   # check other components only once
   object <- RLBigDataDedup(data1)
-  checkEquals(getData(object), data1, msg=" (check data component)")
+  checkEquals(object@data, data1, msg=" (check data component)")
   checkEqualsNumeric(getFrequencies(object), frequencies1, tolerance=1e-6,
     msg=" (check frequencies)")
 #
@@ -161,7 +159,6 @@ test.RLBigDataDedup <- function()
   
    
   # same blocking with phonetic coding yields more results
-  # TODO
   testResult=testResultFun(data1, identity=identity1, blockfld=3, phonetic=1:4)
   reqResult=read.table("result4.compare.txt",sep=",",colClasses="double",
     header=TRUE)
@@ -196,9 +193,8 @@ test.RLBigDataDedup <- function()
   list("lname_c1",c("by", "bm")))
   checkEquals(testResult, reqResult, msg=" (combined blocking criteria)")
 
- # TODO: implement error
   # too restrictive blocking (i.e. no resulting pairs) should fail)
-#    checkException(testResultFun(data1, blockfld=1:4), msg=" (no record pairs generated)")
+    checkException(testResultFun(data1, blockfld=1:4), msg=" (no record pairs generated)")
   
   # exclude columns, still allow blocking and phonetic code
   testResult=testResultFun(data1, identity=identity1, blockfld=3, phonetic=1:4,
@@ -308,19 +304,41 @@ test.RLBigDataDedup <- function()
   testResult <- dbGetQuery(rpairs@con, "select row_names as id from data")
   checkTrue(is.numeric(testResult$id),
     msg = "Check that record ids are stored as numbers")
+
+  # check that SQL keywords as column names are handled correctly
+  # also if column appears in blocking, string comparison or phonetic code
+  colnames(data1)=c("fname.c1", "fname.c2", "lname.c1", "lname.c2", "by", "where", "select")
+
+  rpairs <- RLBigDataDedup(data1)
+  begin(rpairs)
+  pairs <- nextPairs(rpairs)
+  checkEquals(colnames(pairs)[-c(1,2,ncol(pairs))], colnames(data1),
+    msg = " check SQL keywords as column names")
+  clear(rpairs)
+
+  rpairs <- RLBigDataDedup(data1, blockfld=list(5,6,7))
+  invisible(begin(rpairs))
+  pairs <- nextPairs(rpairs)
+  checkEquals(colnames(pairs)[-c(1,2,ncol(pairs))], colnames(data1),
+    msg = " check SQL keywords as column names (in blocking)")
+  clear(rpairs)
+
+  rpairs <- RLBigDataDedup(data1, strcmp=5:7)
+  invisible(begin(rpairs))
+  pairs <- nextPairs(rpairs)
+  checkEquals(colnames(pairs)[-c(1,2,ncol(pairs))], colnames(data1),
+    msg = " check SQL keywords as column names (with string comparison)")
+  clear(rpairs)
+
+  # in this case
+  rpairs <- RLBigDataDedup(data1, phonetic=5:7)
+  invisible(begin(rpairs))
+  pairs <- nextPairs(rpairs)
+  checkEquals(colnames(pairs)[-c(1,2,ncol(pairs))], colnames(data1),
+    msg = " check SQL keywords as column names (with phonetic code)")
+  clear(rpairs)
 }
 
 # names of datasets differ?
 
 
-test.getPatternCounts <- function()
-{
-  # Test für Dedup-Objekt
-  object <- RLBigDataDedup(data1) # default case: no blocking whatsoever
-  result1=read.table("result1.getPatternCounts.txt")
-  # Check only numeric equality. Reason: result1 is read as a data frame with
-  # one column, which is not easily convertible to a vector with names
-  checkEqualsNumeric(getPatternCounts(object), result1[[1]])
-  checkEqualsNumeric(getPatternCounts(object,n=1), result1[[1]])
-  checkEqualsNumeric(getPatternCounts(object,n=4), result1[[1]])
-}

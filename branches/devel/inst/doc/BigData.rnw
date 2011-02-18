@@ -18,7 +18,7 @@ options(width=50)
 
 As of version 0.3, the package RecordLinkage includes extensions to overcome
 the problem of high memory consumption which arises when processing a large
-number of records (ca. >=1000 without blocking, >=10000 with one blocking
+number of records (ca.\ $>=1000$ without blocking, $>=10000$ with one blocking
 variable). This is achieved by a concept where
 the whole set of record pairs is not created at once, but block-wise during
 classification. In addition, an embedded SQLite database is used through
@@ -34,13 +34,14 @@ methods which dispatch on the new S4 as well as on the existing S3 classes.
 This approach combines two advantages: First, existing code using the package
 still works, second, the new classes and methods offer (nearly) the same
 interface, i.e. the necessary function calls for a linkage task differ only
-slightly.
+slightly. An exception is \texttt{getPairs}, whose arguments differ from the
+exisiting version (see man page).
 
 \section{Defining data and comparison parameters}
 
 The existing S3 class \texttt{"RecLinkData"} is supplemented by the S4 classes
 \texttt{"RLBigDataLinkage"} and \texttt{"RLBigDataDedup"} for linking two datasets
-and deduplication of one dataset respectively. Both share the common abstract (virtual)
+and deduplication of one dataset respectively. Both share the common abstract
 superclass \texttt{"RLBigData"}.
 
 <<>>=
@@ -51,8 +52,15 @@ showClass("RLBigDataDedup")
 showClass("RLBigDataLinkage")
 @
 
-For the two non-virtual classes constructor functions exist which correspond
-to \texttt{compare.dedup} and \texttt{compare.linkage} for the S3 classes.
+For the two non-virtual classes constructor functions, \texttt{RLBigDataDedup}
+and \texttt{RLBigDataLinkage}, exist which correspond
+to \texttt{compare.dedup} and \texttt{compare.linkage} for the S3 classes and
+share most of their arguments. In contrast to the latter, these functions do
+not create the whole set of comparison patterns but only instantiates an object
+that holds all the information necessary to construct these pairs on demand.
+
+The following example shows the basic usage of the constructors, for details
+consult their documentation.
 <<>>=
 # deduplicate dataset with two blocking iterations and string comparison
 data(RLdata500)
@@ -69,15 +77,14 @@ rpairs2 <- RLBigDataLinkage(RLdata500, dataset, identity1 = identity.RLdata500,
   identity2 = identity2, phonetic = 1:4, exclude = "lname_c2")
 @
 
-Comparison patterns are created on demand and blockwise, facilitated by
-the internal functions:
+In order to create comparison patterns, the following backend functions exist,
+which are usually not directly executed by the user:
 \begin{description}
-  \item[begin] Construct SQL statement to execute blocking, phonetic code,
-    string comparison and building comparison patterns; send query to underlying
-    database.
-  \item[nextPairs] Fetch next block of patterns.
-  \item[clear] Clear result set after comparison patterns have been fetched or
-    to cancel.
+  \item[begin] Constructs an SQL statement to execute blocking, phonetic code,
+    string comparison and building comparison patterns and sends this query to
+    the underlying SQLite database.
+  \item[nextPairs] Fetches a block of patterns after the query has been send.
+  \item[clear] Clears the result set after comparison patterns have been fetched.
 \end{description}
 
 <<>>=
@@ -86,14 +93,14 @@ nextPairs(rpairs1, 10)
 clear(rpairs1)
 @
 
-These functions are usually not directly executed by the user, they
-form part of the backend of the classification functions.
 
 \section{Supervised classification}
 
 The existing function \texttt{classifySupv} was transformed to a S4 method
 which handles the old S3 object (\texttt{"RecLinkData"}) as well as the new 
-classes.
+classes.  However, at the moment a classificator can only be trained with
+an object of class \texttt{"RecLinkResult"}, for which comparison patterns
+are stored in the R object.
 
 <<>>=
 train <- getMinimalTrain(compare.dedup(RLdata500, identity = identity.RLdata500,
@@ -101,8 +108,6 @@ train <- getMinimalTrain(compare.dedup(RLdata500, identity = identity.RLdata500,
 rpairs1 <- RLBigDataDedup(RLdata500, identity = identity.RLdata500)
 classif <- trainSupv(train, "rpart", minsplit=2)
 result <- classifySupv(classif, rpairs1)
-# first two arguments can be switched:
-result <- classifySupv(rpairs1, classif)
 @
 
 The result is an object of class \texttt{"RLResult"} which holds the indices
@@ -117,48 +122,59 @@ getTable(result)
 getErrorMeasures(result)
 @
 
-(Anm.: Objekt muss evtl. noch weiter ausgebaut und ergänzende Methoden geschrieben 
-werden)
 
 \section{Weight-based classification}
 
+As with \texttt{"RecLinkData"} objects, weight-based classification with
+\texttt{"RLBigData*"} classes includes weight calculation and classification
+based on one or two thresholds, dividing links, non-links and, if desired,
+possible links. The following example applies classification with
+Epilink (see documentation of \texttt{epiWeights} for details):
 <<>>=
-result <- epiClassify(rpairs2,0.6)
+rpairs1 <- epiWeights(rpairs1)
+result <- epiClassify(rpairs1, 0.5)
 getTable(result)
 @
 
-(Implementierung von em arbeitet im Moment mit einer Klasse EMWeights, die
-Gewichte und das zugehörige RLBigData-Objekt enthält. Von der Struktur her
-wäre es vielleicht umgekehrt sinnvoller: Gewichte sind ein Attribut eines 
-Datenobjekts. Nachteil der letzteren Lösung: Dieses Attribut kann leer sein
-(wenn keine Gewichte berechnet wurden), seine Existenz muss also abgefragt 
-werden - bei der eigenen Klasse ist über die Methodensignatur gesichert,
-dass die Klassifikationsfunktion nur für Objekte mit Gewichten aufgerufen wird.
 
-Oder: Klassifierungsfunktion prüft, ob Gewichte vorhanden sind und erstellt sie,
-falls nicht -> Nachteil: Wenn man aus Versehen die Methode auf einem Objekt ohne
-Gewichte aufruft, wird die zeitintensive EM-Schätzung unnötig aufgerufen,
-statt durch Fehlermeldung das Versehen anzuzeigen).
+ By default, the weights for each individual record pair are
+stored in the associated database, which speeds up subsequent classification
+significantly. If the resulting disk usage is an issue, this behaviuor can be
+changed;
+\begin{itemize}
+  \item in the case of weight calculation with an EM algorithm by calling
+    \texttt{emWeights} with argument \texttt{save.weights = FALSE},
+      which results in only $2^{\textrm{number of attributes}}$
+      per-pattern weights being stored;
+  \item in the case of Epilink weights, by calling \texttt{epiWeights}
+    directly; the weights will be calculated on-the-fly.
+\end{itemize}
 
-TODO: possible links
-)
 
-<<>>=
-rpairs3 <- RLBigDataDedup(RLdata500, identity.RLdata500, blockfld=1)
-W <- emWeights(rpairs3)
-result <- emClassify(W)
-getTable(result)
 
-W <- emWeights(rpairs3)
-result <- emClassify(W, my = 0.005)
-getTable(result)
-
-@
 
 \section{Evaluation and results}
 
+In addition to \texttt{getTable} and \texttt{getErrorMeasures},
+\texttt{getPairs}, which was redesigned as a versatile S4 method, is an
+important tool to inspect data and linkage results. For example, the following
+code extracts all links with weights greater or equal than 0.7 from the result
+set obtained in the last example:
+
 <<>>=
+getPairs(result, min.weight=0.7, filter.link="link")
 @
+
+A frequent use case is to inspect misclassifed record pairs; for this
+purpose two shortcuts are included that call \texttt{getPairs} with
+appropriate arguments:
+
+<<>>=
+getFalsePos(result)
+getFalseNeg(result)
+
+@
+
 \end{document}
 
 

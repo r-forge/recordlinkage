@@ -170,6 +170,13 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
 
   # init extension functions (string comparison, phonetic code) for SQLite
   init_sqlite_extensions(con)
+  
+  # check that set of generated pairs is not empty
+  begin(object)
+  res <- nextPairs(object, 1)
+  clear(object)
+  if(nrow(res)==0) stop("No pairs generated. Check blocking criteria.")
+
   return(object)
 }
 
@@ -306,5 +313,12 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
 
   # init extension functions (string comparison, phonetic code) for SQLite
   init_sqlite_extensions(con)
+  
+  # check that set of generated pairs is not empty
+  begin(object)
+  res <- nextPairs(object, 1)
+  clear(object)
+  if(nrow(res)==0) stop("No pairs generated. Check blocking criteria.")
+
   return(object)
 }

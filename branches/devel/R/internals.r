@@ -54,22 +54,22 @@ setMethod(
       # enclose fields in phonetic function if desired
       if (fldIndex %in% phoneticFld)
       {
-        fld1 <- sprintf("%s(t1.%s)", phoneticFun, coln[fldIndex])
-        fld2 <- sprintf("%s(t2.%s)", phoneticFun, coln[fldIndex])
+        fld1 <- sprintf("%s(t1.'%s')", phoneticFun, coln[fldIndex])
+        fld2 <- sprintf("%s(t2.'%s')", phoneticFun, coln[fldIndex])
       } else
       {
-        fld1 <- sprintf("t1.%s", coln[fldIndex])
-        fld2 <- sprintf("t2.%s", coln[fldIndex])
+        fld1 <- sprintf("t1.'%s'", coln[fldIndex])
+        fld2 <- sprintf("t2.'%s'", coln[fldIndex])
       }
 
 
       # something like 'jarowinkler(t1.fname, t2.fname) as fname'
       if (fldIndex %in% strcmpFld)
-        return(sprintf("%s(%s, %s) as %s", strcmpFun, fld1, fld2, coln[fldIndex]))
+        return(sprintf("%s(%s, %s) as '%s'", strcmpFun, fld1, fld2, coln[fldIndex]))
 
 
       # direct comparison: something like 't1.fname=t2.fname as fname'      
-      return(sprintf("%s=%s as %s", fld1, fld2, coln[fldIndex]))
+      return(sprintf("%s=%s as '%s'", fld1, fld2, coln[fldIndex]))
     }
     coln <- switch(class(object),
       RLBigDataDedup = make.db.names(object@con, colnames(object@data),
@@ -118,7 +118,7 @@ setMethod(
     query <- sprintf("select %s from %s where %s", sql$select_list, 
       sql$from_clause, sql$where_clause)
     dbSendQuery(x@con, query) # can be retreived via dbListResults(x@con)[[1]]
-    return(x)
+    invisible(x)
   }
 )
 
@@ -145,6 +145,9 @@ setMethod(
           result[,i] <- as.numeric(result[,i])
       }
     }
+    browser()
+    # column names may have changed due to SQL conform conversion, reset them
+    colnames(result)[-c(1,2,ncol(result))] <- getColumnNames(x)
     result
   }
 )
@@ -274,6 +277,31 @@ setMethod(
   }
 )
 
+
+setGeneric(
+  name = "getColumnNames",
+  def = function(object, withExcluded = FALSE) standardGeneric("getColumnNames")
+)
+
+setMethod(
+  f = "getColumnNames",
+  signature = "RLBigDataDedup",
+  definition = function(object, withExcluded = FALSE)
+  {
+    if (withExcluded || length(object@excludeFld)==0) colnames(object@data)
+    else colnames(object@data)[-object@excludeFld]
+  }
+)
+
+setMethod(
+  f = "getColumnNames",
+  signature = "RLBigDataLinkage",
+  definition = function(object, withExcluded = FALSE)
+  {
+    if (withExcluded || length(object@excludeFld)==0) colnames(object@data1)
+    else colnames(object@data1)[-object@excludeFld]
+  }
+)
 
 ### Various other utility functions
 

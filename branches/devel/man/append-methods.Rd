@@ -1,7 +1,9 @@
 \name{\%append\%-methods}
 \docType{methods}
 \alias{\%append\%-methods}
+\alias{\%append\%}
 \alias{\%append\%,RecLinkData,RecLinkData-method}
+\alias{\%append\%,RecLinkResult,RecLinkResult-method}
 
 \title{
   Append a set of comparison patterns to another.
@@ -17,6 +19,7 @@ x \%append\% y
 
 \S4method{\%append\%}{RecLinkData,RecLinkData}(x, y)
 
+\S4method{\%append\%}{RecLinkResult,RecLinkResult}(x, y)
 }
 
 \arguments{

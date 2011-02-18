@@ -168,8 +168,8 @@ getPairsBackend <- function(object, filter.match,
 
     result <- dbGetPreparedQuery(object@con, stmt, data.frame(min=min.weight, max=max.weight))
 
-    if(nrow(result)==0)
-      return (NULL)
+#    if(nrow(result)==0)
+#      return (NULL)
 
     cnames <- c("id.1", paste(colN, ".1", sep=""), "id.2",
       paste(colN, ".2", sep=""), "is_match")
@@ -195,6 +195,20 @@ getPairsBackend <- function(object, filter.match,
     else
     {
 
+      cnames=c("id",
+        colnames(switch(class(object),
+          RLBigDataDedup = object@data,
+          RLBigDataLinkage = object@data1,
+          stop(paste("Unexpected class of object:", class(object)))
+        )), "is_match")
+      if (withClass)
+        cnames <- c(cnames, "Class")
+      if (withWeight)
+        cnames <- c(cnames, "Weight")
+
+      if (nrow(result)==0)
+        return(data.frame(matrix(nrow=0, ncol=length(cnames),
+          dimnames=list(character(0), cnames))))
       # if pairs are to be printed on consecutive lines, some formatting is
       # necassery
 
@@ -218,16 +232,6 @@ getPairsBackend <- function(object, filter.match,
       # reshape result into a table of suitable format
       m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
 
-      cnames=c("id",
-        colnames(switch(class(object),
-          RLBigDataDedup = object@data,
-          RLBigDataLinkage = object@data1,
-          stop(paste("Unexpected class of object:", class(object)))
-        )), "is_match")
-      if (withClass)
-        cnames <- c(cnames, "Class")
-      if (withWeight)
-        cnames <- c(cnames, "Weight")
 
       colnames(m) <- cnames
 

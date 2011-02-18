@@ -1,7 +1,6 @@
 \name{getPairs-methods}
 \docType{methods}
 \alias{getPairs-methods}
-\alias{getPairs,EMWeights-method}
 \alias{getPairs,RLResult-method}
 \title{Retreive record pairs}
 \description{

@@ -209,9 +209,8 @@ test.RLBigDataLinkage <- function()
 
   # too restrictive blocking (i.e. no resulting pairs) should fail)
   
-# TODO!    
-#  checkException(testResultFun(data2, data3, blockfld=1:4), 
-#    msg=" (no record pairs generated)")
+  checkException(testResultFun(data2, data3, blockfld=1:4),
+    msg=" (no record pairs generated)")
   
   # exclude columns, still allow blocking and phonetic code
   testResult=testResultFun(data2, data3, identity1=identity2, 
