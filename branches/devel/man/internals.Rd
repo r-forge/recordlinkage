@@ -28,6 +28,10 @@
 \alias{getDbFile-methods}
 \alias{getDbFile,RLBigData-method}
 \alias{getDbFile,RLResult-method}
+\alias{getColumnNames}
+\alias{getColumnNames-methods}
+\alias{getColumnNames,RLBigDataDedup-method}
+\alias{getColumnNames,RLBigDataLinkage-method}
 
 \title{
   Internal functions and methods
@@ -49,6 +53,7 @@
   getMatchCount(object)
   getNACount(object)
   getDbFile(object)
+  getColumnNames(object, withExcluded = FALSE)
 }
 
 \arguments{
@@ -63,6 +68,7 @@
   \item{coln}{Column names of records.}
   \item{db}{Database connection.}
   \item{cutoff}{Threshold from which string comparison values are rounded to 1.}
+  \item{withExcluded}{Logical. Wether to output names of excluded columns}
   \item{\dots}{Optional arguments.}
 }
 
@@ -91,8 +97,8 @@
       from a \code{"\linkS4class{RLBigData}"} object.}
     \item{\code{getDbFile}}{Returns path of database file for a data or result
       object.}
-
-
+    \item{\code{getColumnNames}}{Returns column names of a
+      \code{"\linkS4class{RLBigData}"} object as a character vector.}
 }
 
 }

@@ -22,17 +22,15 @@ test.compare.dedup.exceptions <- function()
   checkException(compare.dedup("andreas")) # wrong data type
 
   # illegal blocking definition
-#  checkException(compare.dedup(data1, blockfld="fname_c1")) # wrong type
   checkException(compare.dedup(data1, blockfld=TRUE)) # wrong type/value
   checkException(compare.dedup(data1, blockfld=list(1,list(4,6)))) # nested list
-#  checkException(compare.dedup(data1, blockfld=-3)) # negative index
-#  checkException(compare.dedup(data1, blockfld=0))
+  checkException(compare.dedup(data1, blockfld=-3)) # negative index
+  checkException(compare.dedup(data1, blockfld=0))
   
   # illegal phonetic definition
-  checkException(compare.dedup(data1, phonetic="fname_c1")) # wrong type
   checkException(compare.dedup(data1, phonetic=list(1,4))) # list not okay
-#  checkException(compare.dedup(data1, phonetic=-3)) # negative index
-#  checkException(compare.dedup(data1, phonetic=0))
+  checkException(compare.dedup(data1, phonetic=-3)) # negative index
+  checkException(compare.dedup(data1, phonetic=0))
     
   # illegal phonetic function
   checkException(compare.dedup(data1, phonetic=TRUE, phonfun=5)) # not a function
@@ -44,10 +42,9 @@ test.compare.dedup.exceptions <- function()
   # how to test if function returns the right thing?
     
   # illegal string comparator definition
-  checkException(compare.dedup(data1, strcmp="fname_c1")) # wrong type
   checkException(compare.dedup(data1, strcmp=list(1,4))) # list not okay
-#  checkException(compare.dedup(data1, strcmp=-3)) # negative index
-#  checkException(compare.dedup(data1, strcmp=0))
+  checkException(compare.dedup(data1, strcmp=-3)) # negative index
+  checkException(compare.dedup(data1, strcmp=0))
 
   # illegal string comparison function
   checkException(compare.dedup(data1, strcmp=TRUE, phonfun=5)) # not a function
@@ -60,7 +57,6 @@ test.compare.dedup.exceptions <- function()
 
   # illegal exclude field definition    
   checkException(compare.dedup(data1, exclude=c(4,10))) # out of bounds
-  checkException(compare.dedup(data1, exclude="fname_c1")) # wrong type
   checkException(compare.dedup(data1, exlude=list(1,4))) # list not okay
 #  checkException(compare.dedup(data1, exclude=-3)) # negative index
 #  checkException(compare.dedup(data1, exclude=0))

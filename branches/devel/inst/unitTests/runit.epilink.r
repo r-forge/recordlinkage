@@ -115,10 +115,13 @@ test.epiWeights <- function()
   res <- epiWeights(rpairs, f=0.25)
   checkEqualsNumeric(res$Wdata, c(0.75, 0.45),
     msg = "check weight calculation with external f")
+  res2 <- epiWeights(rpairs, f=rep(0.25, 4))
+  checkEqualsNumeric(res$Wdata, res2$Wdata,
+    msg = "check weight calculation with external f")
 
   # check range of weights for a suitable data set
   data(RLdata500)
-  rpairs <- compare.dedup(RLdata500, strcmp=TRUE)
+  rpairs <- compare.dedup(RLdata500, strcmp=TRUE, blockfld=list(1,3,5,6,7))
   rpairs <- epiWeights(rpairs)
   checkTrue(all(rpairs$Wdata >= 0 & rpairs$Wdata <=1),
     msg = "check weight range for large data set")

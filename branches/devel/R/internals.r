@@ -145,7 +145,6 @@ setMethod(
           result[,i] <- as.numeric(result[,i])
       }
     }
-    browser()
     # column names may have changed due to SQL conform conversion, reset them
     colnames(result)[-c(1,2,ncol(result))] <- getColumnNames(x)
     result

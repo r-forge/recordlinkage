@@ -160,10 +160,12 @@ setMethod(
     # (each column is an observation) to allow vectorization
     pairs=t(as.matrix(rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))]))
     pairs[is.na(pairs)]=0
-
-    # multiply each pattern with the epilink weights
     w=log((1-e)/f, base=2)
 
+    # recycle w (in order to get the sum of attribute weights right)
+    w <- numeric(nrow(pairs)) + w
+
+    # multiply each pattern with the epilink weights
     # the weight for each pattern is the sum of its attribute weights
     S <- colSums(pairs * w)/sum(w)
 
@@ -223,9 +225,8 @@ setMethod(
     else # RLBigDataLinkage
       nAttr <- ncol(rpairs_copy@data1) - length(rpairs_copy@excludeFld)
 
-    e=e+rep(0,nAttr)
-    f=f+rep(0,nAttr)
     w=log((1-e)/f, base=2)
+    w <- w + numeric(nAttr)
     sumW <- sum(w)
       # weight computation
 

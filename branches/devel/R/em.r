@@ -28,6 +28,14 @@ optimalThreshold <- function (rpairs, my=NaN, ny=NaN)
   if (!missing(ny) && (ny < 0 || ny > 1))
     stop(sprintf("Illegal value for ny: %g", ny))
 
+  # remove missing values for matching status
+  indMissing <- which(is.na(rpairs$pairs$is_match))
+  if(length(indMissing)==nrow(rpairs$pairs))
+    stop("Only pairs with unknown status in rpairs!")
+
+  if (length(indMissing >0)) rpairs <- rpairs[-indMissing]
+  
+  
 	o=order(rpairs$Wdata,decreasing=TRUE)
 	weights=rpairs$Wdata[o]
   n_data=length(weights)

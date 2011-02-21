@@ -293,7 +293,7 @@ test.getPairs.RLResult <- function()
   # call with default values
 # TODO
 
-  # test with sinlge.rows=FALSE
+  # test with sinlge.rows=TRUE
   # column classes are chosen so that text fields are factors and number fields
   # (including date of birth) are integer
 
@@ -302,7 +302,7 @@ test.getPairs.RLResult <- function()
   reqResult <- read.table("result2.getPairs.txt",sep=",",header=TRUE,
     colClasses = c(rep(c("integer", rep("factor", 4), rep("integer", 3)),2),
     "logical"))
-  testResult <- getPairs(rpairs, single.rows = FALSE)
+  testResult <- getPairs(rpairs, single.rows = TRUE)
   # assign explicit row names
   rownames(reqResult) <- rownames(reqResult)
   checkEquals(as.matrix(testResult), as.matrix(reqResult), msg = " all pairs on single rows")
@@ -315,7 +315,7 @@ test.getPairs.RLResult <- function()
   result2 <- reqResult
 
   # 1. show only non-matches
-  testResult <- getPairs(rpairs, single.rows = FALSE, filter.match="nonmatch")
+  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match="nonmatch")
   reqResult <- result2[c(2,4),]
   rownames(reqResult) <- 1:nrow(reqResult)
   checkTrue(all(testResult$is_match==FALSE),
@@ -327,7 +327,7 @@ test.getPairs.RLResult <- function()
     msg=" only non-matches")
 
   # 2. show only matches
-  testResult <- getPairs(rpairs, single.rows = FALSE, filter.match="match")
+  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match="match")
   reqResult <- result2[1,]
   rownames(reqResult) <- 1:nrow(reqResult)
   checkTrue(all(testResult$is_match==TRUE),
@@ -339,7 +339,7 @@ test.getPairs.RLResult <- function()
     msg=" only matches")
 
   # 3. show only unknown pairs
-  testResult <- getPairs(rpairs, single.rows = FALSE, filter.match="unknown")
+  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match="unknown")
   reqResult <- result2[c(3,5,6),]
   rownames(reqResult) <- 1:nrow(reqResult)
   checkTrue(all(is.na(testResult$is_match)),
@@ -351,7 +351,7 @@ test.getPairs.RLResult <- function()
     msg=" only unknown")
 
   # 4. show non-matches and unknown
-  testResult <- getPairs(rpairs, single.rows = FALSE,
+  testResult <- getPairs(rpairs, single.rows = TRUE,
     filter.match=c("nonmatch","unknown"))
   reqResult <- result2[2:6,]
   rownames(reqResult) <- 1:nrow(reqResult)
@@ -364,7 +364,7 @@ test.getPairs.RLResult <- function()
     msg=" non-match or unknown")
 
   # 5. show matches and unknown
-  testResult <- getPairs(rpairs, single.rows = FALSE,
+  testResult <- getPairs(rpairs, single.rows = TRUE,
     filter.match=c("match","unknown"))
   reqResult <- result2[c(1,3,5,6),]
   rownames(reqResult) <- 1:nrow(reqResult)
@@ -377,7 +377,7 @@ test.getPairs.RLResult <- function()
     msg=" match or unknown")
 
   # 6. show matches and non-matches
-  testResult <- getPairs(rpairs, single.rows = FALSE,
+  testResult <- getPairs(rpairs, single.rows = TRUE,
     filter.match=c("match","nonmatch"))
   reqResult <- result2[c(1,2,4),]
   rownames(reqResult) <- 1:nrow(reqResult)
@@ -392,20 +392,20 @@ test.getPairs.RLResult <- function()
   # check that empty result does not throw an error
   identity2 <- 1:4 # all records are different -> no matches
   rpairs <- RLBigDataDedup(data1, identity = identity2)
-  testResult <- getPairs(rpairs, single.rows = FALSE, filter.match = "match")
+  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match = "match")
   checkEquals(as.matrix(testResult), as.matrix(result2[NULL,]),
     msg = " empty result 1")
-  testResult <- getPairs(rpairs, single.rows = FALSE,
+  testResult <- getPairs(rpairs, single.rows = TRUE,
     filter.match = c("match", "unknown"))
   checkEquals(as.matrix(testResult), as.matrix(result2[NULL,]),
     msg = " empty result 2")
 
   identity2 <- rep(NA, 4) # only "unknown" pairs
   rpairs <- RLBigDataDedup(data1, identity = identity2)
-  testResult <- getPairs(rpairs, single.rows = FALSE, filter.match = "nonmatch")
+  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match = "nonmatch")
   checkEquals(as.matrix(testResult), as.matrix(result2[NULL,]),
     msg = " empty result 3")
-  testResult <- getPairs(rpairs, single.rows = FALSE,
+  testResult <- getPairs(rpairs, single.rows = TRUE,
     filter.match = c("match", "nonmatch"))
   checkEquals(as.matrix(testResult), as.matrix(result2[NULL,]),
     msg = " empty result 4")
@@ -414,7 +414,7 @@ test.getPairs.RLResult <- function()
   # check column names if database names are different
   colnames(data1)=c("fname.c1", "fname.c2", "lname.c1", "lname.c2", "by", "where", "select")
   rpairs <- RLBigDataDedup(data1, identity = identity2)
-  testResult <- getPairs(rpairs)
+  testResult <- getPairs(rpairs, single.rows=TRUE)
   checkEquals(colnames(testResult), c("id.1", paste(colnames(data1), ".1", sep=""),
     "id.2", paste(colnames(data1), ".2", sep=""), "is_match"),
     msg = " check column names")
