@@ -172,8 +172,10 @@ getPairsBackend <- function(object, filter.match,
 #      return (NULL)
 
     cnames <- c("id.1", paste(colN, ".1", sep=""), "id.2",
-      paste(colN, ".2", sep=""), "is_match")
+      paste(colN, ".2", sep=""))
 
+    if (withMatch)
+      cnames <- c(cnames, "is_match")
     if (withClass)
       cnames <- c(cnames, "Class")
     if (withWeight)
@@ -186,7 +188,8 @@ getPairsBackend <- function(object, filter.match,
     # as matching status. This causes RSQLite to cast the column to character
     # (see comment for RS_SQLite_fetch in package RSQLite, file src/RS-SQLite.c)
     # and finally to the unintended conversion "0" -> NA / "1" -> NA
-    result$is_match <- as.logical(as.numeric(result$is_match))
+    if (withMatch)
+      result$is_match <- as.logical(as.numeric(result$is_match))
     if (withClass)
     {
       result$Class <- factor(result$Class, levels=1:3)
@@ -204,7 +207,9 @@ getPairsBackend <- function(object, filter.match,
           RLBigDataDedup = object@data,
           RLBigDataLinkage = object@data1,
           stop(paste("Unexpected class of object:", class(object)))
-        )), "is_match")
+        )))
+      if (withMatch)
+        cnames <- c(cnames, "is_match")
       if (withClass)
         cnames <- c(cnames, "Class")
       if (withWeight)
@@ -217,12 +222,12 @@ getPairsBackend <- function(object, filter.match,
       # necassery
 
       # This function inserts some white space:
-      #   1. The second row of every pair has the matching status and possibly
+      #   1. The second row of every pair has possible the matching status,
       #       classification and weight, the other one blank fields
       #   2. A line of white space seperates record pairs
 
       # compute number of additional fields (weight etc)
-      nAdditional <- 1 + as.numeric(withWeight) + as.numeric(withClass)
+      nAdditional <- as.numeric(withMatch) + as.numeric(withWeight) + as.numeric(withClass)
     	printfun=function(x)
       {
         c(x[1:((length(x)-nAdditional)/2)],rep("", nAdditional),
@@ -255,8 +260,8 @@ setMethod(
   signature = "RLBigData",
   definition = function(object, max.weight = Inf, min.weight = -Inf,
     filter.match = c("match", "unknown", "nonmatch"),
-    withWeight = dbExistsTable(object@con, "Wdata"), single.rows = FALSE,
-    sort = TRUE)
+    withWeight = dbExistsTable(object@con, "Wdata"), withMatch = TRUE,
+    single.rows = FALSE, sort = TRUE)
   {
   
     # check arguments
@@ -272,8 +277,8 @@ setMethod(
 
     # call backend function
     getPairsBackend(object, filter.match=filter.match, max.weight = max.weight,
-      min.weight = min.weight, withWeight = withWeight, sort = withWeight,
-      single.rows = single.rows)
+      min.weight = min.weight, withWeight = withWeight, withMatch = withMatch,
+      sort = withWeight, single.rows = single.rows)
 
   }
 )

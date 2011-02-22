@@ -232,7 +232,29 @@ test.getPairs.RLBigDataDedup <- function()
     msg = " check column names")
 
   # TODO check withMatch
-  # TODO check withWeights
+  testResult <- getPairs(epiWeights(rpairs), withMatch = TRUE)
+  checkTrue(!is.null(testResult$is_match), msg = "check withMatch = TRUE")
+
+  testResult <- getPairs(rpairs, withMatch = FALSE)
+  checkTrue(is.null(testResult$is_match), msg = "check withMatch = FALSE")
+
+  # TODO same check(s) for single.rows=FALSE
+  
+  # check withWeights
+  testResult <- getPairs(epiWeights(rpairs), withWeight = TRUE)
+  checkTrue(!is.null(testResult$Weight), msg = "check withWeight = TRUE")
+
+  testResult <- getPairs(rpairs, withWeight = FALSE)
+  checkTrue(is.null(testResult$Weight), msg = "check withWeight = FALSE")
+
+  # check sort
+  # only correct sorting with sort=TRUE can be tested, even without being
+  # requested, the pairs might be sorted due to the query plan
+  testResult <- getPairs(epiWeights(rpairs), single.row=TRUE)
+  checkEquals(testResult$Weight, sort(testResult$Weight, decreasing = TRUE),
+    msg = "check sorting by weight")
+  
+  
 }
 
 
@@ -302,17 +324,17 @@ test.getPairs.RLResult <- function()
   # only links
   testResult <- sort.result(getPairs(result, filter.link = "link", single.rows = TRUE))
   checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="L",]),
-    msg = "check only links)
+    msg = "check only links")
   
   # only possible links
   testResult <- sort.result(getPairs(result, filter.link = "possible", single.rows = TRUE))
   checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="P",]),
-    msg = "check only possible links)
+    msg = "check only possible links")
 
   # only non-links
   testResult <- sort.result(getPairs(result, filter.link = "nonlink", single.rows = TRUE))
   checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="N",]),
-    msg = "check only non-links)
+    msg = "check only non-links")
 
   # links and possible links
   testResult <- sort.result(getPairs(result, filter.link = c("link", "possible"), single.rows = TRUE))

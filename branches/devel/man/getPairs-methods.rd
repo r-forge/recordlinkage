@@ -19,7 +19,8 @@
 
 \S4method{getPairs}{RLBigData}(object, max.weight = Inf, min.weight = -Inf,
     filter.match = c("match", "unknown", "nonmatch"),
-    withWeight = dbExistsTable(object@con, "Wdata"), single.rows = FALSE,
+    withWeight = dbExistsTable(object@con, "Wdata"), withMatch = TRUE,
+    single.rows = FALSE,
     sort = TRUE)
 
 \S4method{getPairs}{RLResult}(object, filter.match = c("match", "unknown", "nonmatch"),
