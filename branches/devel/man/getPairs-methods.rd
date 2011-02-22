@@ -37,13 +37,13 @@ getFalse(object, single.rows = FALSE)
 \arguments{
   \item{object}{The data or result object from which to extract record pairs.}
   \item{max.weight, min.weight}{Real numbers. Upper and lower weight threshold.}
-  \item{filter.match}{Character vector, a nonempty subset of \code{c("match", "nonmatch", "unkown")
-    denoting which pairs to allow in the output.}}
-  \item{filter.link}{Character vector, a nonempty subset of \code{c("link", "nonmatch", "unkown")}
+  \item{filter.match}{Character vector, a nonempty subset of \code{c("match", "nonmatch", "unkown")}
     denoting which pairs to allow in the output.}
-  \item{withWeight}{Logical. Wether to include linkage weights in the output.}
-  \item{withMatch}{Logical. Wether to include matching status in the output.}
-  \item{withClass}{Logical. Wether to include classification result in the output.}
+  \item{filter.link}{Character vector, a nonempty subset of \code{c("link", "nonlink", "unkown")}
+    denoting which pairs to allow in the output.}
+  \item{withWeight}{Logical. Whether to include linkage weights in the output.}
+  \item{withMatch}{Logical. Whether to include matching status in the output.}
+  \item{withClass}{Logical. Whether to include classification result in the output.}
   \item{single.rows}{Logical. Wether to print record pairs in one row instead
     of two consecutive rows.}
   \item{show}{Deprecated. Selects which records to show, one of \code{"links"},
