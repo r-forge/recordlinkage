@@ -230,13 +230,16 @@ test.getPairs.RLBigDataDedup <- function()
   checkEquals(colnames(testResult), c("id.1", paste(colnames(data1), ".1", sep=""),
     "id.2", paste(colnames(data1), ".2", sep=""), "is_match"),
     msg = " check column names")
+
+  # TODO check withMatch
+  # TODO check withWeights
 }
 
 
 test.getPairs.RLResult.exceptions <- function()
 {
   # single.rows
-
+  # TODO: illegal value for filter.links
 
 }
 
@@ -267,157 +270,109 @@ test.getPairs.RLResult.exceptions <- function()
 test.getPairs.RLResult <- function()
 {
 
-
+  # utility function to sort results
+  sort.result <- function(res)
+  {
+    res[order(res$id.1, res$id.2),]
+  }
+  
+  # utility function to convert data.frame to matrix, circumventing
+  # alignment of non-character columns
+  asMatrix <- function(df)
+  {
+    array(unlist(lapply(df, as.character)), dim = dim(df))
+  }
   # set up test object
   # match status of test pairs is: T F NA F NA NA
-  # link status set to:            L L L  N N  N
+  # link status set to:            L L P  N N  N
   rpairs <- RLBigDataDedup(data1, identity = identity1)
   result <- new("RLResult", data = rpairs,
-    links = matrix(c(1,2,1,3,1,4), ncol = 2, byrow = TRUE),
-    possibleLinks=matrix(ncol=2, nrow=0), nPairs = 6)
+    links = matrix(c(1,2,1,3), ncol = 2, byrow = TRUE),
+    possibleLinks=matrix(c(1,4), ncol=2, nrow=1), nPairs = 6)
+
+  # read reference result, sort by ids
+  reqResult <- read.table("result3.getPairs.txt",sep=",",header=TRUE, colClasses="factor")
+  reqResult <- reqResult[order(reqResult$id.1, reqResult$id.2),]
+
+  # test only for arguments that are unique to the RLResult-method
+  # check with single.rows=TRUE first, then one check for single.rows=FALSE
+  
+  # check filter.links
+  
+  # only links
+  testResult <- sort.result(getPairs(result, filter.link = "link", single.rows = TRUE))
+  checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="L",]),
+    msg = "check only links)
+  
+  # only possible links
+  testResult <- sort.result(getPairs(result, filter.link = "possible", single.rows = TRUE))
+  checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="P",]),
+    msg = "check only possible links)
+
+  # only non-links
+  testResult <- sort.result(getPairs(result, filter.link = "nonlink", single.rows = TRUE))
+  checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="N",]),
+    msg = "check only non-links)
+
+  # links and possible links
+  testResult <- sort.result(getPairs(result, filter.link = c("link", "possible"), single.rows = TRUE))
+  checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="L" |
+    reqResult$Class=="P",]),
+    msg = "check only links and possible links")
+
+  # links and non-links
+  testResult <- sort.result(getPairs(result, filter.link = c("link", "nonlink"), single.rows = TRUE))
+  checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="L" |
+    reqResult$Class=="N",]),
+    msg = "check only links and non-links")
+
+  # non-links and possible links
+  testResult <- sort.result(getPairs(result, filter.link = c("possible", "nonlink"), single.rows = TRUE))
+  checkEquals(asMatrix(testResult), asMatrix(reqResult[reqResult$Class=="P" |
+    reqResult$Class=="N",]),
+    msg = "check non-links and possible links")
+
+  # no restriction
+  testResult <- sort.result(getPairs(result, single.rows = TRUE))
+  checkEquals(asMatrix(testResult), asMatrix(reqResult),
+    msg = "check without restrictions")
+
+  # test exclusion of linkage result
+  testResult <- sort.result(getPairs(result, single.rows = TRUE, withClass = FALSE))
+  classInd <- match("Class", colnames(reqResult))
+  checkEquals(asMatrix(testResult), asMatrix(reqResult[,-classInd]),
+    msg = "check without linkage result")
 
 
-  # get
+  # check combination of filter.match and filter.link (only selected examples)
+
+  # only true non-links
+  testResult <- sort.result(getPairs(result, single.rows = TRUE,
+    filter.link = "nonlink", filter.match = "nonmatch"))
+  checkEquals(asMatrix(testResult),
+    asMatrix(reqResult[which(reqResult$is_match=="FALSE" & reqResult$Class=="N"),]),
+    msg = "check true non-links")
+
+  # only false links
+  testResult <- sort.result(getPairs(result, single.rows = TRUE,
+    filter.link = "link", filter.match = "nonmatch"))
+  checkEquals(asMatrix(testResult),
+    asMatrix(reqResult[which(reqResult$is_match=="FALSE" & reqResult$Class=="L"),]),
+    msg = "check false links")
+
+  # only true links
+  testResult <- sort.result(getPairs(result, single.rows = TRUE,
+    filter.link = "link", filter.match = "match"))
+  checkEquals(asMatrix(testResult),
+    asMatrix(reqResult[which(reqResult$is_match=="TRUE" & reqResult$Class=="L"),]),
+    msg = "check true links")
+
+  # there should be no false non-links in this example
+  testResult <- sort.result(getPairs(result, single.rows = TRUE,
+    filter.link = "nonlink", filter.match = "match"))
+  checkEquals(nrow(testResult), 0, msg = "check false non-links")
 
 
-  # this gives the following combinations:
-
-
-
-
-
-  reqResult <- read.table("result1.getPairs.txt",sep=",",header=TRUE, colClasses="factor")
-
-
-  # The resulting set consists of 6 data pairs
-  # call with default values
-# TODO
-
-  # test with sinlge.rows=TRUE
-  # column classes are chosen so that text fields are factors and number fields
-  # (including date of birth) are integer
-
-  # but: column classes are ignored as it is difficult to enforce
-  # the same format as in the data (conversion by SQLite engine)
-  reqResult <- read.table("result2.getPairs.txt",sep=",",header=TRUE,
-    colClasses = c(rep(c("integer", rep("factor", 4), rep("integer", 3)),2),
-    "logical"))
-  testResult <- getPairs(rpairs, single.rows = TRUE)
-  # assign explicit row names
-  rownames(reqResult) <- rownames(reqResult)
-  checkEquals(as.matrix(testResult), as.matrix(reqResult), msg = " all pairs on single rows")
-
-  # tests for argument filter.match (and single.rows=FALSE for easier coding)
-  #
-  # The table of expected results (reqTable) holds pairs with the following
-  # status: T F NA F NA NA. In the following, the slice with "allowed"
-  # outcome is selected and compared to the output of getPairs()
-  result2 <- reqResult
-
-  # 1. show only non-matches
-  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match="nonmatch")
-  reqResult <- result2[c(2,4),]
-  rownames(reqResult) <- 1:nrow(reqResult)
-  checkTrue(all(testResult$is_match==FALSE),
-    msg=" only non-matches")
-  # check also the prepared test data for consistency
-  checkTrue(all(reqResult$is_match==FALSE),
-    msg=" only non-matches")
-  checkEquals(as.matrix(testResult), as.matrix(reqResult),
-    msg=" only non-matches")
-
-  # 2. show only matches
-  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match="match")
-  reqResult <- result2[1,]
-  rownames(reqResult) <- 1:nrow(reqResult)
-  checkTrue(all(testResult$is_match==TRUE),
-    msg=" only matches")
-  # check also the prepared test data for consistency
-  checkTrue(all(reqResult$is_match==TRUE),
-    msg=" only matches")
-  checkEquals(as.matrix(testResult), as.matrix(reqResult),
-    msg=" only matches")
-
-  # 3. show only unknown pairs
-  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match="unknown")
-  reqResult <- result2[c(3,5,6),]
-  rownames(reqResult) <- 1:nrow(reqResult)
-  checkTrue(all(is.na(testResult$is_match)),
-    msg=" only unknown")
-  # check also the prepared test data for consistency
-  checkTrue(all(is.na(reqResult$is_match)),
-    msg=" only unknown")
-  checkEquals(as.matrix(testResult), as.matrix(reqResult),
-    msg=" only unknown")
-
-  # 4. show non-matches and unknown
-  testResult <- getPairs(rpairs, single.rows = TRUE,
-    filter.match=c("nonmatch","unknown"))
-  reqResult <- result2[2:6,]
-  rownames(reqResult) <- 1:nrow(reqResult)
-  checkTrue(all(is.na(testResult$is_match) | testResult$is_match==FALSE),
-    msg=" non-match or unknown")
-  # check also the prepared test data for consistency
-  checkTrue(all(is.na(reqResult$is_match) | reqResult$is_match==FALSE),
-    msg=" non-match or unknown")
-  checkEquals(as.matrix(testResult), as.matrix(reqResult),
-    msg=" non-match or unknown")
-
-  # 5. show matches and unknown
-  testResult <- getPairs(rpairs, single.rows = TRUE,
-    filter.match=c("match","unknown"))
-  reqResult <- result2[c(1,3,5,6),]
-  rownames(reqResult) <- 1:nrow(reqResult)
-  checkTrue(all(is.na(testResult$is_match) | testResult$is_match==TRUE),
-    msg=" match or unknown")
-  # check also the prepared test data for consistency
-  checkTrue(all(is.na(reqResult$is_match) | reqResult$is_match==TRUE),
-    msg=" match or unknown")
-  checkEquals(as.matrix(testResult), as.matrix(reqResult),
-    msg=" match or unknown")
-
-  # 6. show matches and non-matches
-  testResult <- getPairs(rpairs, single.rows = TRUE,
-    filter.match=c("match","nonmatch"))
-  reqResult <- result2[c(1,2,4),]
-  rownames(reqResult) <- 1:nrow(reqResult)
-  checkTrue(all(testResult$is_match==FALSE | testResult$is_match==TRUE),
-    msg=" match or non-match")
-  # check also the prepared test data for consistency
-  checkTrue(all(reqResult$is_match==FALSE | reqResult$is_match==TRUE),
-    msg=" match or non-match")
-  checkEquals(as.matrix(testResult), as.matrix(reqResult),
-    msg=" match or non-match")
-
-  # check that empty result does not throw an error
-  identity2 <- 1:4 # all records are different -> no matches
-  rpairs <- RLBigDataDedup(data1, identity = identity2)
-  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match = "match")
-  checkEquals(as.matrix(testResult), as.matrix(result2[NULL,]),
-    msg = " empty result 1")
-  testResult <- getPairs(rpairs, single.rows = TRUE,
-    filter.match = c("match", "unknown"))
-  checkEquals(as.matrix(testResult), as.matrix(result2[NULL,]),
-    msg = " empty result 2")
-
-  identity2 <- rep(NA, 4) # only "unknown" pairs
-  rpairs <- RLBigDataDedup(data1, identity = identity2)
-  testResult <- getPairs(rpairs, single.rows = TRUE, filter.match = "nonmatch")
-  checkEquals(as.matrix(testResult), as.matrix(result2[NULL,]),
-    msg = " empty result 3")
-  testResult <- getPairs(rpairs, single.rows = TRUE,
-    filter.match = c("match", "nonmatch"))
-  checkEquals(as.matrix(testResult), as.matrix(result2[NULL,]),
-    msg = " empty result 4")
-
-
-  # check column names if database names are different
-  colnames(data1)=c("fname.c1", "fname.c2", "lname.c1", "lname.c2", "by", "where", "select")
-  rpairs <- RLBigDataDedup(data1, identity = identity2)
-  testResult <- getPairs(rpairs, single.rows=TRUE)
-  checkEquals(colnames(testResult), c("id.1", paste(colnames(data1), ".1", sep=""),
-    "id.2", paste(colnames(data1), ".2", sep=""), "is_match"),
-    msg = " check column names")
 }
 
 
