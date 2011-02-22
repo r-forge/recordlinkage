@@ -182,7 +182,11 @@ getPairsBackend <- function(object, filter.match,
     colnames(result) <- cnames
 
     # converion of SQLite coding to more apropriate types
-    result$is_match <- as.logical(result$is_match)
+    # double conversion is necessary for cases when the first row has NA
+    # as matching status. This causes RSQLite to cast the column to character
+    # (see comment for RS_SQLite_fetch in package RSQLite, file src/RS-SQLite.c)
+    # and finally to the unintended conversion "0" -> NA / "1" -> NA
+    result$is_match <- as.logical(as.numeric(result$is_match))
     if (withClass)
     {
       result$Class <- factor(result$Class, levels=1:3)
