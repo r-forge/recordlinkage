@@ -363,7 +363,7 @@ setMethod(
 
   	if (!is.null(rpairs$Wdata))
     {
-      ind=which(rpairs$Wdata < max.weight & rpairs$Wdata >= min.weight)
+      ind=which(rpairs$Wdata <= max.weight & rpairs$Wdata >= min.weight)
       weights <- rpairs$Wdata
     }
     else
