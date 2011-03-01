@@ -3,6 +3,17 @@
   # data used for the test
   data1 <<- read.table("data1.getPairs.txt", sep=",", na.strings="",header=TRUE)
   identity1 <<- scan("identity1.getPairs.txt",comment.char="#",sep=",")
+  data2 <<- read.table("data2.compare.txt", sep=",", na.strings="",header=TRUE)
+  identity2 <<-scan("identity2.compare.txt",comment.char="#",sep=",")
+  data3 <<- read.table("data3.compare.txt", sep=",", na.strings="",header=TRUE)
+  identity3 <<- scan("identity3.compare.txt",comment.char="#",sep=",")
+}
+
+# utility function to convert data.frame to matrix, circumventing
+# alignment of non-character columns
+asMatrix <- function(df)
+{
+  array(unlist(lapply(df, as.character)), dim = dim(df))
 }
 
 # Test behaviour for illegal input
@@ -231,21 +242,33 @@ test.getPairs.RLBigDataDedup <- function()
     "id.2", paste(colnames(data1), ".2", sep=""), "is_match"),
     msg = " check column names")
 
-  # TODO check withMatch
-  testResult <- getPairs(epiWeights(rpairs), withMatch = TRUE)
+  # check withMatch
+  testResult <- getPairs(rpairs, withMatch = TRUE)
   checkTrue(!is.null(testResult$is_match), msg = "check withMatch = TRUE")
 
   testResult <- getPairs(rpairs, withMatch = FALSE)
   checkTrue(is.null(testResult$is_match), msg = "check withMatch = FALSE")
 
-  # TODO same check(s) for single.rows=FALSE
-  
+  # same checks for single.rows=TRUE
+  testResult <- getPairs(epiWeights(rpairs), withMatch = TRUE, single.rows = TRUE)
+  checkTrue(!is.null(testResult$is_match), msg = "check withMatch = TRUE, single.rows = TRUE")
+
+  testResult <- getPairs(epiWeights(rpairs), withMatch = FALSE, single.rows = TRUE)
+  checkTrue(is.null(testResult$is_match), msg = "check withMatch = FALSE, single.rows = TRUE")
+
   # check withWeights
   testResult <- getPairs(epiWeights(rpairs), withWeight = TRUE)
   checkTrue(!is.null(testResult$Weight), msg = "check withWeight = TRUE")
 
-  testResult <- getPairs(rpairs, withWeight = FALSE)
+  testResult <- getPairs(epiWeights(rpairs), withWeight = FALSE)
   checkTrue(is.null(testResult$Weight), msg = "check withWeight = FALSE")
+
+  # same checks for single.rows=TRUE
+  testResult <- getPairs(epiWeights(rpairs), withWeight = TRUE, single.rows = TRUE)
+  checkTrue(!is.null(testResult$Weight), msg = "check withMatch = TRUE, single.rows = TRUE")
+
+  testResult <- getPairs(rpairs, withWeight = FALSE, single.rows = TRUE)
+  checkTrue(is.null(testResult$Weight), msg = "check withMatch = FALSE, single.rows = TRUE")
 
   # check sort
   # only correct sorting with sort=TRUE can be tested, even without being
@@ -257,37 +280,37 @@ test.getPairs.RLBigDataDedup <- function()
   
 }
 
+test.getPairs.RLBigDataLinkage <- function()
+{
+  # only basic test, testing different arguments is done in test for RLBigDataDedup
+  rpairs <- RLBigDataLinkage(data2, data3, identity1 = identity2, identity2 = identity3)
+  reqResult <- read.table("result4.getPairs.txt",sep=",",header=TRUE,na.string="")
+  checkEquals(asMatrix(getPairs(rpairs, single.rows=TRUE)), asMatrix(reqResult),
+    msg = "check without restrictions")
+
+  # only matches
+  checkEquals(asMatrix(getPairs(rpairs, single.rows=TRUE, filter.match = "match")),
+    asMatrix(reqResult[reqResult$is_match==TRUE,]),
+    msg = "check matches only")
+
+  # only non-matches
+  checkEquals(asMatrix(getPairs(rpairs, single.rows=TRUE, filter.match = "nonmatch")),
+    asMatrix(reqResult[reqResult$is_match==FALSE,]),
+    msg = "check non-matches only")
+
+  # result for pairs with unknown status should be empty in this case
+  testResult <- getPairs(rpairs, single.rows=TRUE, filter.match = "unknown")
+  checkEquals(nrow(testResult), 0, msg = "check unknown matches only")
+}
+
 
 test.getPairs.RLResult.exceptions <- function()
 {
-  # single.rows
-  # TODO: illegal value for filter.links
 
 }
 
 
 
-# better: test of getPairs in order to be independent of actual SQL
-# realization
-#test.getPairsSQL <- function()
-#{
-#  # create dataset with reduced set of attributes (to shorten SQL strings)
-#  smallData <- data1[,c(1,5)]
-#  colnames(smallData) <- c("a", "b")
-#  rpairs <- RLBigDataDedup(smallData, identity1)
-#
-#  # unrestricted
-#  testResult <- getPairsSQL(
-#    rpairs,
-#    filter.match = c("match", "non-match", "unknown"),
-#    filter.link = c("link", "nonlink", "possible"),
-#    max.weight = Inf,
-#    min.weight = -Inf
-#  )
-#  checkEquals(testResult, paste"select t1.id as id.1, t1.a as a.1, t2.b as b.1,"
-#
-#
-#}
 
 test.getPairs.RLResult <- function()
 {
@@ -298,12 +321,6 @@ test.getPairs.RLResult <- function()
     res[order(res$id.1, res$id.2),]
   }
   
-  # utility function to convert data.frame to matrix, circumventing
-  # alignment of non-character columns
-  asMatrix <- function(df)
-  {
-    array(unlist(lapply(df, as.character)), dim = dim(df))
-  }
   # set up test object
   # match status of test pairs is: T F NA F NA NA
   # link status set to:            L L P  N N  N

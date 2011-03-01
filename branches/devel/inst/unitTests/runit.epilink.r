@@ -213,6 +213,68 @@ test.epiClassify <- function()
   
 }
 
+test.epiClassify.RLBigData <- function()
+{
+  rpairs <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
+  rpairs <- epiWeights(rpairs)
+  Wdata <- dbReadTable(rpairs@con, "Wdata")
+  minWeight <- min(Wdata$W)
+  maxWeight <- max(Wdata$W)
+
+  # test with one threshold
+  threshold.upper <- runif(1, minWeight, maxWeight)
+  result <- epiClassify(rpairs, threshold.upper=threshold.upper)
+  reqLinks <- Wdata[Wdata$W >= threshold.upper, 1:2]
+  checkEqualsNumeric(result@links[order(result@links[,1], result@links[,2]),],
+    as.matrix(reqLinks[order(reqLinks$id1, reqLinks$id2), ]),
+    msg = "check links, only upper threshold, feasible value")
+  checkEqualsNumeric(nrow(result@possibleLinks), 0,
+    msg = "check possible links, only upper threshold, feasible value")
+
+
+  # test with two thresholds
+  threshold.upper <- runif(1, 0.6, maxWeight)
+  threshold.lower <- runif(1, minWeight, 0.5)
+  result <- epiClassify(rpairs, threshold.upper, threshold.lower)
+  reqLinks <- Wdata[Wdata$W >= threshold.upper, 1:2]
+  reqPossibleLinks <- Wdata[Wdata$W < threshold.upper & Wdata$W >= threshold.lower, 1:2]
+
+  checkEqualsNumeric(result@links[order(result@links[,1], result@links[,2]),],
+    as.matrix(reqLinks[order(reqLinks$id1, reqLinks$id2), ]),
+    msg = "check links, only upper threshold, feasible value")
+  checkEqualsNumeric(result@possibleLinks[order(result@possibleLinks[,1],
+    result@possibleLinks[,2]),],
+    as.matrix(reqPossibleLinks[order(reqPossibleLinks$id1, reqPossibleLinks$id2), ]),
+    msg = "check possible links, two thresholds, feasible value")
+
+
+  # check case with only links
+  result <- epiClassify(rpairs, threshold.upper=minWeight)
+  reqLinks <- Wdata[ , 1:2]
+  checkEqualsNumeric(result@links[order(result@links[,1], result@links[,2]),],
+    as.matrix(reqLinks[order(reqLinks$id1, reqLinks$id2), ]),
+    msg = "check links, only upper threshold, only links")
+  checkEqualsNumeric(nrow(result@possibleLinks), 0,
+    msg = "check possible links, only upper threshold, only links")
+
+
+  # check case with only non-links
+  result <- epiClassify(rpairs, threshold.upper=maxWeight+0.1)
+  checkEqualsNumeric(nrow(result@links), 0,
+    msg = "check possible links, only upper threshold, only non-links")
+  checkEqualsNumeric(nrow(result@possibleLinks), 0,
+    msg = "check possible links, only upper threshold, only non-links")
+
+
+  # check case with only possible links
+  result <- epiClassify(rpairs, maxWeight+0.1, minWeight)
+  reqPossibleLinks <- Wdata[ , 1:2]
+  checkEqualsNumeric(result@possibleLinks[order(result@possibleLinks[,1],
+    result@possibleLinks[,2]),],
+    as.matrix(reqPossibleLinks[order(reqPossibleLinks$id1, reqPossibleLinks$id2), ]),
+    msg = "check possible links, two thresholds, only possible links")
+}
+
 test.epiWeights.RLBigDataDedup <- function()
 {
   rpairs <- RLBigDataDedup(RLdata500, blockfld=list(1,3,5,6,7), strcmp=1:4)
