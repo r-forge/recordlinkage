@@ -56,6 +56,7 @@ setMethod(
      # Spaltennamen angleichen -> funktioniert so nicht!
      # TODO: Fehlerbehandlung für ungleiche Attributanzahl
   #     colnames(slice) <- c("id1", "id2", levels(model$model$frame$var)[-1])
+      slice[is.na(slice)] <- 0
       prediction=switch(model$method,
     	  svm=predict(model$model, newdata=slice,...),
           rpart=predict(model$model, newdata=slice,type="class",...),
