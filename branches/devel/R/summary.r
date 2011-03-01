@@ -41,6 +41,7 @@ summary.RecLinkData <- function(object,...)
     names(c)[1]=sprintf("[%g,%g]", h$breaks[1], h$breaks[2])
 		print(c)
 	}
+	return(invisible(NULL))
 }
 
 
@@ -73,6 +74,7 @@ summary.RecLinkResult <- function (object, ...)
     cat("Classification table:\n\n")
     print(table(as.logical(object$pairs$is_match),object$prediction,
           dnn=list("true status","classification"),useNA="ifany"))
+  	return(invisible(NULL))
 }
 
 texSummary <- function (object)
