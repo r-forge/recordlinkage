@@ -31,6 +31,8 @@ trainSupv <- function(rpairs,method,use.pred=FALSE,omit.possible=TRUE,
 	# delete possible links if desired
 	if (omit.possible)
 		pairs=pairs[pairs$is_match!="P",,drop=FALSE]
+  # drop unused levels
+  pairs$is_match <- factor(pairs$is_match)
 
   # now check if a usable training set remains, i.e. there are
   # at least two distinct examples with different match outcome
