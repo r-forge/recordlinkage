@@ -17,10 +17,16 @@
   \item{object}{The object for which to show a summary.}
 }
 \details{
-  Object will be shown automatically by a call to \code{show}.
+   The printed information consists of:
+  \itemize{
+    \item{The type of linkage procedure (deduplication or linkage).}
+    \item{The number of records.}
+    \item{The number of true matches and pairs with unknown status.}
+  }
 }
+
 \value{
-  \code{show} returns an invisible \code{NULL}.
+  \code{show} returns an invisible \code{NULL} and is used for its side effect.
 }
 
 \author{

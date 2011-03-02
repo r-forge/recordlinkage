@@ -19,15 +19,15 @@
 \arguments{
   \item{model}{Object of class \code{RecLinkClassif}. The
     calibrated model. See \code{\link{trainSupv}}.}
-  \item{newdata}{Object of class \code{"{RecLinkData}"}
+  \item{newdata}{Object of class \code{"\link{RecLinkData}"}
     or \code{"\linkS4class{RLBigData}"}. The data to classify.}
-  \item{\dots}{Further arguments for the \code{\link{predict}} function.}
+  \item{\dots}{Further arguments for the \code{\link{predict}} method.}
 }
 
 \details{
 
   The record pairs in \code{newdata} are classified by calling
-  the appropriate \code{\link{predict}} function for \code{model$model}.
+  the appropriate \code{\link{predict}} method for \code{model$model}.
   
 }
 
@@ -44,8 +44,8 @@
 \author{Andreas Borg, Murat Sariyar}
 
 \seealso{\code{\link{trainSupv}} for training of classifiers,
-         \code{\link{classifyUnsup} for unsupervised classification.}
-         }
+         \code{\link{classifyUnsup}} for unsupervised classification.}
+
 \examples{
 # Split data into training and validation set, train and classify with rpart
 data(RLdata500)

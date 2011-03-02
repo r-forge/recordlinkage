@@ -11,32 +11,32 @@ Abstract class for big data sets.
 \section{Objects from the Class}{A virtual Class: No objects may be created from it.}
 \section{Slots in "RLBigData"}{
   \describe{
-    \item{\code{frequencies}:}{Object of class \code{"numeric"} 
+    \item{\code{frequencies}:}{Object of class \code{"numeric"}.
       Average frequency of values for each column of the underlying data
       (1 / of number of distinct values)
     }
-    \item{\code{blockFld}:}{Object of class \code{"list"} Blocking definiton.
+    \item{\code{blockFld}:}{Object of class \code{"list"}. Blocking definiton.
       See ... for details.
     }
-    \item{\code{excludeFld}:}{Object of class \code{"numeric"}
+    \item{\code{excludeFld}:}{Object of class \code{"numeric"}.
       Indices of attributes which are not considered for comparison.
     }
-    \item{\code{strcmpFld}:}{Object of class \code{"numeric"}
+    \item{\code{strcmpFld}:}{Object of class \code{"numeric"}.
       Indices of attributes on which a string comparator is executed.
     }
-    \item{\code{strcmpFun}:}{Object of class \code{"character"}
+    \item{\code{strcmpFun}:}{Object of class \code{"character"}.
       String representing the string comparison function.
     }
-    \item{\code{phoneticFld}:}{Object of class \code{"numeric"}
+    \item{\code{phoneticFld}:}{Object of class \code{"numeric"}.
       Indices of attributes on which a phonetic code is generated.      
     }
-    \item{\code{phoneticFun}:}{Object of class \code{"character"}
+    \item{\code{phoneticFun}:}{Object of class \code{"character"}.
       String representing the phonetic coding function.
     }
-    \item{\code{drv}:}{Object of class \code{"DBIDriver"}
+    \item{\code{drv}:}{Object of class \code{"DBIDriver"}.
       Database driver.
     }
-    \item{\code{con}:}{Object of class \code{"DBIConnection"}
+    \item{\code{con}:}{Object of class \code{"DBIConnection"}.
       Database connection.
     }
   }
@@ -61,15 +61,12 @@ Abstract class for big data sets.
 \author{
 Andreas Borg
 }
-\note{
-  TODO
-}
 
 
 \seealso{
-TODO
-%%  ~~objects to See Also as \code{\link{~~fun~~}}, ~~~
-%%  ~~or \code{\linkS4class{CLASSNAME}} for links to other classes ~~~
+  Non-abstract subclasses \code{"\linkS4class{RLBigDataDedup}"} and
+  \code{"\linkS4class{RLBigDataLinkage}"} with constructors
+  \code{\link{RLBigDataDedup}} and \code{\link{RLBigDataLinkage}}.
 }
 \examples{
 showClass("RLBigData")

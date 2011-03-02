@@ -14,7 +14,11 @@
 \value{
   A list with at least the following elements:
   \describe{
-    \item{\code{data}:}{Object of class \code{"data.frame"} Data frame of original records.}
+    \item{\code{data} (for \code{type = "deduplication"}:}{Object of class
+      \code{"data.frame"}. Data frame of original records.}
+
+    \item{\code{data1}, \code{data2} (for \code{type = "linkage"}:}{Objects of class
+      \code{"data.frame"}. Data frames of original records.}
 
     \item{\code{pairs}:}{Object of class \code{"data.frame"}
       Data frame of data pairs. Each row represents the comparison pattern of two records,

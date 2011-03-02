@@ -17,9 +17,8 @@ RLBigDataDedup(dataset, identity = NA, blockfld = list(), exclude = numeric(0), 
 RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = list(), exclude = numeric(0), strcmp = numeric(0), strcmpfun = "jarowinkler", phonetic = numeric(0), phonfun = "pho_h")
 }
 \arguments{
-  \item{dataset}{Table of records to be deduplicated. Either a data frame or 
-                 a matrix.} 
-  \item{dataset1, dataset2}{Two data sets to be linked.}
+  \item{dataset, dataset1, dataset2}{Table of records to be deduplicated or linked.
+    Either a data frame or a matrix.}
 
   \item{identity, identity1, identity2}{Optional vectors (are converted to
               factors) for identifying true matches and
@@ -30,7 +29,7 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
               match if and only if \code{identity1[i,]==identity2[j,]}.}
 
   \item{blockfld}{Blocking field definition. A numeric or character
-                  vectors or a list of several such vectors,
+                  vector or a list of several such vectors,
                   corresponding to column numbers or names. 
                   See details and examples.}
 
@@ -44,15 +43,14 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
                   is given, the string comparison will be used for the specified columns.}
 
   \item{strcmpfun}{Character string representing the string comparison function.
-                Possible values are \code{"jarowinkler"} and \code{"levenshtein"}
+                Possible values are \code{"jarowinkler"} and \code{"levenshtein"}.
   }
   
   \item{phonetic}{Determines usage of phonetic code. Used in the same manner as
-                  \code{strcmp}}
+                  \code{strcmp}}.
 
-  \item{phonfun}{Character string representing the phonetic function. Possible
-                 values are \code{"pho_h"} and, under certain circumstances,
-                 \code{"soundex" (see details).}
+  \item{phonfun}{Character string representing the phonetic function. Currently,
+                only \code{"pho_h"} is supported (see \code{\link{pho_h}}).
   }
 }
 \details{
@@ -64,12 +62,12 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
   scenarios are reflected by the two functions: \code{RLBigDataDedup} works on a
   single data set which is to be deduplicated, \code{RLBigDataLinkage} is intended
   for linking two data sets together. Their usage follows the functions
-  \code{\link{compare.dedup}} and \code{{compare.linkage}}, which are recommended
+  \code{\link{compare.dedup}} and \code{\link{compare.linkage}}, which are recommended
   for smaller amounts of data, e.g. training sets.
 
   Datasets are represented as data frames or matrices (typically of type
   character), each row representing one record, each column representing one
-  field or attribute (like first name, date of birth\ldots). Row names are not
+  attribute (like first name, date of birth,\ldots). Row names are not
   retained in the record pairs. If an identifier other than row number is
   needed, it should be supplied as a designated column and excluded from
   comparison (see note on \code{exclude} below).
@@ -77,7 +75,7 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
   In case of \code{RLBigDataLinkage}, the two datasets must have the same number
   of columns and it is assumed that their column classes and semantics match.
   If present, the column names of \code{dataset1} are assigned to \code{dataset2}
-  in order two enforce a matching format. Therefore, column names used in
+  in order to enforce a matching format. Therefore, column names used in
   \code{blockfld} or other arguments refer to \code{dataset1}.
 
 
@@ -96,8 +94,8 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
   blocking, also with phonetic code.
 
   Phonetic codes and string similarity measures are supported for enhanced
-  detection of misspellings. Applying a phonetic code leads to a binary
-   values, where 1 denotes equality of the generated phonetic code.
+  detection of misspellings. Applying a phonetic code leads to binary
+  similarity values, where 1 denotes equality of the generated phonetic code.
   A string comparator leads to a similarity value in the range \eqn{[0,1]}.
   Using string comparison on a field for which a phonetic code
   is generated is possible, but issues a warning.
@@ -134,12 +132,17 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
   the vignette "Classes for record linkage of big data sets".
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+# deduplication without blocking, use string comparator on names
+rpairs <- RLBigDataDedup(RLdata500, strcmp = 1:4)
+# linkage with blocking on first name and year of birth, use phonetic
+# code on first components of first and last name
+rpairs <- RLBigDataLinkage(RLdata500, RLdata10000, blockfld = c(1, 7),
+  phonetic = c(1, 3))
+# deduplication with blocking on either last name or complete date of birth,
+# use string comparator on all fields, include identity information
+rpairs <- RLBigDataDedup(RLdata500, identity = identity.RLdata500, strcmp=TRUE,
+  blockfld = list(1, c(5, 6, 7)))
 
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{classif}
 

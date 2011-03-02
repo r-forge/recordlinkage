@@ -17,9 +17,9 @@ S3 class representing information about the classification result of a
     Classification of each record, corresponding to the record pairs stored
     in component \code{pairs}. Levels are:
       \describe{
-        \item{\code{"L"}}{for links,}
-        \item{\code{"P"}}{for possible links,}
         \item{\code{"N"}}{for non-links.}
+        \item{\code{"P"}}{for possible links,}
+        \item{\code{"L"}}{for links,}
       }}
   }
 }

@@ -47,7 +47,7 @@ getFalse(object, single.rows = FALSE)
   \item{withClass}{Logical. Whether to include classification result in the output.}
   \item{single.rows}{Logical. Wether to print record pairs in one row instead
     of two consecutive rows.}
-  \item{show}{Deprecated. Selects which records to show, one of \code{"links"},
+  \item{show}{Character. Selects which records to show, one of \code{"links"},
     \code{"nonlinks"}, \code{"possible"}, \code{"all"}.}
   \item{sort}{Logical. Whether to sort descending by weight.}
 }
@@ -63,7 +63,7 @@ getFalse(object, single.rows = FALSE)
   \enumerate{
     \item{Controlling which record pairs are included in the output:
       \code{min.weight} and \code{max.weight}, \code{filter.match},
-      \code{filter.link}.}
+      \code{filter.link}, \code{show}.}
     \item{Controlling which information is shown: \code{withWeight}, \code{withMatch},
       \code{withClass}}
     \item{Cotrolling the overall structure of the result: \code{sort},
@@ -79,15 +79,16 @@ getFalse(object, single.rows = FALSE)
   Therefore, this format should be used  for printing only.
   
   \code{getFalsePos}, \code{getFalseNeg} and \code{getFalse} are shortcuts
+  (currently for objects of class \code{"\linkS4class{RLResult}"} only)
   to retreive false positives (links that are non-matches in fact),
   false negatives (non-links that are matches in fact) or all falsly classified
   pairs, respectively.
 }
 \value{
   A data frame. If \code{single.rows} is \code{TRUE}, each row holds (in this
-  order) the weight of the data pair (possibly \code{NA}), id and data fields of the
-  first record and
-  id and data fields of the second record.
+  order) id and data fields of the
+  first record, id and data fields of the second record and possibly matching
+  status, classification result and/or weight.
 
   If \code{single.rows} is not \code{TRUE}, the result holds for each resulting
   record pair consecutive rows of the following format:
@@ -103,7 +104,8 @@ getFalse(object, single.rows = FALSE)
 \note{
 
   \itemize{
-    \item{Due to conversions in the SQLite database, the column classes of the result
+    \item{For the \code{"RLBigData*"} methods:
+      Due to conversions in the SQLite database, the column classes of the result
       may (and usually do) differ from the ones in the original data.
     }
     \item{

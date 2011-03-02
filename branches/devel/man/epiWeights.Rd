@@ -38,7 +38,7 @@ Calculate EpiLink weights
   This function calculates weights for record pairs based on the approach
   used by Contiero et al. in the EpiLink record linkage software (see references).
 
-  Since package version 0.3, this is a generic functions with methods for
+  Since package version 0.3, this is a generic function with methods for
   S3 objects of class \code{"\link[=RecLinkData.object]{RecLinkData}"}
   as well as S4 objects of classes \code{"\linkS4class{RLBigDataDedup}"} and
   \code{"\linkS4class{RLBigDataLinkage}"}.

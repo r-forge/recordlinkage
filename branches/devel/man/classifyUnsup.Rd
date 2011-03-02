@@ -18,7 +18,7 @@ classifyUnsup(rpairs, method, ...)
   \item{\dots}{Further arguments for the classification method}
 }
 \details{
-  A clustering algorithm is applied to find clusters in the record pairs. In the 
+  A clustering algorithm is applied to find clusters in the comparison patterns. In the
   case of   two clusters (the default), the cluster further from the origin 
   (i.e. representing higher similarity values) is   interpreted as the set of links, 
   the other as the set of non-links.

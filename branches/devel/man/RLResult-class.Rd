@@ -45,7 +45,7 @@
   Andreas Borg, Murat Sariyar
 }
 \note{
-  The slot \code{data} uses a data uses a database to store data and create
+  The slot \code{data} uses a database to store data and create
   comparison patterns, thus assignment of a \code{"RLResult"} object to a
   different variable can lead to undesired results. Use \code{clone} to make
   a distinct copy. Similarly, the standard save mechanism does not work;

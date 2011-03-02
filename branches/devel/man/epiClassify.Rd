@@ -15,11 +15,13 @@
 }
 
 \usage{
-epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper, ...)
+epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper,
+  ...)
 
 \S4method{epiClassify}{RecLinkData}(rpairs, threshold.upper, threshold.lower = threshold.upper)
 
-\S4method{epiClassify}{RLBigData}(rpairs, threshold.upper, threshold.lower = threshold.upper, e = 0.01, f = getFrequencies(rpairs))
+\S4method{epiClassify}{RLBigData}(rpairs, threshold.upper, threshold.lower = threshold.upper,
+  e = 0.01, f = getFrequencies(rpairs))
 }
 
 \arguments{
@@ -43,12 +45,12 @@ epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper, ...)
   for \code{rpairs} using \code{\link{epiWeights}}.
 
   The \code{"RLBigData"}
-  method checks if weights (also calculated by \code{\link{epiWeights}}
+  method checks if weights (also calculated by \code{\link{epiWeights}})
   are present in the underlying database. If this is the case, classification
-  is based on the existing weights, if not, weights are calculated on the fly
+  is based on the existing weights. If not, weights are calculated on the fly
   during classification, but not stored. The latter behaviour might be preferable
   when a very large dataset is to be classified or disk space is limited
-  (see also the notes to \code{\link{epiWeights}}.
+  (see also the notes to \code{\link{epiWeights}}).
 }
 
 \value{

@@ -2,12 +2,18 @@
 \alias{clone}
 \alias{saveRLObject}
 \alias{loadRLObject}
+\alias{clone-methods}
+\alias{clone,RLBigData-method}
+\alias{clone,RLResult-method}
+\alias{saveRLObject-methods}
+\alias{saveRLObject,RLBigData-method}
+\alias{saveRLObject,RLResult-method}
 
 \title{
   Serialization of record linkage object.
 }
 \description{
-  These functions saving, loading and deep copying of record linkage objects
+  Saving, loading and deep copying of record linkage objects
   for big data sets.
 }
 \usage{
@@ -16,7 +22,7 @@
   loadRLObject(file, inPlace = FALSE)
 }
 \arguments{
-  \item{object}{The object to save.}
+  \item{object}{Object of class \code{"\linkS4class{RLBigData}"}. The object to save.}
   \item{file}{The name of the file to save to or load from.}
   \item{inPlace}{Logical. Wether to use the exisiting file as working copy.
     See details.}
@@ -46,12 +52,10 @@
   a working copy of the database is made in a temporary file and the original
   file left untouched. Calling with \code{inPlace = TRUE} sets the provided file as
   working copy and changes made to the database are persistent. This option is
-  useful when working with large files which would cause a lot of disk usage
+  useful when working with large files in order to prevent disk usage
   overhead.
 
-  Objects loaded with \code{inPlace = TRUE} should still be saved with
-  \code{saveRLObject}, as the R object might be altered.
-  
+
   
 }
 \value{
@@ -66,10 +70,16 @@
   \code{clone} creates a new temporary SQLite database (a copy of the one
     belonging to \code{object}.
 
-  \code{saveRLObject} Writes to the specified file.
+  \code{saveRLObject} writes to the specified file.
+
+  \code{loadRLObject} creates a new temporary SQLite database in the case
+  \code{inPlace = FALSE}.
 }
 
 \note{
+  Objects loaded with \code{inPlace = TRUE} should still be saved with
+  \code{saveRLObject}, as the R object might be altered.
+
   The constructors \code{\link[=RLBigDataDedup]{RLBigData*}} create database
   files in a temporary directory by default. Be careful to save to a persistent
   directory when objects should be loaded in a different R session.

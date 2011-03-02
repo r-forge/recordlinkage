@@ -19,7 +19,7 @@
 functions, such as \code{\link{classifySupv}} or \code{\link{emClassify}}}
 \section{Slots}{
   \describe{
-    \item{\code{.S3Class}:}{Object of class \code{"character"} ~~ }
+    \item{\code{.S3Class}:}{Object of class \code{"character"}.}
   }
 }
 \section{Extends}{

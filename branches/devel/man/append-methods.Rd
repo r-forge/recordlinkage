@@ -38,7 +38,7 @@ x \%append\% y
 }
 
 \note{
-  In general, the methods do not perform integrity checks, e.\,g.\ if
+  In general, the methods do not perform integrity checks, e.g. if
   the objects refer to the same set of records or have compatible weights.
 }
 \author{Andreas Borg, Murat Sariyar}
