@@ -33,9 +33,9 @@
 
 \value{
   For the \code{"\link{RecLinkData}"} method, an S3 object
-  of class \code{"\link{RecLinkResult}"}, which is a copy
-  of \code{newdata}, except for element \code{rpairs$prediction}, which stores
-  the classification result.
+  of class \code{"\link{RecLinkResult}"} that represents a copy
+  of \code{newdata} with element \code{rpairs$prediction}, which stores
+  the classification result, as addendum.
 
   For the \code{"\linkS4class{RLBigData}"} method, an S4 object of class
   \code{"\linkS4class{RLResult}"}.

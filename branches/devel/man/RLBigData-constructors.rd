@@ -132,6 +132,8 @@ RLBigDataLinkage(dataset1, dataset2, identity1 = NA, identity2 = NA, blockfld = 
   the vignette "Classes for record linkage of big data sets".
 }
 \examples{
+data(RLdata500)
+data(RLdata10000)
 # deduplication without blocking, use string comparator on names
 rpairs <- RLBigDataDedup(RLdata500, strcmp = 1:4)
 # linkage with blocking on first name and year of birth, use phonetic

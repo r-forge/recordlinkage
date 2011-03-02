@@ -68,7 +68,7 @@
 
 \section{Side effects}{
   \code{clone} creates a new temporary SQLite database (a copy of the one
-    belonging to \code{object}.
+    belonging to \code{object}).
 
   \code{saveRLObject} writes to the specified file.
 
