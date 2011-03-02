@@ -45,8 +45,8 @@ epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper,
   for \code{rpairs} using \code{\link{epiWeights}}.
 
   The \code{"RLBigData"}
-  method checks if weights (also calculated by \code{\link{epiWeights}})
-  are present in the underlying database. If this is the case, classification
+  method checks if weights are present in the underlying database.
+  If this is the case, classification
   is based on the existing weights. If not, weights are calculated on the fly
   during classification, but not stored. The latter behaviour might be preferable
   when a very large dataset is to be classified or disk space is limited
@@ -54,8 +54,13 @@ epiClassify(rpairs, threshold.upper, threshold.lower = threshold.upper,
 }
 
 \value{
-  A \code{\link[=RecLinkResult-class]{"RecLinkResult"}} object with classification results stored in
-  component \code{prediction}, otherwise a copy of \code{rpairs}.
+  For the \code{"\link{RecLinkData}"} method, a S3 object
+  of class \code{"\link{RecLinkResult}"} that represents a copy
+  of \code{newdata} with element \code{rpairs$prediction}, which stores
+  the classification result, as addendum.
+
+  For the \code{"\linkS4class{RLBigData}"} method, a S4 object of class
+  \code{"\linkS4class{RLResult}"}.
 }
 
 \author{Andreas Borg, Murat Sariyar}

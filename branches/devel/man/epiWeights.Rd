@@ -22,7 +22,7 @@ Calculate EpiLink weights
 }
 
 \arguments{
-  \item{rpairs}{\code{\link{RecLinkData}} The record pairs for which to
+  \item{rpairs}{The record pairs for which to
     compute weights. See details.}
   \item{e}{
     Numeric vector. Estimated error rate(s).
@@ -30,7 +30,7 @@ Calculate EpiLink weights
   \item{f}{
     Numeric vector. Average frequency of attribute values.
   }
-  \item{withProgressBar}{Wether to display a progress bar}
+  \item{withProgressBar}{Whether to display a progress bar}
   \item{...}{Placeholder for method-specific arguments.}
 }
 

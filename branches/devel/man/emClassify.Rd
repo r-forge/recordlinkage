@@ -7,7 +7,7 @@
 \title{Weight-based Classification of Data Pairs}
 \description{
   Classifies data pairs to which weights were assigned by \code{\link{emWeights}}.
-  Based on user-defined thresholds or estimated error rates.
+  Based on user-defined thresholds or predefined error rates.
 }
 \usage{
   emClassify(rpairs, threshold.upper = Inf,
@@ -55,10 +55,13 @@
 }
 
 \value{
-  An object containing the classified dataset and the classification result.
-  For the \code{"\link{RecLinkData}"} method, a S3 object of class
-  \code{"\link{RecLinkResult}"}, for the \code{"\linkS4class{RLBigData}"} method,
-  a S4 object of class \code{"\linkS4class{RLResult}"}.
+  For the \code{"\link{RecLinkData}"} method, a S3 object
+  of class \code{"\link{RecLinkResult}"} that represents a copy
+  of \code{newdata} with element \code{rpairs$prediction}, which stores
+  the classification result, as addendum.
+
+  For the \code{"\linkS4class{RLBigData}"} method, a S4 object of class
+  \code{"\linkS4class{RLResult}"}.
 }
 
 \references{Ivan P. Fellegi, Alan B. Sunter: A Theory for Record Linkage,

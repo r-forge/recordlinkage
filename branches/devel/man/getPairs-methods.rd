@@ -1,4 +1,4 @@
-\name{getPairs-methods}
+\name{getPairs}
 \alias{getPairs}
 \alias{getPairs,RecLinkData-method}
 \alias{getPairs,RecLinkResult-method}

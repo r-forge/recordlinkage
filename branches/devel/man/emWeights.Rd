@@ -60,7 +60,7 @@
   if several classification calls are to be made (e.g. for testing different
   thresholds). However, if a very large number of record pairs is processed,
   saving individual weights can lead to excessive disk usage; in this case
-  \code{store.weights} may be a better choice. Subsequent calls to
+  \code{store.weights = FALSE} may be a better choice. Subsequent calls to
   \code{\link{emClassify}} will then calculate individual weights on the fly
   during classification without saving them.
 }
@@ -89,7 +89,6 @@
 \author{Andreas Borg, Murat Sariyar}
 
 \seealso{\code{\link{emClassify}} for classification of weighted pairs.
-  \code{\link{emWeights-methods}}
   \code{\link{epiWeights}} for a different approach for weight calculation.
 }
 

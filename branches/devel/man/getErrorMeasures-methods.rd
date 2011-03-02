@@ -37,7 +37,7 @@
 }
 
 \note{Record pairs with unknown true matching status (e.g. due to missing
-  values in the argument \code{identity} to \code{\link{RLBigDataDedup}}
+  values in the argument \code{identity} to \code{\link{RLBigDataDedup}})
   and possible links are not counted, which can distort the values returned
   by this function.
 }
@@ -51,7 +51,7 @@
     \item{\code{signature(object = "RLResult")}}{
       Method for S4 objects of class \code{\link[=RecLinkResult-class]{"RLResult"}}, 
       from classification of big data objects (see \code{"\linkS4class{RLBigData}"},
-      \code{"\linkS4class{RLBigDataDedup}"}, \code{"\linkS4class{RLBigDataLinkage}"}
+      \code{"\linkS4class{RLBigDataDedup}"}, \code{"\linkS4class{RLBigDataLinkage}"})
     }
   }
   A wrapper function \code{errorMeasures(result)} exists for compatibility with package version

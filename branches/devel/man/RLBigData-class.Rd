@@ -16,7 +16,7 @@ Abstract class for big data sets.
       (1 / of number of distinct values)
     }
     \item{\code{blockFld}:}{Object of class \code{"list"}. Blocking definiton.
-      See ... for details.
+      See documentation for \link[=RLBigDataDedup]{constructor functions} for details.
     }
     \item{\code{excludeFld}:}{Object of class \code{"numeric"}.
       Indices of attributes which are not considered for comparison.
