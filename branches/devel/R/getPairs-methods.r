@@ -396,11 +396,11 @@ setMethod(
     }
 
 
-    pairs=data.frame(Weight=weights[ind],
-                    id1=rpairs$pairs[ind,1],
+    pairs=data.frame(id1=rpairs$pairs[ind,1],
                     data1[rpairs$pairs[ind,1],],
                     id2=rpairs$pairs[ind,2],
-                    data2[rpairs$pairs[ind,2],])
+                    data2[rpairs$pairs[ind,2],],
+                    Weight=weights[ind])
 
 
   	if (isTRUE(sort))
@@ -416,20 +416,20 @@ setMethod(
       {
         pairs <- pairs[0,]
       }
-    	colnames(pairs)=c("Weight", "id1", paste(colnames(data1),".1",sep=""),
-  								   "id2", paste(colnames(data2),".2",sep=""))
+    	colnames(pairs)=c("id1", paste(colnames(data1),".1",sep=""),
+  								   "id2", paste(colnames(data2),".2",sep=""), "Weight")
   		return (pairs)
   	}
 
   	printfun=function(x)
     {
-      c(x[1:((length(x)+1)/2)],c("",x[((length(x)+3)/2):length(x)]))
+      c(x[1:((length(x)-1)/2)],c("",x[((length(x)+1)/2):length(x)]),
+      rep("", (length(x) + 1) / 2))
 
     }
-
     m=apply(pairs,1,printfun)
-    m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*2,ncol=nrow(m)/2,byrow=TRUE))
-    colnames(m)=c("Weight", "id", colnames(data1))
+    m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
+    colnames(m)=c("id", colnames(data1), "Weight")
   	# if no pairs at all meet the restrictions, empty frame
     if (is.na(ind) || length(ind)==0)
     {
