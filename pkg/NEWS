@@ -1,11 +1,11 @@
 Changes in version 0.3-0
 
-  - A framework of S4 methods and classes tailored for processing large
-    data sets has been added. See the vignette 'BigData' for details.
-  - The output format of getPairs (existing method for RecLinkData and
-    RecLinkResult objects) has changed: Column "Weight" is now last instead
-    of first. Also, for single.rows=FALSE, record pairs are speparated by
-    a blank line.
+	- A framework of S4 methods and classes tailored for processing large
+	  data sets has been added. See the vignette 'BigData' for details.
+  	- The output format of getPairs (existing method for RecLinkData and
+	  RecLinkResult objects) has changed: Column "Weight" is now last instead
+	  of first. Also, for single.rows=FALSE, record pairs are speparated by
+	  a blank line.
 
 Changes in version 0.2-6
 
