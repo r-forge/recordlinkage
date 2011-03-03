@@ -1,5 +1,10 @@
 # Tests for functions in file em.r
 
+
+# TODO: 
+#   Test für EMWeights-Methode
+#   Test für Berücksichtigung von exclude-Feldern (Warnung bei EMWeights-Methode?)
+
 test.emWeights.exceptions <- function()
 {
   data(RLdata500)
@@ -70,6 +75,21 @@ test.emWeights <- function()
       msg = "check usage of individual cutoff values")
 }
 
+
+test.emWeights.RLBigData <- function()
+{
+  # checks that results are the same as for an equivalent RecLinkData-object
+  data(RLdata500)
+  rpairs1 <- compare.dedup(RLdata500, blockfld=list(1,3,5,6,7))
+  rpairs1 <- emWeights(rpairs1, tol=0.01)
+  rpairs2 <- RLBigDataDedup(RLdata500, blockfld=list(1,3,5,6,7))
+  rpairs2 <- emWeights(rpairs2, tol=0.01)
+  ids <- rpairs1$pairs[,1:2]
+  Wdata2 <- dbGetPreparedQuery(rpairs2@con,
+    "select W from Wdata where id1=? and id2=?", ids)$W
+  checkEqualsNumeric(Wdata2, rpairs1$Wdata)
+
+}
 test.emClassify.exceptions <- function()
 {
   load("rpairs.em.rda")
@@ -193,6 +213,104 @@ test.emClassify <- function()
   
 }
 
+test.emClassify.RLBigData <- function()
+{
+  data(RLdata500)
+  rpairs <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
+  rpairs <- emWeights(rpairs, tol=0.01)
+
+  Wdata <- dbReadTable(rpairs@con, "Wdata")
+  # test threshold
+  # only upper threshold supplied (only matches and non-matches)
+    # feasible value
+    thresh <- sample(unique(Wdata$W),1)
+    result <- emClassify(rpairs, threshold.upper = thresh)
+    reqLinks <- Wdata[Wdata$W >= thresh, 1:2]
+    checkEqualsNumeric(result@links[order(result@links[,1], result@links[,2]),],
+      as.matrix(reqLinks[order(reqLinks$id1, reqLinks$id2), ]),
+      msg = "check links, only upper threshold, feasible value")
+
+    checkEquals(nrow(result@possibleLinks), 0,
+      msg = "check possible links, only upper threshold, feasible value")
+
+    # high value: only non-matches
+    thresh <- max(Wdata$W + 1)
+    result <- emClassify(rpairs, threshold.upper = thresh)
+   checkEquals(nrow(result@links), 0,
+      msg = "check high value for only upper threshold")
+   checkEquals(nrow(result@possibleLinks), 0,
+      msg = "check high value for only upper threshold")
+
+    # low value: only matches
+    thresh <- min(Wdata$W)
+    result <- emClassify(rpairs, threshold.upper = thresh)
+    checkEqualsNumeric(as.matrix(Wdata[order(Wdata$id1, Wdata$id2), 1:2]),
+      result@links[order(result@links[,1], result@links[,2]),],
+      msg = "check low value for only higher threshold")
+
+  # only lower threshold supplied (only non-matches and possibles
+    # feasible value
+    thresh <- sample(unique(Wdata$W),1)
+    result <- emClassify(rpairs, threshold.lower = thresh)
+    reqPossibleLinks <- Wdata[Wdata$W >= thresh, 1:2]
+
+    checkEqualsNumeric(result@possibleLinks[order(result@possibleLinks[,1],
+      result@possibleLinks[,2]),],
+      as.matrix(reqPossibleLinks[order(reqPossibleLinks$id1, reqPossibleLinks$id2), ]),
+      msg = "check possibles, only lower threshold, feasible value")
+
+    checkEquals(nrow(result@links), 0,
+      msg = "check links, only lower threshold, feasible value")
+
+
+    # high value: only non-matches
+    thresh <- max(Wdata$W + 1)
+    result <- emClassify(rpairs, threshold.lower = thresh)
+    checkEquals(nrow(result@links), 0,
+      msg = "check high value for only lower threshold")
+    checkEquals(nrow(result@possibleLinks), 0,
+      msg = "check high value for only lower threshold")
+
+    # low value: only possible matches
+    thresh <- min(Wdata$W)
+    result <- emClassify(rpairs, threshold.lower = thresh)
+    checkEqualsNumeric(as.matrix(Wdata[order(Wdata$id1, Wdata$id2), 1:2]),
+      result@possibleLinks[order(result@possibleLinks[,1], result@possibleLinks[,2]),],
+      msg = "check low value for only lower threshold")
+
+  # upper threshold with lower threshold = -Inf (only possibles and matches)
+    # feasible value
+    thresh <- sample(unique(Wdata$W),1)
+    result <- emClassify(rpairs, threshold.upper = thresh,
+      threshold.lower = -Inf)
+    reqLinks <- Wdata[Wdata$W >= thresh, 1:2]
+    reqPossibleLinks <- Wdata[Wdata$W < thresh, 1:2]
+    checkEqualsNumeric(result@links[order(result@links[,1], result@links[,2]),],
+      as.matrix(reqLinks[order(reqLinks$id1, reqLinks$id2), ]),
+      msg = "check links, upper threshold and lower = -Inf, feasible value")
+    checkEqualsNumeric(result@possibleLinks[order(result@possibleLinks[,1],
+      result@possibleLinks[,2]),],
+      as.matrix(reqPossibleLinks[order(reqPossibleLinks$id1, reqPossibleLinks$id2), ]),
+      msg = "check links, upper threshold and lower = -Inf, feasible value")
+
+    # high value: only possibles
+    thresh <- max(Wdata$W + 1)
+    result <- emClassify(rpairs, threshold.upper = thresh,
+      threshold.lower = -Inf)
+    checkEqualsNumeric(as.matrix(Wdata[order(Wdata$id1, Wdata$id2), 1:2]),
+      result@possibleLinks[order(result@possibleLinks[,1], result@possibleLinks[,2]),],
+      msg = "check high value for upper threshold and lower = -Inf")
+
+
+    # low value: only matches
+    thresh <- min(Wdata$W)
+    result <- emClassify(rpairs, threshold.upper = thresh,
+      threshold.lower = -Inf)
+    checkEqualsNumeric(as.matrix(Wdata[order(Wdata$id1, Wdata$id2), 1:2]),
+      result@links[order(result@links[,1], result@links[,2]),],
+      msg = "check low value for upper threshold and lower = -Inf")
+
+}
 
 test.optimalThreshold.exceptions <- function()
 {
