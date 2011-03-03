@@ -30,17 +30,15 @@
 
 \section{Methods}{
   \describe{
-    \item{clone}{\code{signature(object = "RLResult")}: Makes a deep copy.}
-    \item{getErrorMeasures}{\code{signature(object = "RLResult")}: Show
-      statistics like alpha/beta-error, accuracy etc.}
-    \item{getPairs}{\code{signature(object = "RLResult")}: Retreive record pairs
-      from the result, e.g. for further processing.}
-    \item{getTable}{\code{signature(object = "RLResult")}: Compute a contingency
-      table.}
-    \item{saveRLObject}{\code{signature(object = "RLResult")}: Save a copy to
-      a file.}
-	 }
+    \item{clone}{\code{signature(object = "RLResult")}}
+    \item{getDbFile}{\code{signature(object = "RLResult")}}
+    \item{getErrorMeasures}{\code{signature(object = "RLResult")}}
+    \item{getPairs}{\code{signature(object = "RLResult")}}
+    \item{getTable}{\code{signature(object = "RLResult")}}
+    \item{saveRLObject}{\code{signature(object = "RLResult")}}
+         }
 }
+
 \author{
   Andreas Borg, Murat Sariyar
 }

@@ -26,8 +26,13 @@ Objects should be created using the constructor function
 \section{Extends}{
 Class \code{"\linkS4class{RLBigData}"}, directly.
 }
+
 \section{Methods}{
-	 See also \link{RLBigData-class} for inherited methods.
+  \describe{
+    \item{getColumnNames}{\code{signature(object = "RLBigDataLinkage")}}
+    \item{getExpectedSize}{\code{signature(object = "RLBigDataLinkage")}}
+  }
+  See also \link{RLBigData-class} for inherited methods.
 }
 
 \author{

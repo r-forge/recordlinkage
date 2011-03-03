@@ -26,7 +26,11 @@
 }
 
 \section{Methods}{
-  No methods defined with class "RecLinkResult" in the signature.
+  \describe{
+    \item{\%append\%}{\code{signature(x = "RecLinkResult", y = "RecLinkResult")}}
+    \item{getErrorMeasures}{\code{signature(object="RecLinkResult")}}
+    \item{getTable}{\code{signature(object="RecLinkResult")}}
+	 }
 }
 
 \author{

@@ -2,6 +2,7 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{RecLinkClassif-class}
+\alias{RecLinkClassif}
 
 \title{Class "RecLinkClassif"}
 \description{
@@ -27,8 +28,8 @@ Class \code{"\linkS4class{oldClass}"}, directly.
 }
 \section{Methods}{
   \describe{
-    \item{classifySupv}{\code{signature(model = "RecLinkClassif", newdata = "RecLinkData")}: ... }
-    \item{classifySupv}{\code{signature(model = "RecLinkClassif", newdata = "RLBigData")}: ... }
+    \item{classifySupv}{\code{signature(model = "RecLinkClassif", newdata = "RecLinkData")}}
+    \item{classifySupv}{\code{signature(model = "RecLinkClassif", newdata = "RLBigData")}}
 	 }
 }
 

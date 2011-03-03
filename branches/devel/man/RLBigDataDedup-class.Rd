@@ -23,10 +23,12 @@ Objects should be created using the constructor function
 \section{Extends}{
 Class \code{"\linkS4class{RLBigData}"}, directly.
 }
+
 \section{Methods}{
   \describe{
-    \item{getData}{\code{signature(x = "RLBigDataDedup")}: ... }
-	 }
+    \item{getColumnNames}{\code{signature(object = "RLBigDataDedup")}}
+    \item{getExpectedSize}{\code{signature(object = "RLBigDataDedup")}}
+ 	 }
 	 See also \link{RLBigData-class} for inherited methods.
 }
 \author{

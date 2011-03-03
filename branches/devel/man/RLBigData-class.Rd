@@ -45,19 +45,27 @@ Abstract class for big data sets.
 
 \section{Methods}{
   \describe{
-    \item{begin}{\code{signature(x = "RLBigData")}: ... }
-    \item{classifySupv}{\code{signature(x = "RecLinkClassif", y = "RLBigData")}: ... }
-    \item{classifySupv}{\code{signature(x = "RLBigData", y = "RecLinkClassif")}: ... }
-    \item{clear}{\code{signature(x = "RLBigData")}: ... }
-    \item{emWeights}{\code{signature(rpairs = "RLBigData", cutoff = "missing")}: ... }
-    \item{epiClassify}{\code{signature(rpairs = "RLBigData")}: ... }
-    \item{getFrequencies}{\code{signature(x = "RLBigData")}: Get average frequencies of attribute values.}
-    \item{getMatchCount}{\code{signature(object = "RLBigData")}: ... }
-    \item{getPatternCounts}{\code{signature(x = "RLBigData")}: ... }
-    \item{getSQLStatement}{\code{signature(object = "RLBigData")}: ... }
-    \item{nextPairs}{\code{signature(x = "RLBigData", n = "numeric")}: ... }
-	 }
+    \item{begin}{\code{signature(x = "RLBigData")}}
+    \item{classifySupv}{\code{signature(model = "RecLinkClassif", newdata = "RLBigData")}}
+    \item{clear}{\code{signature(x = "RLBigData")}}
+    \item{clone}{\code{signature(object = "RLBigData")}}
+    \item{emClassify}{\code{signature(rpairs = "RLBigData")}}
+    \item{emWeights}{\code{signature(rpairs = "RLBigData")}}
+    \item{epiClassify}{\code{signature(rpairs = "RLBigData")}}
+    \item{epiWeights}{\code{signature(rpairs = "RLBigData")}}
+    \item{getDbFile}{\code{signature(object = "RLBigData")}}
+    \item{getFrequencies}{\code{signature(x = "RLBigData")}}
+    \item{getMatchCount}{\code{signature(object = "RLBigData")}}
+    \item{getNACount}{\code{signature(object = "RLBigData")}}
+    \item{getPairs}{\code{signature(object = "RLBigData")}}
+    \item{getPatternCounts}{\code{signature(x = "RLBigData")}}
+    \item{getSQLStatement}{\code{signature(object = "RLBigData")}}
+    \item{nextPairs}{\code{signature(x = "RLBigData")}}
+    \item{saveRLObject}{\code{signature(object = "RLBigData")}}
+    \item{show}{\code{signature(object = "RLBigData")}}
+  }
 }
+
 \author{
 Andreas Borg
 }
