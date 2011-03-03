@@ -6,11 +6,12 @@
 \alias{\%append\%,RecLinkResult,RecLinkResult-method}
 
 \title{
-  Append a set of comparison patterns to another.
+  Concatenate comparison patterns or classification results
 }
 \description{
-  Combines the comparison patterns and, for \code{"\link{RecLinkResult}"}
-  objects, the classification result of two objects into one.
+  Combines two object of class  \code{"\link{RecLinkData}"}
+  or \code{"\link{RecLinkResult}"} by concatenating comparison patterns
+  and, if available, weights and classification results.
 }
 
 \usage{
@@ -28,7 +29,8 @@ x \%append\% y
 
 
 \value{
-  An object with class corresponding to the input objects whose
+  An object with class corresponding to the input objects which represents
+  the concatenation of \code{x} and \code{y}. Its
   component \code{pairs} is \code{rbind(x$pairs, y$pairs)}. If both \code{x}
   and \code{y} have weights stored in component \code{Wdata}, the result
   gets \code{c(x$Wdata, y$Wdata)} as component \code{Wdata}. For the
@@ -38,8 +40,10 @@ x \%append\% y
 }
 
 \note{
-  In general, the methods do not perform integrity checks, e.g. if
-  the objects refer to the same set of records or have compatible weights.
+  The methods perform only a minimum of integrity checks, so the user has to
+  make sure that the underlying data, the formats of comparison patterns
+  (e.g. excluded columns) and the type of weights (method and parameters of
+  weight calculation) match.
 }
 \author{Andreas Borg, Murat Sariyar}
 
