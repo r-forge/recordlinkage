@@ -145,6 +145,25 @@ test.levenshteinDist.exceptions <- function()
 
 test.levenshteinDist <- function()
 {
+  # test actual value of function for some test cases
+
+  # equal strings: distance 0
+  checkEquals(levenshteinDist("foo", "foo"), 0)
+
+  # completely different strings: distance = length of longer string
+  checkEquals(levenshteinDist("foo", "barbar"), 6)
+
+  # shorter string is part of longer string: distance is length difference
+  checkEquals(levenshteinDist("foo", "foobar"), 3)
+
+  # some more  elaborated examples:
+  checkEquals(levenshteinDist("foo", "boo"), 1) # replacement
+  checkEquals(levenshteinDist("foo", "froo"), 1) # insertion
+  checkEquals(levenshteinDist("foo", "fo"), 1) # deletion
+  checkEquals(levenshteinDist("foo", "bro"), 2) # deletion and replacement
+  checkEquals(levenshteinDist("foobar", "oofrar"), 3) # all of the above
+
+
    testData1=c("Christian", "Michael", "Stefan", "Thomas")
    testData2=c("Kristian",  "Michel", "Stephan", "Tomas")  
 
