@@ -334,8 +334,13 @@ test.compare.dedup <- function()
     header=TRUE)
   checkEquals(testResult$pairs, reqResult, msg=" (check reserved words in data)")
     
-    
-  
+  # test for bug in rev. 326: Failure if all columns except one are excluded
+  testResult=compare.dedup(data1, exclude=2:ncol(data1))
+  reqResult=read.table("result1.compare.txt",sep=",",colClasses="double",
+    header=TRUE)
+  reqResult <- reqResult[,c(1:3, ncol(reqResult))]
+  checkEquals(testResult$pairs, reqResult, msg=" (test for fix in rev 327)")
+
 }
 
 
@@ -707,6 +712,13 @@ test.compare.linkage <- function()
   reqResult <- read.table("resultNA2.compare.txt",sep=",",colClasses="double",
     header=TRUE)
   checkEquals(testResult$pairs, reqResult, msg=" (check reserved words in data)")
+
+  # test for bug in rev. 326: Failure if all columns except one are excluded
+  testResult=compare.linkage(data2,data3, exclude=2:ncol(data2))
+  reqResult=read.table("result8.compare.txt",sep=",",colClasses="double",
+    header=TRUE)
+  reqResult <- reqResult[,c(1:3, ncol(reqResult))]
+  checkEquals(testResult$pairs, reqResult, msg=" (test for fix in rev 327)")
 }
 
 # names of datasets differ?
