@@ -1,8 +1,10 @@
 \name{emClassify}
 \alias{emClassify}
-\alias{emClassify-methods}
-\alias{emClassify,RecLinkData-method}
 \alias{emClassify,RLBigData-method}
+\alias{emClassify,RecLinkData,ANY,ANY-method}
+\alias{emClassify,RLBigData,ANY,ANY-method}
+\alias{emClassify,RecLinkData,missing,missing-method}
+\alias{emClassify,RLBigData,missing,missing-method}
 
 \title{Weight-based Classification of Data Pairs}
 \description{
@@ -11,13 +13,14 @@
 }
 \usage{
   emClassify(rpairs, threshold.upper = Inf,
+    threshold.lower = threshold.upper, my = Inf, ny = Inf, ...)
+
+  \S4method{emClassify}{RecLinkData,ANY,ANY}(rpairs, threshold.upper = Inf,
     threshold.lower = threshold.upper, my = Inf, ny = Inf)
 
-  \S4method{emClassify}{RecLinkData}(rpairs, threshold.upper = Inf,
-    threshold.lower = threshold.upper, my = Inf, ny = Inf)
-
-  \S4method{emClassify}{RLBigData}(rpairs, threshold.upper = Inf,
-    threshold.lower = threshold.upper, my = Inf, ny = Inf)
+  \S4method{emClassify}{RLBigData,ANY,ANY}(rpairs, threshold.upper = Inf,
+    threshold.lower = threshold.upper, my = Inf, ny = Inf,
+    withProgressBar = (sink.number()==0))
 }
 
 \arguments{
@@ -26,6 +29,8 @@
   \item{ny}{A probability. Error bound for false negatives.}
   \item{threshold.upper}{A numeric value. Threshold for links.}
   \item{threshold.lower}{A numeric value. Threshold for possible links.}
+  \item{withProgressBar}{Whether to display a progress bar}
+  \item{...}{Placeholder for method-specific arguments.}
 }
 \details{
   Two general approaches are implemented. The classical procedure

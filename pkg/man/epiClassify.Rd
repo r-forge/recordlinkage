@@ -2,8 +2,8 @@
 \Rdversion{1.1}
 \alias{epiClassify}
 \alias{epiClassify-methods}
-\alias{epiClassify,RecLinkData-method}
 \alias{epiClassify,RLBigData-method}
+\alias{epiClassify,RecLinkData-method}
 
 \title{
   Classify record pairs with EpiLink weights

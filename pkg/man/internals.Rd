@@ -32,7 +32,7 @@
 \alias{getColumnNames-methods}
 \alias{getColumnNames,RLBigDataDedup-method}
 \alias{getColumnNames,RLBigDataLinkage-method}
-
+\alias{getThresholds}
 \title{
   Internal functions and methods
 }
@@ -54,6 +54,7 @@
   getNACount(object)
   getDbFile(object)
   getColumnNames(object, withExcluded = FALSE)
+  getThresholds(W, M, U, my, ny)
 }
 
 \arguments{
@@ -69,6 +70,9 @@
   \item{db}{Database connection.}
   \item{cutoff}{Threshold from which string comparison values are rounded to 1.}
   \item{withExcluded}{Logical. Wether to output names of excluded columns}
+  \item{W,M,U}{Linkage weights, m- and u-probabilites. See \code{\link{emWeights}}
+    for details.}
+  \item{W,M,U}{Error bounds. See \code{\link{emClassify}} for details.}
   \item{\dots}{Optional arguments.}
 }
 
@@ -99,6 +103,8 @@
       object.}
     \item{\code{getColumnNames}}{Returns column names of a
       \code{"\linkS4class{RLBigData}"} object as a character vector.}
+    \item{\code{getThresholds}}{Calculates upper and lower classification
+      based on error bounds.}
 }
 
 }

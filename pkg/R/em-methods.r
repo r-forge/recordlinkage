@@ -1,10 +1,57 @@
-  setGeneric(
+# em.r: Functions for Record Linkage with weights calculated by the EM algorithm
+
+# internal Function to compute thresholds from given error bounds
+getThresholds <- function(W, M, U, my, ny)
+{
+      o=order(W,decreasing=TRUE) # order Weights decreasing
+      FN=rev(cumsum(rev(M[o])))
+      FP=cumsum(U[o])
+      if (my==Inf && ny==Inf)
+      {
+          # no error bound given: minimize overall error
+          cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
+          if (length(cutoff_upper)==0)
+              cutoff_upper=0
+          cutoff_lower=cutoff_upper
+
+      } else if (my==Inf)
+      {
+          # only rate of false matches relevant
+          cutoff_lower=head(which(FN<=ny),1)
+          if (length(cutoff_lower)==0)
+              cutoff_lower=length(o)
+          cutoff_upper=cutoff_lower
+
+      } else if (ny==Inf)
+      {
+          # only rate of false non-matches relevant
+          cutoff_upper=tail(which(FP<=my),1)
+          cutoff_lower=cutoff_upper
+      } else
+      {
+          # both error bounds relevant
+          cutoff_upper=tail(which(FP<=my),1)
+          cutoff_lower=head(which(FN<=ny),1)
+          if (length(cutoff_upper)==0)
+              cutoff_upper=0
+          if (length(cutoff_lower)==0)
+              cutoff_lower=length(o)
+          if (cutoff_lower<cutoff_upper)
+          {
+              cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
+              cutoff_lower=cutoff_upper
+          }
+      }
+      c(threshold.upper=W[o][cutoff_upper], threshold.lower=W[o][cutoff_lower])
+}
+
+
+setGeneric(
   name = "emWeights",
   def = function(rpairs, cutoff=0.95, ...) standardGeneric("emWeights")
 )
 
 
-# em.r: Functions for Record Linkage with weights calculated by the EM algorithm
 
 # Arguments:
 #
@@ -191,9 +238,45 @@ setGeneric(
   name = "emClassify",
   def = function(rpairs, threshold.upper = Inf, 
                         threshold.lower = threshold.upper, my = Inf, 
-                        ny = Inf) standardGeneric("emClassify")
+                        ny = Inf, ...) standardGeneric("emClassify")
 )
 
+# Method for missing thresholds, calls backend function to calculate thresholds
+# from error bounds
+setMethod(
+  f = "emClassify",
+  signature = c("RecLinkData", "missing", "missing"),
+  definition = function(rpairs, threshold.upper = Inf,
+                        threshold.lower = threshold.upper, my = Inf,
+                        ny = Inf)
+  {
+    if (nrow(rpairs$pairs) == 0)
+      stop("No record pairs!")
+
+    if (is.null(rpairs$Wdata))
+      stop("No weights in rpairs!")
+
+    if (!is.numeric(my))
+      stop(sprintf("Illegal type for my: %s", class(my)))
+    if (!missing(my) && (my < 0 || my > 1))
+      stop(sprintf("Illegal value for my: %g", my))
+
+    if (!is.numeric(ny))
+      stop(sprintf("Illegal type for ny: %s", class(ny)))
+    if (!missing(ny) && (ny < 0 || ny > 1))
+      stop(sprintf("Illegal value for ny: %g", ny))
+
+    thresholds <- getThresholds(W = rpairs$W, M = rpairs$M, U = rpairs$U,
+                                my = my, ny=ny)
+    emClassify(rpairs, threshold.upper = thresholds[1],
+               threshold.lower = thresholds[2])
+  
+  }
+)
+
+
+# This method is called if any of the thresholds is given (otherwise the
+# method above would be called).
 setMethod(
   f = "emClassify",
   signature = "RecLinkData",
@@ -201,82 +284,17 @@ setMethod(
                         threshold.lower = threshold.upper, my = Inf, 
                         ny = Inf)
   {    
-    if (!("RecLinkData" %in% class(rpairs) || "RecLinkResult" %in% class(rpairs)))
-      stop(sprintf("Wrong class for rpairs: %s", class(rpairs)))
-  
-    if (nrow(rpairs$pairs) == 0)
-      stop("No record pairs!")
-  
-    if (is.null(rpairs$Wdata))
-      stop("No weights in rpairs!")
-  
     if (!is.numeric(threshold.upper))
       stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
-  
+
     if (!is.numeric(threshold.lower))
       stop(sprintf("Illegal type for threshold.lower: %s", class(threshold.lower)))
-  
+
     if (threshold.upper < threshold.lower)
       stop(sprintf("Upper threshold %g lower than lower threshold %g",
         threshold.upper, threshold.lower))
         
-    if (!is.numeric(my))
-      stop(sprintf("Illegal type for my: %s", class(my)))
-    if (!missing(my) && (my < 0 || my > 1))
-      stop(sprintf("Illegal value for my: %g", my))
-  
-    if (!is.numeric(ny))
-      stop(sprintf("Illegal type for ny: %s", class(ny)))
-    if (!missing(ny) && (ny < 0 || ny > 1))
-      stop(sprintf("Illegal value for ny: %g", ny))
-  
-    # if no threshold was given, compute them according to the error bounds
-    if (missing(threshold.upper) && missing(threshold.lower))
-    {
-      o=order(rpairs$W,decreasing=TRUE) # order Weights decreasing
-      FN=rev(cumsum(rev(rpairs$M[o]))) 
-      FP=cumsum(rpairs$U[o])
-      if (my==Inf && ny==Inf)
-      {
-          # no error bound given: minimize overall error
-          cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
-          if (length(cutoff_upper)==0)
-              cutoff_upper=0
-          cutoff_lower=cutoff_upper
-          
-      } else if (my==Inf)
-      {  
-          # only rate of false matches relevant
-          cutoff_lower=head(which(FN<=ny),1)
-          if (length(cutoff_lower)==0)
-              cutoff_lower=length(o)
-          cutoff_upper=cutoff_lower
-      
-      } else if (ny==Inf)
-      {
-          # only rate of false non-matches relevant
-          cutoff_upper=tail(which(FP<=my),1)
-          cutoff_lower=cutoff_upper
-      } else
-      {
-          # both error bounds relevant
-          cutoff_upper=tail(which(FP<=my),1)
-          cutoff_lower=head(which(FN<=ny),1)
-          if (length(cutoff_upper)==0)
-              cutoff_upper=0
-          if (length(cutoff_lower)==0)
-              cutoff_lower=length(o)
-          if (cutoff_lower<cutoff_upper)
-          {
-              cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
-              cutoff_lower=cutoff_upper
-          }
-      } 
-      print("Threshold berechnen und Klassifikation zuweisen")
-      threshold.upper=rpairs$W[o][cutoff_upper]
-      threshold.lower=rpairs$W[o][cutoff_lower]
-    } # end if
-     
+
     prediction=rep("P",nrow(rpairs$pairs))
     prediction[rpairs$Wdata>=threshold.upper]="L"
     prediction[rpairs$Wdata<threshold.lower]="N"
@@ -290,31 +308,18 @@ setMethod(
 ) # end of setMethod
 
 
-
+# Method for missing thresholds, calls backend function to calculate thresholds
+# from error bounds
 setMethod(
   f = "emClassify",
-  signature = "RLBigData",
-  definition = function (rpairs, threshold.upper = Inf,
+  signature = c("RLBigData", "missing", "missing"),
+  definition = function(rpairs, threshold.upper = Inf,
                         threshold.lower = threshold.upper, my = Inf,
                         ny = Inf)
   {
 
     if(!dbExistsTable(rpairs@con, "W"))
       stop("No EM weights have been calculated for rpairs! Call emWeights first.")
-
-    W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
-    M <- dbGetQuery(rpairs@con, "select M from M order by id asc")$M
-    U <- dbGetQuery(rpairs@con, "select U from U order by id asc")$U
-
-    if (!is.numeric(threshold.upper))
-      stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
-
-    if (!is.numeric(threshold.lower))
-      stop(sprintf("Illegal type for threshold.lower: %s", class(threshold.lower)))
-
-    if (threshold.upper < threshold.lower)
-      stop(sprintf("Upper threshold %g lower than lower threshold %g",
-        threshold.upper, threshold.lower))
 
     if (!is.numeric(my))
       stop(sprintf("Illegal type for my: %s", class(my)))
@@ -326,52 +331,36 @@ setMethod(
     if (!missing(ny) && (ny < 0 || ny > 1))
       stop(sprintf("Illegal value for ny: %g", ny))
 
-    # if no threshold was given, compute them according to the error bounds
-    if (missing(threshold.upper) && missing(threshold.lower))
-    {
-      o=order(W,decreasing=TRUE) # order Weights decreasing
-      FN=rev(cumsum(rev(M[o])))
-      FP=cumsum(U[o])
-      if (my==Inf && ny==Inf)
-      {
-          # no error bound given: minimize overall error
-          cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
-          if (length(cutoff_upper)==0)
-              cutoff_upper=0
-          cutoff_lower=cutoff_upper
+    W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
+    M <- dbGetQuery(rpairs@con, "select M from M order by id asc")$M
+    U <- dbGetQuery(rpairs@con, "select U from U order by id asc")$U
 
-      } else if (my==Inf)
-      {
-          # only rate of false matches relevant
-          cutoff_lower=head(which(FN<=ny),1)
-          if (length(cutoff_lower)==0)
-              cutoff_lower=length(o)
-          cutoff_upper=cutoff_lower
+    thresholds <- getThresholds(W = W, M = M, U = U,
+                                my = my, ny=ny)
+    emClassify(rpairs, threshold.upper = thresholds[1],
+               threshold.lower = thresholds[2])
 
-      } else if (ny==Inf)
-      {
-          # only rate of false non-matches relevant
-          cutoff_upper=tail(which(FP<=my),1)
-          cutoff_lower=cutoff_upper
-      } else
-      {
-          # both error bounds relevant
-          cutoff_upper=tail(which(FP<=my),1)
-          cutoff_lower=head(which(FN<=ny),1)
-          if (length(cutoff_upper)==0)
-              cutoff_upper=0
-          if (length(cutoff_lower)==0)
-              cutoff_lower=length(o)
-          if (cutoff_lower<cutoff_upper)
-          {
-              cutoff_upper=which.min(c(0,FP)+c(FN,0))-1
-              cutoff_lower=cutoff_upper
-          }
-      }
-      print("Threshold berechnen und Klassifikation zuweisen")
-      threshold.upper <- rpairs@W[o][cutoff_upper]
-      threshold.lower <- rpairs@W[o][cutoff_lower]
-    } # end if
+  }
+)
+
+setMethod(
+  f = "emClassify",
+  signature = "RLBigData",
+  definition = function (rpairs, threshold.upper = Inf,
+                        threshold.lower = threshold.upper, my = Inf,
+                        ny = Inf, withProgressBar = (sink.number()==0))
+  {
+
+
+    if (!is.numeric(threshold.upper))
+      stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
+
+    if (!is.numeric(threshold.lower))
+      stop(sprintf("Illegal type for threshold.lower: %s", class(threshold.lower)))
+
+    if (threshold.upper < threshold.lower)
+      stop(sprintf("Upper threshold %g lower than lower threshold %g",
+        threshold.upper, threshold.lower))
 
 
     # check if weights are stored in database
@@ -394,10 +383,15 @@ setMethod(
       possibleLinks <- matrix(nrow=0, ncol=2)
       n_attr <- length(getFrequencies(rpairs))
       nPairs <- 0
+
+      if (withProgressBar)
+      {
+        expPairs <- getExpectedSize(rpairs_copy)
+        pgb <- txtProgressBar(max=expPairs)
+      }
+
       while(nrow(slice <- nextPairs(rpairs, n)) > 0)
       {
-#        message(i)
-#        flush.console()
         slice[is.na(slice)] <- 0
         indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
         links <- rbind(links, as.matrix(slice[W[indices] >= threshold.upper,1:2]))
@@ -406,7 +400,13 @@ setMethod(
           W[indices] >= threshold.lower ,1:2]))
         i <- i + n
         nPairs <- nPairs + nrow(slice)
+        if (withProgressBar)
+        {
+          setTxtProgressBar(pgb, nPairs)
+          flush.console()
+        }
       }
+      if (withProgressBar) close(pgb)
     }
     
     new("RLResult", data = rpairs, links = as.matrix(links),

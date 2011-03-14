@@ -257,7 +257,7 @@ setMethod(
         flush.console()
       }
     }
-      if (withProgressBar) close(pgb)
+    if (withProgressBar) close(pgb)
     dbCommit(rpairs@con)
 
     # remove copied database

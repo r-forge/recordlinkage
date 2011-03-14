@@ -9,11 +9,13 @@
   Supervised classification of record pairs based on a trained model.
 }
 \usage{
+
   classifySupv(model, newdata, ...)
 
   \S4method{classifySupv}{RecLinkClassif,RecLinkData}(model, newdata, ...)
 
-  \S4method{classifySupv}{RecLinkClassif,RLBigData}(model, newdata, ...)
+  \S4method{classifySupv}{RecLinkClassif,RLBigData}(model, newdata,
+  withProgressBar = (sink.number()==0), ...)
 }
 
 \arguments{
@@ -21,6 +23,7 @@
     calibrated model. See \code{\link{trainSupv}}.}
   \item{newdata}{Object of class \code{"\link{RecLinkData}"}
     or \code{"\linkS4class{RLBigData}"}. The data to classify.}
+  \item{withProgressBar}{Whether to display a progress bar}
   \item{\dots}{Further arguments for the \code{\link{predict}} method.}
 }
 
@@ -28,7 +31,11 @@
 
   The record pairs in \code{newdata} are classified by calling
   the appropriate \code{\link{predict}} method for \code{model$model}.
-  
+
+  By default, the \code{"\linkS4class{RLBigDataDedup}"} method displays a
+  progress bar unless output is diverted by \code{sink}, e.g. when processing
+  a Sweave file.
+
 }
 
 \value{

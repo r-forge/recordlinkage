@@ -40,7 +40,7 @@ test.emWeights <- function()
   rpairs2 <- compare.dedup(RLdata500, identity=identity.RLdata500, 
     blockfld=list(1,3,c(5,6,7)), strcmp = TRUE)
   # basic consistency checks
-  result1 <- emWeights(rpairs1)
+  result1 <- emWeights(rpairs1, tol=0.01)
   checkEquals(class(result1)[1], "RecLinkData",
     msg = " (check class of result)")
   checkTrue(is.numeric(result1$M),
@@ -56,7 +56,7 @@ test.emWeights <- function()
   checkTrue(!any(is.na(result1$Wdata)),
     msg = "check that no weights are NaN or NA")
   # use fuzzy set with cutoff 1, should yield same result
-  result2 <- emWeights(rpairs2, cutoff = 1)
+  result2 <- emWeights(rpairs2, cutoff = 1, tol=0.01)
   checkEqualsNumeric(result1$W, result2$W)
   checkEqualsNumeric(result1$Wdata, result2$Wdata)
   
@@ -65,12 +65,12 @@ test.emWeights <- function()
   # copy of fuzzy pairs with binary first attribute
   rpairs3$pairs$fname_c1 <- (rpairs3$pairs$fname_c1==1) * 1
   # different cutoff value for binary attribute should make no difference
-  result3 <- emWeights(rpairs3,cutoff=0.7)
-  result4 <- emWeights(rpairs3,cutoff=c(0.5,rep(0.7,6)))
+  result3 <- emWeights(rpairs3,cutoff=0.7, tol=0.01)
+  result4 <- emWeights(rpairs3,cutoff=c(0.5,rep(0.7,6)), tol=0.01)
   checkEqualsNumeric(result3$Wdata,result4$Wdata,
     msg = "check usage of individual cutoff values")
   # different cutoff value for fuzzy column should yield different weights
-  result5 <- emWeights(rpairs3,cutoff=c(0.7, 0.7, 0.5, rep(0.7,4)))
+  result5 <- emWeights(rpairs3,cutoff=c(0.7, 0.7, 0.5, rep(0.7,4)), tol=0.01)
   checkTrue(!identical(result3$Wdata, result5$Wdata),
       msg = "check usage of individual cutoff values")
 }
@@ -90,15 +90,19 @@ test.emWeights.RLBigData <- function()
   checkEqualsNumeric(Wdata2, rpairs1$Wdata)
 
 }
+
 test.emClassify.exceptions <- function()
 {
+  data(RLdata500)
+  rpairsBig <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
+  rpairsBig <- emWeights(rpairsBig, tol=0.01)
   load("rpairs.em.rda")
-  
+
   # illegal class, type of rpairs
   rpairs2 <- rpairs
   class(rpairs2) <- "wrongClass"
   checkException(emClassify(rpairs2), msg = "wrong class for rpairs")
-  
+
   rpairs2 <- rpairs$pairs
   class(rpairs2) <- "RecLinkData"
   checkException(emClassify(rpairs2), msg = "wrong type for rpairs")
@@ -108,40 +112,48 @@ test.emClassify.exceptions <- function()
   rpairs2$Wdata <- NULL
   checkException(emClassify(rpairs2), msg = "no weights in rpairs")
 
-  
-  # errors concerning threshold.upper
-  checkException(emClassify(rpairs, threshold.upper = "0"),
-    msg = "wrong type for threshold.upper")
-  checkException(emClassify(rpairs, threshold.upper = FALSE),
-    msg = "wrong type for threshold.upper")
-  checkException(emClassify(rpairs, threshold.upper = 1+9i),
-    msg = "wrong type for threshold.upper")
+  rpairs2 <- clone(rpairsBig)
+  dbGetQuery(rpairs2@con, "drop table W")
+  checkException(emClassify(rpairs2), msg = "no weights in rpairs")
 
-  # errors concerning threshold.lower
-  checkException(emClassify(rpairs, threshold.lower = "0"),
-    msg = "wrong type for threshold.lower")
-  checkException(emClassify(rpairs, threshold.lower = FALSE),
-    msg = "wrong type for threshold.lower")
-  checkException(emClassify(rpairs, threshold.lower = 1+9i),
-    msg = "wrong type for threshold.lower")
 
-  # errors concerning combination of thresholds
-  # runif will not generate 0 (see doc), is greater than 0
-  checkException(emClassify(rpairs, threshold.upper=0, threshold.lower=runif(1)),
-    msg = "lower threshold greater than upper threshold")
+  # run the following tests twice: also for RLBigData-object
+  for (rpairs in list(rpairs, rpairsBig))
+  {
 
-  # errors concerning my
-  checkException (emClassify(rpairs, my=-2), msg = "Illegal value for my")
-  checkException (emClassify(rpairs, my=1+runif(1)), msg = "Illegal value for my")
-  checkException (emClassify(rpairs, my="0.2"), msg = "Illegal value for my")
-  checkException (emClassify(rpairs, my=TRUE), msg = "Illegal value for my")
+    # errors concerning threshold.upper
+    checkException(emClassify(rpairs, threshold.upper = "0"),
+      msg = "wrong type for threshold.upper")
+    checkException(emClassify(rpairs, threshold.upper = FALSE),
+      msg = "wrong type for threshold.upper")
+    checkException(emClassify(rpairs, threshold.upper = 1+9i),
+      msg = "wrong type for threshold.upper")
 
-  # errors concerning ny
-  checkException (emClassify(rpairs, ny=-2), msg = "Illegal value for ny")
-  checkException (emClassify(rpairs, ny=1+runif(1)), msg = "Illegal value for ny")
-  checkException (emClassify(rpairs, ny="0.2"), msg = "Illegal value for ny")
-  checkException (emClassify(rpairs, ny=TRUE), msg = "Illegal value for ny")
-  
+    # errors concerning threshold.lower
+    checkException(emClassify(rpairs, threshold.lower = "0"),
+      msg = "wrong type for threshold.lower")
+    checkException(emClassify(rpairs, threshold.lower = FALSE),
+      msg = "wrong type for threshold.lower")
+    checkException(emClassify(rpairs, threshold.lower = 1+9i),
+      msg = "wrong type for threshold.lower")
+
+    # errors concerning combination of thresholds
+    # runif will not generate 0 (see doc), is greater than 0
+    checkException(emClassify(rpairs, threshold.upper=0, threshold.lower=runif(1)),
+      msg = "lower threshold greater than upper threshold")
+
+    # errors concerning my
+    checkException (emClassify(rpairs, my=-2), msg = "Illegal value for my")
+    checkException (emClassify(rpairs, my=1+runif(1)), msg = "Illegal value for my")
+    checkException (emClassify(rpairs, my="0.2"), msg = "Illegal value for my")
+    checkException (emClassify(rpairs, my=TRUE), msg = "Illegal value for my")
+
+    # errors concerning ny
+    checkException (emClassify(rpairs, ny=-2), msg = "Illegal value for ny")
+    checkException (emClassify(rpairs, ny=1+runif(1)), msg = "Illegal value for ny")
+    checkException (emClassify(rpairs, ny="0.2"), msg = "Illegal value for ny")
+    checkException (emClassify(rpairs, ny=TRUE), msg = "Illegal value for ny")
+  }
 }
 
 test.emClassify <- function()
