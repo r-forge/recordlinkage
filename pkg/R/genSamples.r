@@ -210,8 +210,8 @@ getMinimalTrain <- function(rpairs, nEx=1)
     stop(sprintf("Illegal value for nEx: %d!", nEx))
 
   # check if fuzzy values occur
-  if (any(rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))] > 0
-    & rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))] < 1, rm.na=TRUE))
+  if (any(rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))] > 0 &
+      rpairs$pairs[,-c(1,2,ncol(rpairs$pairs))] < 1, na.rm=TRUE))
     warning("Comparison patterns in rpairs contain string comparison values!")
   p=rpairs$pairs
   # Zeilen markieren, um Paare identifizieren zu können
