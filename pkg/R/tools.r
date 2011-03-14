@@ -40,7 +40,7 @@ setMethod(
     dbDisconnect(rpairs@con)
     unlink(rpairs@dbFile)
 
-    res
+    round(res)
   }
 )
 
