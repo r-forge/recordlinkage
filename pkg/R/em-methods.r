@@ -358,6 +358,9 @@ setMethod(
   {
 
 
+    if(!dbExistsTable(rpairs@con, "W"))
+      stop("No EM weights have been calculated for rpairs! Call emWeights first.")
+
     if (!is.numeric(threshold.upper))
       stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
 
@@ -381,8 +384,6 @@ setMethod(
     }
     else
     { # otherwise iterate through pairs and calculate on the fly
-      on.exit(clear(rpairs))
-      rpairs <- begin(rpairs)
       n <- 10000
       i = n
       links <- matrix(nrow=0, ncol=2)
@@ -390,11 +391,16 @@ setMethod(
       n_attr <- length(getFrequencies(rpairs))
       nPairs <- 0
 
+      W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
+
       if (withProgressBar)
       {
-        expPairs <- getExpectedSize(rpairs_copy)
+        expPairs <- getExpectedSize(rpairs)
         pgb <- txtProgressBar(max=expPairs)
       }
+
+      on.exit(clear(rpairs))
+      rpairs <- begin(rpairs)
 
       while(nrow(slice <- nextPairs(rpairs, n)) > 0)
       {

@@ -160,7 +160,7 @@ test.emClassify <- function()
 {
   data(RLdata500)
   rpairs <- compare.dedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
-  rpairs <- emWeights(rpairs)
+  rpairs <- emWeights(rpairs, tol=0.01)
 
   # test threshold
   # only upper threshold supplied (only matches and non-matches)
@@ -322,6 +322,20 @@ test.emClassify.RLBigData <- function()
       result@links[order(result@links[,1], result@links[,2]),],
       msg = "check low value for upper threshold and lower = -Inf")
 
+    # Check variant where weights are not stored in the database, should
+    # give same result. (Bug fixed in rev. 336
+
+    # make a clean copy without weights
+    rpairs1 <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
+    rpairs2 <- clone(rpairs1)
+    rpairs1 <- emWeights(rpairs1, tol=0.01)
+    rpairs2 <- emWeights(rpairs1, store.weights = FALSE, tol=0.01)
+    result1 <- emClassify(rpairs1, quantile(Wdata$W, 0.95), quantile(Wdata$W, 0.9))
+    result2 <- emClassify(rpairs2, quantile(Wdata$W, 0.95), quantile(Wdata$W, 0.9))
+    # checking the 'link' and 'non-link' components would make sorting necessary,
+    # comparison of the contengency table should be enough
+    checkEquals(getTable(result1), getTable(result2),
+      msg="check equal result if weights are not stored in database")
 }
 
 test.optimalThreshold.exceptions <- function()
