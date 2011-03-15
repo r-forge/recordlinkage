@@ -143,13 +143,16 @@ setMethod(
 setMethod(  
   f = "emWeights",
   signature = "RLBigData",
-  definition = function (rpairs, cutoff=0.95, store.weights = TRUE, ...)
+  definition = function (rpairs, cutoff=0.95, store.weights = TRUE,
+    verbose = TRUE, ...)
   {
     u=getFrequencies(rpairs)
     # get number of attributes from frequency vector: this way excluded
     # columns are not counted
     n_attr <- length(u)
-    observed_count <- getPatternCounts(rpairs, cutoff=cutoff)
+    if (verbose) message("Count pattern frequencies...")
+    observed_count <- getPatternCounts(rpairs, cutoff=cutoff,
+      withProgressBar = (verbose && sink.number()==0))
     n_patterns <- length(observed_count)
     n_data <- sum(observed_count)
     patterns=bincombinations(n_attr)  # Liste der Patterns
@@ -165,7 +168,7 @@ setMethod(
     init_M=apply(patterns,1,function(a) prod(a*m+(1-a)*(1-m))*n_data*prob_M)
     init_U=apply(patterns,1,function(a) prod(a*u+(1-a)*(1-u))*n_data*(1-prob_M))
     expected_count=c(init_U,init_M)
-  
+    if (verbose) message("Run EM algorithm...")
     res=mygllm(observed_count,s,X,E=expected_count,...)
 
 
@@ -188,6 +191,7 @@ setMethod(
 
     if (store.weights) # by default, a table of individual weights is stored in the database
     {
+      if (verbose) message("Calculate and store individual weights...")
       # Create a copy of the record pairs from which comparison patterns will
       # be generated. This allows concurrent writing of calculated weights.
       rpairs_copy <- clone(rpairs)
