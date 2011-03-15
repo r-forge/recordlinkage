@@ -168,10 +168,12 @@ setMethod(
     init_M=apply(patterns,1,function(a) prod(a*m+(1-a)*(1-m))*n_data*prob_M)
     init_U=apply(patterns,1,function(a) prod(a*u+(1-a)*(1-u))*n_data*(1-prob_M))
     expected_count=c(init_U,init_M)
-    if (verbose) message("Run EM algorithm...")
+    if (verbose)
+    {
+      message("Run EM algorithm...")
+      flush.console() # flush output before time-consuming C-call
+    }
     res=mygllm(observed_count,s,X,E=expected_count,...)
-
-
 
     n_matches=sum(res[(n_patterns+1):(2*n_patterns)])
     n_nonmatches=sum(res[1:n_patterns])
