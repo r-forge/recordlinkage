@@ -93,32 +93,45 @@ test.emWeights.RLBigData <- function()
 
 test.emClassify.exceptions <- function()
 {
+
+  # create various types of test data
+  # also one object without weights stored
   data(RLdata500)
-  rpairsBig <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
-  rpairsBig <- emWeights(rpairsBig, tol=0.01)
+  rpairsBig1 <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
+  rpairsBig2 <- clone(rpairsBig1)
+  rpairsBig1 <- emWeights(rpairsBig1, tol=0.01)
+  rpairsBig2 <- emWeights(rpairsBig2, tol=0.01)
   load("rpairs.em.rda")
 
   # illegal class, type of rpairs
   rpairs2 <- rpairs
   class(rpairs2) <- "wrongClass"
-  checkException(emClassify(rpairs2), msg = "wrong class for rpairs")
+  checkException(emClassify(rpairs2, my=0.05), msg = "wrong class for rpairs")
+  checkException(emClassify(rpairs2, threshold.upper=10, threshold.lower=0), msg = "wrong class for rpairs")
 
   rpairs2 <- rpairs$pairs
   class(rpairs2) <- "RecLinkData"
-  checkException(emClassify(rpairs2), msg = "wrong type for rpairs")
+  checkException(emClassify(rpairs2, my=0.05), msg = "wrong type for rpairs")
+  checkException(emClassify(rpairs2, threshold.upper=10, threshold.lower=0), msg = "wrong type for rpairs")
 
   # no weights in rpairs
   rpairs2 <- rpairs
   rpairs2$Wdata <- NULL
-  checkException(emClassify(rpairs2), msg = "no weights in rpairs")
+  checkException(emClassify(rpairs2, my=0.05), msg = "no weights in rpairs")
+  checkException(emClassify(rpairs2, threshold.upper=10, threshold.lower=0), msg = "no weights in rpairs")
 
-  rpairs2 <- clone(rpairsBig)
+  rpairs2 <- clone(rpairsBig1)
   dbGetQuery(rpairs2@con, "drop table W")
-  checkException(emClassify(rpairs2), msg = "no weights in rpairs")
+  checkException(emClassify(rpairs2, my=0.05), msg = "no weights in rpairs")
+  checkException(emClassify(rpairs2, threshold.upper=10, threshold.lower=0), msg = "no weights in rpairs")
 
+  rpairs2 <- clone(rpairsBig2)
+  dbGetQuery(rpairs2@con, "drop table W")
+  checkException(emClassify(rpairs2, my=0.05), msg = "no weights in rpairs")
+  checkException(emClassify(rpairs2, threshold.upper=10, threshold.lower=0), msg = "no weights in rpairs")
 
   # run the following tests twice: also for RLBigData-object
-  for (rpairs in list(rpairs, rpairsBig))
+  for (rpairs in list(rpairs, rpairsBig1, rpairsBig2))
   {
 
     # errors concerning threshold.upper
@@ -227,11 +240,18 @@ test.emClassify <- function()
 
 test.emClassify.RLBigData <- function()
 {
+  # create two test objects, on with weights stored per pattern, one
+  # for which weights will be calculated on the fly
   data(RLdata500)
-  rpairs <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
-  rpairs <- emWeights(rpairs, tol=0.01)
+  rpairs1 <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
+  rpairs2 <-clone(rpairs1)
+  rpairs1 <- emWeights(rpairs1, tol=0.01)
+  rpairs2 <- emWeights(rpairs2, tol=0.01, store.weights = FALSE)
 
-  Wdata <- dbReadTable(rpairs@con, "Wdata")
+  Wdata <- dbReadTable(rpairs1@con, "Wdata")
+
+  for (rpairs in list(rpairs1, rpairs2))
+  {
   # test threshold
   # only upper threshold supplied (only matches and non-matches)
     # feasible value
@@ -322,20 +342,7 @@ test.emClassify.RLBigData <- function()
       result@links[order(result@links[,1], result@links[,2]),],
       msg = "check low value for upper threshold and lower = -Inf")
 
-    # Check variant where weights are not stored in the database, should
-    # give same result. (Bug fixed in rev. 336
-
-    # make a clean copy without weights
-    rpairs1 <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
-    rpairs2 <- clone(rpairs1)
-    rpairs1 <- emWeights(rpairs1, tol=0.01)
-    rpairs2 <- emWeights(rpairs1, store.weights = FALSE, tol=0.01)
-    result1 <- emClassify(rpairs1, quantile(Wdata$W, 0.95), quantile(Wdata$W, 0.9))
-    result2 <- emClassify(rpairs2, quantile(Wdata$W, 0.95), quantile(Wdata$W, 0.9))
-    # checking the 'link' and 'non-link' components would make sorting necessary,
-    # comparison of the contengency table should be enough
-    checkEquals(getTable(result1), getTable(result2),
-      msg="check equal result if weights are not stored in database")
+  } # end for loop
 }
 
 test.optimalThreshold.exceptions <- function()
@@ -396,39 +403,58 @@ test.optimalThreshold <- function()
   # test with threshold for my/ny: check that the minimal alpha error 
   # for which the error bound holds is obtained 
   
-  my=runif(1,0.01, 0.2)
-  thresh <- optimalThreshold(rpairs, my=my)
-  alpha_result <- errorMeasures(emClassify(rpairs, thresh))$alpha
+  # calculate thresholds for all relevant values of beta
   W_unique <- unique(rpairs$Wdata)
-  alpha=list()
-  for (thresh_iter in W_unique)
-  {
-    errM <- errorMeasures(emClassify(rpairs, thresh_iter))
-    if (errM$beta <= my)
+  allBeta <- unique(sapply(W_unique, function(thresh_iter)
     {
-      alpha[[as.character(thresh_iter)]] <- errM$alpha
+      errorMeasures(emClassify(rpairs, thresh_iter))$beta
     }
-  } 
-  checkEqualsNumeric(alpha_result, min(unlist(alpha),na.rm=TRUE))  
+  ))
 
+  for (my in allBeta)
+  {
+    thresh <- optimalThreshold(rpairs, my=my)
+    alpha_result <- errorMeasures(emClassify(rpairs, thresh))$alpha
+    alpha=list()
+    for (thresh_iter in W_unique)
+    {
+      errM <- errorMeasures(emClassify(rpairs, thresh_iter))
+      if (errM$beta <= my)
+      {
+        alpha[[as.character(thresh_iter)]] <- errM$alpha
+      }
+    }
+    checkEqualsNumeric(alpha_result, min(unlist(alpha),na.rm=TRUE),
+      msg = sprintf("check for my=%g", my))
+  }
 
   # corresponding check for ny. threshold.upper must be used to obtain
   # legal beta errors
-  ny=runif(1,0.01, 0.2)
-  thresh <- optimalThreshold(rpairs, ny=ny)
-  beta_result <- errorMeasures(emClassify(rpairs, thresh))$beta
+
+  # calculate thresholds for all relevant values of alpha
   W_unique <- unique(rpairs$Wdata)
-  beta_all=list()
-  for (thresh_iter in W_unique)
-  {
-    errM <- errorMeasures(emClassify(rpairs, thresh_iter))
-    if (errM$alpha <= ny)
+  allAlpha <- unique(sapply(W_unique, function(thresh_iter)
     {
-      beta_all[[as.character(thresh_iter)]] <- errM$beta
+      errorMeasures(emClassify(rpairs, thresh_iter))$alpha
     }
-  } 
-  checkEqualsNumeric(beta_result, min(unlist(beta_all), na.rm=TRUE))  
-  
+  ))
+
+  for (ny in allAlpha)
+  {
+    thresh <- optimalThreshold(rpairs, ny=ny)
+    beta_result <- errorMeasures(emClassify(rpairs, thresh))$beta
+    beta_all=list()
+    for (thresh_iter in W_unique)
+    {
+      errM <- errorMeasures(emClassify(rpairs, thresh_iter))
+      if (errM$alpha <= ny)
+      {
+        beta_all[[as.character(thresh_iter)]] <- errM$beta
+      }
+    }
+    checkEqualsNumeric(beta_result, min(unlist(beta_all), na.rm=TRUE),
+      msg = sprintf("check for ny=%g", ny))
+  }
   # pairs with NA should be ignored, i.e. the result should be the same as if
   # these pairs were missing
   rpairs2 <- rpairs

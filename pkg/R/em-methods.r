@@ -290,6 +290,12 @@ setMethod(
                         threshold.lower = threshold.upper, my = Inf, 
                         ny = Inf)
   {    
+    if (nrow(rpairs$pairs) == 0)
+      stop("No record pairs!")
+
+    if (is.null(rpairs$Wdata))
+      stop("No weights in rpairs!")
+
     if (!is.numeric(threshold.upper))
       stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
 
