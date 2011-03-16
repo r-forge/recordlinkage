@@ -177,65 +177,134 @@ test.emClassify <- function()
 
   # test threshold
   # only upper threshold supplied (only matches and non-matches)
-    # feasible value
-    thresh <- sample(unique(rpairs$Wdata),1)
-    result <- emClassify(rpairs, threshold.upper = thresh)
-    checkTrue(all((result$Wdata >= thresh)==(result$prediction=="L")),
-      msg = "check links, only upper threshold, feasible value")
-    checkTrue(all((result$Wdata < thresh)==(result$prediction=="N")),
-      msg = "check non-links, only upper threshold, feasible value")
-    # high value: only non-matches
-    thresh <- max(rpairs$Wdata + 1)
-    result <- emClassify(rpairs, threshold.upper = thresh)
-    checkTrue(all(result$prediction=="N"),
-      msg = "check high value for only upper threshold")
-    # low value: only matches
-    thresh <- min(rpairs$Wdata)
-    result <- emClassify(rpairs, threshold.upper = thresh)
-    checkTrue(all(result$prediction=="L"),
-      msg = "check low value for only lower threshold")
+  # feasible value
+  thresh <- sample(unique(rpairs$Wdata),1)
+  result <- emClassify(rpairs, threshold.upper = thresh)
+  checkTrue(all((result$Wdata >= thresh)==(result$prediction=="L")),
+    msg = "check links, only upper threshold, feasible value")
+  checkTrue(all((result$Wdata < thresh)==(result$prediction=="N")),
+    msg = "check non-links, only upper threshold, feasible value")
+  # high value: only non-matches
+  thresh <- max(rpairs$Wdata + 1)
+  result <- emClassify(rpairs, threshold.upper = thresh)
+  checkTrue(all(result$prediction=="N"),
+    msg = "check high value for only upper threshold")
+  # low value: only matches
+  thresh <- min(rpairs$Wdata)
+  result <- emClassify(rpairs, threshold.upper = thresh)
+  checkTrue(all(result$prediction=="L"),
+    msg = "check low value for only lower threshold")
 
   # only lower threshold supplied (only non-matches and possibles
-    # feasible value
-    thresh <- sample(unique(rpairs$Wdata),1)
-    result <- emClassify(rpairs, threshold.lower = thresh)
-    checkTrue(all((result$Wdata >= thresh)==(result$prediction=="P")),
-      msg = "check possibles, only lower threshold, feasible value")    
-    checkTrue(all((result$Wdata < thresh)==(result$prediction=="N")),
-      msg = "check non-links, only lower threshold, feasible value")        
-    # high value: only non-matches
-    thresh <- max(rpairs$Wdata + 1)
-    result <- emClassify(rpairs, threshold.lower = thresh)
-    checkTrue(all(result$prediction=="N"),
-      msg = "check high value for only lower threshold")
-    # low value: only possible matches
-    thresh <- min(rpairs$Wdata)
-    result <- emClassify(rpairs, threshold.lower = thresh)
-    checkTrue(all(result$prediction=="P"),
-      msg = "check low value for only lower threshold")
+  # feasible value
+  thresh <- sample(unique(rpairs$Wdata),1)
+  result <- emClassify(rpairs, threshold.lower = thresh)
+  checkTrue(all((result$Wdata >= thresh)==(result$prediction=="P")),
+    msg = "check possibles, only lower threshold, feasible value")    
+  checkTrue(all((result$Wdata < thresh)==(result$prediction=="N")),
+    msg = "check non-links, only lower threshold, feasible value")        
+  # high value: only non-matches
+  thresh <- max(rpairs$Wdata + 1)
+  result <- emClassify(rpairs, threshold.lower = thresh)
+  checkTrue(all(result$prediction=="N"),
+    msg = "check high value for only lower threshold")
+  # low value: only possible matches
+  thresh <- min(rpairs$Wdata)
+  result <- emClassify(rpairs, threshold.lower = thresh)
+  checkTrue(all(result$prediction=="P"),
+    msg = "check low value for only lower threshold")
 
   # upper threshold with lower threshold = -Inf (only possibles and matches)
-    # feasible value
-    thresh <- sample(unique(rpairs$Wdata),1)
-    result <- emClassify(rpairs, threshold.upper = thresh,
-      threshold.lower = -Inf)
-    checkTrue(all((result$Wdata >= thresh)==(result$prediction=="L")),
-      msg = "check links, upper threshold and lower = -Inf, feasible value")        
-    checkTrue(all((result$Wdata < thresh)==(result$prediction=="P")),
-      msg = "check links, upper threshold and lower = -Inf, feasible value")            
-    # high value: only possibles
-    thresh <- max(rpairs$Wdata + 1)
-    result <- emClassify(rpairs, threshold.upper = thresh,
-      threshold.lower = -Inf)
-    checkTrue(all(result$prediction=="P"),
-      msg = "check high value for upper threshold and lower = -Inf")
-    # low value: only matches
-    thresh <- min(rpairs$Wdata)
-    result <- emClassify(rpairs, threshold.upper = thresh,
-      threshold.lower = -Inf)
-    checkTrue(all(result$prediction=="L"),
-      msg = "check high value for upper threshold and lower = -Inf")
-  
+  # feasible value
+  thresh <- sample(unique(rpairs$Wdata),1)
+  result <- emClassify(rpairs, threshold.upper = thresh,
+    threshold.lower = -Inf)
+  checkTrue(all((result$Wdata >= thresh)==(result$prediction=="L")),
+    msg = "check links, upper threshold and lower = -Inf, feasible value")        
+  checkTrue(all((result$Wdata < thresh)==(result$prediction=="P")),
+    msg = "check links, upper threshold and lower = -Inf, feasible value")            
+  # high value: only possibles
+  thresh <- max(rpairs$Wdata + 1)
+  result <- emClassify(rpairs, threshold.upper = thresh,
+    threshold.lower = -Inf)
+  checkTrue(all(result$prediction=="P"),
+    msg = "check high value for upper threshold and lower = -Inf")
+  # low value: only matches
+  thresh <- min(rpairs$Wdata)
+  result <- emClassify(rpairs, threshold.upper = thresh,
+    threshold.lower = -Inf)
+  checkTrue(all(result$prediction=="L"),
+    msg = "check high value for upper threshold and lower = -Inf")
+
+  # Test usage of my / ny error bounds. For this purpose, an object is populated
+  # with real values for m- and u-probabilites. In this case the error bounds
+  # should be valid.
+  pairs <- as.matrix(rpairs$pairs[-c(1,2)])
+  pairs [is.na(pairs)] <- 0
+  counts <- countpattern(pairs)
+  countNonMatch <- counts[seq(1, length(counts) - 1, 2)]
+  countMatch <- counts[seq(2, length(counts), 2)]
+  realM <- countMatch / sum(countMatch)
+  realU <- countNonMatch / sum(countNonMatch)
+  rpairs$M <- realM
+  rpairs$U <- realU
+
+  # First check: bound on beta error (alias my)
+  W_unique <- unique(rpairs$Wdata)
+  allBeta <- unique(sapply(W_unique, function(thresh_iter)
+    {
+      errorMeasures(emClassify(rpairs, thresh_iter))$beta
+    }
+  ))
+
+  for (my in allBeta)
+  {
+    alpha_result <- errorMeasures(emClassify(rpairs, my=my))$alpha
+    alpha=list()
+    for (thresh_iter in W_unique)
+    {
+      errM <- errorMeasures(emClassify(rpairs, thresh_iter))
+      if (errM$beta <= my)
+      {
+        alpha[[as.character(thresh_iter)]] <- errM$alpha
+      }
+    }
+    checkEqualsNumeric(alpha_result, min(unlist(alpha),na.rm=TRUE),
+      msg = sprintf("check for my=%g", my))
+  }
+
+  # Second check: bound on alpha error (alias my)
+  allAlpha <- unique(sapply(W_unique, function(thresh_iter)
+    {
+      errorMeasures(emClassify(rpairs, thresh_iter))$alpha
+    }
+  ))
+
+  for (ny in allAlpha)
+  {
+    beta_result <- errorMeasures(emClassify(rpairs, ny=ny))$beta
+    beta=list()
+    for (thresh_iter in W_unique)
+    {
+      errM <- errorMeasures(emClassify(rpairs, thresh_iter))
+      if (errM$alpha <= ny)
+      {
+        beta[[as.character(thresh_iter)]] <- errM$beta
+      }
+    }
+    checkEqualsNumeric(beta_result, min(unlist(beta),na.rm=TRUE),
+      msg = sprintf("check for ny=%g", ny))
+  }
+
+  # Third check: both bounds set to reasonable values
+  # take values for error bounds which are closest to the 10% quantile
+  ny <- allAlpha[which.min(abs(allAlpha - quantile(allAlpha, 0.1)))]
+  my <- allBeta[which.min(abs(allBeta - quantile(allBeta, 0.1)))]
+  # calculate error measures from the contingency table,
+  # the value in getErrorMeasures values possible links differently
+  resultTab <- getTable(emClassify(rpairs, my=my, ny=ny))
+  checkEqualsNumeric(my, resultTab["FALSE", "L"] / sum(resultTab["FALSE",]))
+  checkEqualsNumeric(ny, resultTab["TRUE", "N"] / sum(resultTab["TRUE",]))
 }
 
 test.emClassify.RLBigData <- function()
@@ -343,6 +412,8 @@ test.emClassify.RLBigData <- function()
       msg = "check low value for upper threshold and lower = -Inf")
 
   } # end for loop
+  
+
 }
 
 test.optimalThreshold.exceptions <- function()

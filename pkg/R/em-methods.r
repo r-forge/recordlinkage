@@ -3,9 +3,17 @@
 # internal Function to compute thresholds from given error bounds
 getThresholds <- function(W, M, U, my, ny)
 {
+      # Numeric tolerance. Two numbers a and b are considered equal if
+      # abs(a-b) <= tol
+      tol <- .Machine$double.eps ^ 0.5
       o=order(W,decreasing=TRUE) # order Weights decreasing
-      FN=rev(cumsum(rev(M[o])))
-      FP=cumsum(U[o])
+      # take only weights that are valid numbers (NaN can appear
+      # after EM calculation)
+      o <- o[!is.na(W[o])]
+      # extend error rates by zeros to account for infinite weight
+      # (for the case of no links at all)
+      FN=c(rev(cumsum(rev(M[o]))), 0)
+      FP=c(0, cumsum(U[o]))
       if (my==Inf && ny==Inf)
       {
           # no error bound given: minimize overall error
@@ -16,22 +24,22 @@ getThresholds <- function(W, M, U, my, ny)
 
       } else if (my==Inf)
       {
-          # only rate of false matches relevant
-          cutoff_lower=head(which(FN<=ny),1)
+          # only rate of false non-matches relevant
+          cutoff_lower=head(which(FN - ny <= tol),1)
           if (length(cutoff_lower)==0)
               cutoff_lower=length(o)
           cutoff_upper=cutoff_lower
 
       } else if (ny==Inf)
       {
-          # only rate of false non-matches relevant
-          cutoff_upper=tail(which(FP<=my),1)
+          # only rate of false matches relevant
+          cutoff_upper=tail(which(FP - my <= tol),1)
           cutoff_lower=cutoff_upper
       } else
       {
           # both error bounds relevant
-          cutoff_upper=tail(which(FP<=my),1)
-          cutoff_lower=head(which(FN<=ny),1)
+          cutoff_upper=tail(which(FP - my <= tol),1)
+          cutoff_lower=head(which(FN - ny <= tol),1)
           if (length(cutoff_upper)==0)
               cutoff_upper=0
           if (length(cutoff_lower)==0)
@@ -42,7 +50,9 @@ getThresholds <- function(W, M, U, my, ny)
               cutoff_lower=cutoff_upper
           }
       }
-      c(threshold.upper=W[o][cutoff_upper], threshold.lower=W[o][cutoff_lower])
+      # classification weights include infinite weight (classifying no links)
+      classW <- c(Inf, W[o])
+      c(threshold.upper=classW[cutoff_upper], threshold.lower=classW[cutoff_lower])
 }
 
 
@@ -264,13 +274,13 @@ setMethod(
 
     if (!is.numeric(my))
       stop(sprintf("Illegal type for my: %s", class(my)))
-    if (!missing(my) && (my < 0 || my > 1))
-      stop(sprintf("Illegal value for my: %g", my))
+#    if (!missing(my) && (my < 0 || my > 1))
+#      stop(sprintf("Illegal value for my: %g", my))
 
     if (!is.numeric(ny))
       stop(sprintf("Illegal type for ny: %s", class(ny)))
-    if (!missing(ny) && (ny < 0 || ny > 1))
-      stop(sprintf("Illegal value for ny: %g", ny))
+#    if (!missing(ny) && (ny < 0 || ny > 1))
+#      stop(sprintf("Illegal value for ny: %g", ny))
 
     thresholds <- getThresholds(W = rpairs$W, M = rpairs$M, U = rpairs$U,
                                 my = my, ny=ny)
@@ -335,13 +345,13 @@ setMethod(
 
     if (!is.numeric(my))
       stop(sprintf("Illegal type for my: %s", class(my)))
-    if (!missing(my) && (my < 0 || my > 1))
-      stop(sprintf("Illegal value for my: %g", my))
+#    if (!missing(my) && (my < 0 || my > 1))
+#      stop(sprintf("Illegal value for my: %g", my))
 
     if (!is.numeric(ny))
       stop(sprintf("Illegal type for ny: %s", class(ny)))
-    if (!missing(ny) && (ny < 0 || ny > 1))
-      stop(sprintf("Illegal value for ny: %g", ny))
+#    if (!missing(ny) && (ny < 0 || ny > 1))
+#      stop(sprintf("Illegal value for ny: %g", ny))
 
     W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
     M <- dbGetQuery(rpairs@con, "select M from M order by id asc")$M
