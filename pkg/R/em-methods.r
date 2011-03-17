@@ -264,7 +264,7 @@ setMethod(
   signature = c("RecLinkData", "missing", "missing"),
   definition = function(rpairs, threshold.upper = Inf,
                         threshold.lower = threshold.upper, my = Inf,
-                        ny = Inf)
+                        ny = Inf, ...)
   {
     if (nrow(rpairs$pairs) == 0)
       stop("No record pairs!")
@@ -274,13 +274,13 @@ setMethod(
 
     if (!is.numeric(my))
       stop(sprintf("Illegal type for my: %s", class(my)))
-#    if (!missing(my) && (my < 0 || my > 1))
-#      stop(sprintf("Illegal value for my: %g", my))
+    if (!missing(my) && (my < 0 || my > 1))
+      stop(sprintf("Illegal value for my: %g", my))
 
     if (!is.numeric(ny))
       stop(sprintf("Illegal type for ny: %s", class(ny)))
-#    if (!missing(ny) && (ny < 0 || ny > 1))
-#      stop(sprintf("Illegal value for ny: %g", ny))
+    if (!missing(ny) && (ny < 0 || ny > 1))
+      stop(sprintf("Illegal value for ny: %g", ny))
 
     thresholds <- getThresholds(W = rpairs$W, M = rpairs$M, U = rpairs$U,
                                 my = my, ny=ny)
@@ -337,7 +337,7 @@ setMethod(
   signature = c("RLBigData", "missing", "missing"),
   definition = function(rpairs, threshold.upper = Inf,
                         threshold.lower = threshold.upper, my = Inf,
-                        ny = Inf)
+                        ny = Inf, ...)
   {
 
     if(!dbExistsTable(rpairs@con, "W"))
@@ -345,13 +345,13 @@ setMethod(
 
     if (!is.numeric(my))
       stop(sprintf("Illegal type for my: %s", class(my)))
-#    if (!missing(my) && (my < 0 || my > 1))
-#      stop(sprintf("Illegal value for my: %g", my))
+    if (!missing(my) && (my < 0 || my > 1))
+      stop(sprintf("Illegal value for my: %g", my))
 
     if (!is.numeric(ny))
       stop(sprintf("Illegal type for ny: %s", class(ny)))
-#    if (!missing(ny) && (ny < 0 || ny > 1))
-#      stop(sprintf("Illegal value for ny: %g", ny))
+    if (!missing(ny) && (ny < 0 || ny > 1))
+      stop(sprintf("Illegal value for ny: %g", ny))
 
     W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
     M <- dbGetQuery(rpairs@con, "select M from M order by id asc")$M
