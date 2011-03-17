@@ -316,7 +316,9 @@ test.emClassify.RLBigData <- function()
   rpairs2 <-clone(rpairs1)
   rpairs1 <- emWeights(rpairs1, tol=0.01)
   rpairs2 <- emWeights(rpairs2, tol=0.01, store.weights = FALSE)
-
+  # same record pairs as RecLinkData object, needed for some checks below
+  rpairs3 <- compare.dedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
+  rpairs3 <- emWeights(rpairs3, tol=0.01)
   Wdata <- dbReadTable(rpairs1@con, "Wdata")
 
   for (rpairs in list(rpairs1, rpairs2))
@@ -412,7 +414,59 @@ test.emClassify.RLBigData <- function()
       msg = "check low value for upper threshold and lower = -Inf")
 
   } # end for loop
-  
+
+  # Test usage of my / ny error bounds.
+  # Only check equal result for RecLinkData and RecLinkData method.
+  # This suffices as a check for correct values is made for the RecLinkData
+  # method
+
+  # first check: only my
+  my <- 0.05
+  resultS3 <- emClassify(rpairs3, my=my)
+  linkIds <- resultS3$pairs[resultS3$prediction=="L", 1:2]
+  linkIds <- as.matrix(linkIds[order(linkIds[[1]], linkIds[[2]]),])
+  for (rpairs in list(rpairs1, rpairs2))
+  {
+    resultS4 <- emClassify(rpairs, my=my)
+    linkIdsS4 <- as.matrix(resultS4@links[order(resultS4@links[,1], resultS4@links[,2]),])
+    checkEqualsNumeric(linkIdsS4, linkIds, msg="check for my")
+    checkEqualsNumeric(nrow(resultS4@possibleLinks), 0, msg="check for my")
+  }
+
+
+
+  # second check: only ny
+  ny <- 0.05
+  resultS3 <- emClassify(rpairs3, ny=ny)
+  linkIds <- resultS3$pairs[resultS3$prediction=="L", 1:2]
+  linkIds <- as.matrix(linkIds[order(linkIds[[1]], linkIds[[2]]),])
+  for (rpairs in list(rpairs1, rpairs2))
+  {
+    resultS4 <- emClassify(rpairs, ny=ny)
+    linkIdsS4 <- as.matrix(resultS4@links[order(resultS4@links[,1], resultS4@links[,2]),])
+    checkEqualsNumeric(linkIdsS4, linkIds, msg="check for ny")
+    checkEqualsNumeric(nrow(resultS4@possibleLinks), 0, msg="check for ny")
+  }
+
+  # third check: my and ny
+  # second check: only my
+  my <- 0.01
+  ny <- 0.01
+  resultS3 <- emClassify(rpairs3, my=my, ny=ny)
+  linkIds <- resultS3$pairs[resultS3$prediction=="L", 1:2]
+  linkIds <- as.matrix(linkIds[order(linkIds[[1]], linkIds[[2]]),])
+  possibleLinkIds <- resultS3$pairs[resultS3$prediction=="P", 1:2]
+  possibleLinkIds <- as.matrix(possibleLinkIds[order(possibleLinkIds[[1]],
+    possibleLinkIds[[2]]),])
+  for (rpairs in list(rpairs1, rpairs2))
+  {
+    resultS4 <- emClassify(rpairs, my=my, ny=ny)
+    linkIdsS4 <- as.matrix(resultS4@links[order(resultS4@links[,1], resultS4@links[,2]),])
+    possibleLinkIdsS4 <- as.matrix(resultS4@possibleLinks[order(resultS4@possibleLinks[,1],
+      resultS4@possibleLinks[,2]),])
+    checkEqualsNumeric(linkIdsS4, linkIds, msg="check for ny")
+    checkEqualsNumeric(possibleLinkIdsS4, possibleLinkIds, msg="check for ny")
+  }
 
 }
 
