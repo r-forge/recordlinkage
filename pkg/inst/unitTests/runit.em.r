@@ -29,6 +29,11 @@ test.emWeights.exceptions <- function()
     msg = "cutoff too high")
   checkException(emWeights(rpairs, cutoff = -0.3),
     msg = "cutoff too low")  
+
+  # RLBigData object with expired SQLite connection
+  rpairsBig <- RLBigDataDedup(RLdata500)
+  dbDisconnect(rpairsBig@con)
+  checkException(emWeights(rpairsBig, tol=0.01), msg = "invalid SQLite connection")
 }
 
 test.emWeights <- function()
@@ -167,6 +172,12 @@ test.emClassify.exceptions <- function()
     checkException (emClassify(rpairs, ny="0.2"), msg = "Illegal value for ny")
     checkException (emClassify(rpairs, ny=TRUE), msg = "Illegal value for ny")
   }
+  # RLBigData object with expired SQLite connection
+  rpairsBig <- RLBigDataDedup(RLdata500, blockfld = list(1,3,5,6,7))
+  rpairsBig <- emWeights(rpairsBig, tol=0.01)
+  dbDisconnect(rpairsBig@con)
+  checkException(emWeights(rpairsBig, tol=0.01), msg = "invalid SQLite connection")
+
 }
 
 test.emClassify <- function()

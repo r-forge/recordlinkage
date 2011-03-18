@@ -63,6 +63,9 @@ setMethod(
       stop(sprintf("Upper threshold %g lower than lower threshold %g",
       threshold.upper, threshold.lower))
 
+    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
+      "See '?saveRLObject' on how to make persistant copies of such objects."))
+
     if (dbExistsTable(rpairs@con, "Wdata"))
     {
       query <- "select id1, id2 from Wdata where W >= :upper"
@@ -189,6 +192,9 @@ setMethod(
       withProgressBar = (sink.number()==0))
   {
 
+
+    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
+      "See '?saveRLObject' on how to make persistant copies of such objects."))
 
     # Delete old weights if they exist
     # vacuum to keep file compact

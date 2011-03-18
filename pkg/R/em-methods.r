@@ -83,10 +83,10 @@ setMethod(
       
     if (!is.numeric(cutoff))
       stop(sprintf("Illegal type for cutoff: %s", class(cutoff)))
+
     if (cutoff < 0 || cutoff > 1)
       stop(sprintf("Illegal value for cutoff: %g", cutoff))
-  
-  
+
     pairs=rpairs$pairs
     # ids und Matchingstatus rausnehmen
     pairs=pairs[,-c(1,2,ncol(pairs))]
@@ -156,6 +156,9 @@ setMethod(
   definition = function (rpairs, cutoff=0.95, store.weights = TRUE,
     verbose = TRUE, ...)
   {
+    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
+      "See '?saveRLObject' on how to make persistant copies of such objects."))
+
     u=getFrequencies(rpairs)
     # get number of attributes from frequency vector: this way excluded
     # columns are not counted
@@ -340,6 +343,9 @@ setMethod(
                         ny = Inf, ...)
   {
 
+    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
+    "See '?saveRLObject' on how to make persistant copies of such objects."))
+
     if(!dbExistsTable(rpairs@con, "W"))
       stop("No EM weights have been calculated for rpairs! Call emWeights first.")
 
@@ -373,6 +379,8 @@ setMethod(
                         ny = Inf, withProgressBar = (sink.number()==0))
   {
 
+    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
+      "See '?saveRLObject' on how to make persistant copies of such objects."))
 
     if(!dbExistsTable(rpairs@con, "W"))
       stop("No EM weights have been calculated for rpairs! Call emWeights first.")

@@ -269,8 +269,9 @@ test.show <- function()
   testResult <- capture.output(show(rpairs))
   checkTrue(any(grepl("Deduplication", testResult)))
   checkTrue(any(grepl("5 records", testResult)))
-  checkTrue(any(grepl("1 match", testResult)))
-  checkTrue(any(grepl("4 pairs with unknown status", testResult)))
+# deactivated: show was modified, this information is now in summary()
+#  checkTrue(any(grepl("1 match", testResult)))
+#  checkTrue(any(grepl("4 pairs with unknown status", testResult)))
 
   # linkage data
   data2 <- read.table("data2.compare.txt", sep=",", header=TRUE)
@@ -282,6 +283,7 @@ test.show <- function()
   checkTrue(any(grepl("Linkage", testResult)))
   checkTrue(any(grepl("3 records", testResult))) # first data set
   checkTrue(any(grepl("2 records", testResult))) # second data set
-  checkTrue(any(grepl("1 match", testResult)))
-  checkTrue(any(grepl("0 pairs with unknown status", testResult)))
+# deactivated: show was modified, this information is now in summary()
+#  checkTrue(any(grepl("1 match", testResult)))
+#  checkTrue(any(grepl("0 pairs with unknown status", testResult)))
 }
