@@ -51,7 +51,7 @@ setMethod(
   signature = "RLBigData",
   definition = function (rpairs,threshold.upper, 
                         threshold.lower=threshold.upper, e=0.01, 
-                        f=getFrequencies(rpairs))
+                        f=getFrequencies(rpairs), withProgressBar = (sink.number()==0))
   {    
     if (!is.numeric(threshold.upper))
       stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
@@ -74,16 +74,19 @@ setMethod(
     } else
     {
 
-      on.exit(clear(rpairs))
-      rpairs <- begin(rpairs)
+      if (withProgressBar)
+      {
+        expPairs <- getExpectedSize(rpairs)
+        pgb <- txtProgressBar(max=expPairs)
+      }
       nPairs <- 0
       n <- 10000
-      i = n
       links <- matrix(nrow=0, ncol=2)
       possibleLinks <- matrix(nrow=0, ncol=2)
+      on.exit(clear(rpairs))
+      rpairs <- begin(rpairs)
       while(nrow(slice <- nextPairs(rpairs, n)) > 0)
       {
-  #      message(i)
         flush.console()
         slice[is.na(slice)] <- 0
         e=e+rep(0,ncol(slice)-3)
@@ -103,16 +106,19 @@ setMethod(
         S=apply(slice[,-c(1,2,ncol(slice))],1,row_sum,w)/sumW
         if (any(is.na(S) | S < 0 | S > 1))
           warning("Some weights have illegal values. Check error rate and frequencies!")
-  #      message(range(slice[,1]))
-  #      message(range(slice[,2]))
-  #      message("----------------------")
         links <- rbind(links, as.matrix(slice[S >= threshold.upper,1:2]))
         possibleLinks <- rbind(possibleLinks,
           as.matrix(slice[S >= threshold.lower & S < threshold.upper, 1:2]))
-        i <- i + n
         nPairs <- nPairs + nrow(slice)
+        if (withProgressBar)
+        {
+          setTxtProgressBar(pgb, nPairs)
+          flush.console()
+        }
       }
+      if (withProgressBar) close(pgb)
     }
+    
     new("RLResult", data = rpairs, links = as.matrix(links),
       possibleLinks = as.matrix(possibleLinks),
       nPairs = nPairs)
