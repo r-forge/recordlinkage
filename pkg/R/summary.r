@@ -273,12 +273,16 @@ setMethod(
       RLBigDataDedup = object@data@identity,
       RLBigDataLinkage = object@data@identity2)
     # TP: true positive, FP: false positive, TN: true negative,
-    # FN: false negative
+    # FN: false negative, PM: possible links that are matches,
+    # PN: possible links that are non-matches
     TP <- sum(identity1[object@links[,1]]==identity2[object@links[,2]], na.rm=TRUE)
     FP <- sum(identity1[object@links[,1]]!=identity2[object@links[,2]], na.rm=TRUE)
+    PM <- sum(identity1[object@possibleLinks[,1]]==identity2[object@possibleLinks[,2]], na.rm=TRUE)
+    PN <- sum(identity1[object@possibleLinks[,1]]!=identity2[object@possibleLinks[,2]], na.rm=TRUE)
+
     nMatch <- getMatchCount(object@data)
-    FN <- nMatch - TP
-    TN <- object@nPairs - TP - FN - FP
+    FN <- nMatch - TP - PM
+    TN <- object@nPairs - TP - FN - FP - PM - PN
     return(list(
       alpha=FN/(TP+FN),
       beta=FP/(TN+FP),

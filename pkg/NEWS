@@ -1,3 +1,7 @@
+Changes in version 0.3-2
+  - improved performance through internal use of data.table, affected functions:
+    -optimalThreshold
+    
 Changes in version 0.3-1
 	- fixed bug in emClassify that threw an error during  classification 
 	  with on-the-fly calculation of weights
