@@ -245,7 +245,6 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
    } # end else
     
 
-
     # remove excluded fields
     if (is.numeric(exclude))
     {        
@@ -262,8 +261,8 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
         dataset[,phonetic]=pho_h(dataset[,phonetic])
     }
 
-    left=dataset[pair_ids[,1],,drop=FALSE]
-    right=dataset[pair_ids[,2],,drop=FALSE]
+    left <- dataset[pair_ids[,1],,drop=FALSE]
+    right <- dataset[pair_ids[,2],,drop=FALSE]
     # matrix to hold comparison patterns
     patterns=matrix(0,ncol=ncol(left),nrow=nrow(left)) 
     if (isTRUE(strcmp))
