@@ -52,18 +52,22 @@ summary.RecLinkResult <- function (object, ...)
         stop(sprintf("Wrong type for object: %s!", class(object)))
 
     summary.RecLinkData(object,...)
+    crossTable <- table(as.logical(object$pairs$is_match),object$prediction,
+          dnn=list("true status","classification"),useNA="ifany")
+
     cat("\n")
-    cat(sprintf("%d links detected",length(which(object$prediction=="L"))),"\n")
-    cat(sprintf("%d possible links detected",length(which(object$prediction=="P"))),"\n")
-    cat(sprintf("%d non-links detected",length(which(object$prediction=="N"))),"\n")
- 
+    cat(sprintf("%d links detected", sum(crossTable[,"L"])),"\n")
+    cat(sprintf("%d possible links detected", sum(crossTable[,"P"])),"\n")
+    cat(sprintf("%d non-links detected", sum(crossTable[,"N"])),"\n")
+
     cat("\n")
 
-    TP=length(which(object$pairs$is_match & object$prediction=="L")) # true positive
-    FP=length(which(!object$pairs$is_match & object$prediction=="L")) # false positive
-    TN=length(which(!object$pairs$is_match & object$prediction=="N")) # true negative
-    FN=length(which(object$pairs$is_match & object$prediction=="N")) # false negative
-    
+
+    TP=crossTable["TRUE", "L"] # true positive
+    FP=crossTable["FALSE", "L"] # false positive
+    TN=crossTable["FALSE", "N"] # true negative
+    FN=crossTable["TRUE", "N"] # false negative
+
     alpha=FN/(TP+FN)
     beta=FP/(TN+FP)
     accuracy=(TP+TN)/(TP+TN+FP+FN)
@@ -72,8 +76,7 @@ summary.RecLinkResult <- function (object, ...)
     cat(sprintf("accuracy: %f\n",accuracy))
     cat("\n\n")
     cat("Classification table:\n\n")
-    print(table(as.logical(object$pairs$is_match),object$prediction,
-          dnn=list("true status","classification"),useNA="ifany"))
+    print(crossTable)
   	return(invisible(NULL))
 }
 
