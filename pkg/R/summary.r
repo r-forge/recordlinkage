@@ -93,7 +93,7 @@ texSummary <- function (object)
     accuracy=(TP+TN)/(TP+TN+FP+FN)
 
     cat("\\begin{description}\n")
-	cat(sprintf("\\item[alpha error] %f\n",alpha))
+    cat(sprintf("\\item[alpha error] %f\n",alpha))
     cat(sprintf("\\item[beta error] %f\n",beta))
     cat(sprintf("\\item[accuracy] %f\n",accuracy))
     cat("\\end{description}\n")
