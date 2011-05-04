@@ -284,8 +284,9 @@ setMethod(
     PN <- sum(identity1[object@possibleLinks[,1]]!=identity2[object@possibleLinks[,2]], na.rm=TRUE)
 
     nMatch <- getMatchCount(object@data)
+    nUnknown <- getNACount(object@data)
     FN <- nMatch - TP - PM
-    TN <- object@nPairs - TP - FN - FP - PM - PN
+    TN <- object@nPairs - TP - FN - FP - PM - PN - nUnknown
     return(list(
       alpha=FN/(TP+FN),
       beta=FP/(TN+FP),
