@@ -345,7 +345,6 @@ resample <- function(x, size, ...)
 
 
 # modified function from package e1071, works also for data with only one column
-# and eliminates overhead of calculating 'matching' vector when it is not needed
 countpattern <- function (x, matching = FALSE)
 {
     nvar <- dim(x)[2]
@@ -355,12 +354,9 @@ countpattern <- function (x, matching = FALSE)
         1), 2^(i - 1))), 2^(nvar - i))
     namespat <- character(nrow(b))
     for (i in 1:nvar) namespat <- paste(namespat, b[, i], sep = "")
-    if (matching)
-    {
-      xpat <- numeric(nrow(x))
-      for (i in 1:nvar) xpat <- 2 * xpat + x[, i]
-      xpat <- xpat + 1
-    }
+    xpat <- numeric(nrow(x))
+    for (i in 1:nvar) xpat <- 2 * xpat + x[, i]
+    xpat <- xpat + 1
     pat <- tabulate(xpat, nb = 2^nvar)
     names(pat) <- namespat
     if (matching)
