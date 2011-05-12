@@ -6,6 +6,7 @@ Changes in version 0.3-2
 	- performance improvements in various functions
 	- bug fixes:
 		- epiClassify failed for datasets with only one column
+		  (reported by Richard Herron)
 		- getErrorMeasures returned wrong values in rare cases
 
 Changes in version 0.3-1
