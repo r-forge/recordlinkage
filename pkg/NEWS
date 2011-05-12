@@ -1,6 +1,6 @@
 Changes in version 0.3-3
 	-bug fixes:
-		- string comparators failed for character(0) input
+		- string comparators crashed for character(0) input
 		  (reported by Dominik Reusser)
 Changes in version 0.3-2
 	- performance improvements in various functions
