@@ -14,7 +14,7 @@ optimalThreshold <- function (rpairs, my=NaN, ny=NaN)
 
   if (nrow(rpairs$pairs) == 0)
     stop("No record pairs!")
-  
+
   if (is.null(rpairs$Wdata))
     stop("No weights in rpairs!")
 
@@ -34,47 +34,56 @@ optimalThreshold <- function (rpairs, my=NaN, ny=NaN)
     stop("Only pairs with unknown status in rpairs!")
 
   if (length(indMissing >0)) rpairs <- rpairs[-indMissing]
-  
-  
-	o=order(rpairs$Wdata,decreasing=TRUE)
-	weights=rpairs$Wdata[o]
-  n_data=length(weights)
-	is_match=rpairs$pairs$is_match[o]
-	n_match <- sum(is_match==1, na.rm = TRUE)
-	n_non_match <- sum(is_match==0, na.rm = TRUE)
-	FP_err=cumsum(is_match!=1)#/as.numeric(1:n_data)
-  FN_err=rev(cumsum(rev(is_match==1)))#/as.numeric(1:n_data)))
-  error=FP_err+FN_err
 
-  # nun baue Tabelle, in der Gewicht (unique) und Fehlerrate gegenübergestellt
-  # sind. Die Fehlerrate eines Gewichts ist in der sortierten Tabelle gleich
-  # der Fehlerrate für den letzten Datensatz des Blocks
-  # tapply() sortiert aufsteigend, das rev() stellt 
-  # die absteigende Reihenfolge wieder her
-
-  error_unique=rev(tapply(error,weights,tail,1))
-  FP_err_unique=rev(tapply(FP_err/n_non_match,weights,tail,1))
-  FN_err_unique=rev(tapply(FN_err/n_match,weights,tail,1))
-  
-  weights_unique=unique(weights)
-
-  # Bestimme Gewicht des Datensatzes mit minimalem Fehler.
-
-  if (missing(my) && missing(ny))
-    return(as.numeric(weights_unique[which.min(error_unique)]))
-
-  if (!missing(my))
+  # grouped by weight, count number of non-matches and matches
+  errStatFun <- function(x)
   {
-    min_ind <- which.min(FN_err_unique[FP_err_unique<=my])
-    return(as.numeric(weights_unique[FP_err_unique<=my][min_ind]))
+      nMatch <- sum(x)
+      nNonMatch <- length(x) - sum(x)
+      list(nMatch = nMatch, nNonMatch = nNonMatch)
   }
+  dt <- data.table(is_match=rpairs$pairs$is_match,
+    Wdata=match(rpairs$Wdata, sort(rpairs$W)), key="Wdata")
+  errStat <- dt[,errStatFun(is_match), by=Wdata]
 
+  # Count false negatives and positives per weight. The vectors correspond to
+  # unique(sort(rpairsWdata)). Each position holds
+  #   for FN: the number of false negatives if all record pairs with
+  #           smaller or equal weight are classified as non-links
+  #   for FP: the number of false positives if all record pairs with
+  #           greater or equal weight are classified as links
+  FN <- cumsum(errStat$nMatch)
+  FP <- rev(cumsum(rev(errStat$nNonMatch)))
+
+  # Construct error measures therefrom. Because thresholds define
+  # right-closed and left-open intervals, the range of weights has to be extended
+  # by a value greater than all exisiting weights (the case that no pairs are
+  # classified as links at all). The error rates are extended by zeros.
+  alphaErr <- c(0, FN/sum(errStat$nMatch))
+  betaErr <- c(FP/sum(errStat$nNonMatch), 0)
+  accuracy <- (nrow(rpairs$pairs) - (FP + FN)) / nrow(rpairs$pairs)
+
+  classWeights <- c(sort(unique(rpairs$Wdata)), Inf)
+
+  # set thresholds
+
+  # no error bounds given: maximize accuracy
+  if (missing(my) && missing(ny))
+    return(as.numeric(classWeights[which.max(accuracy)]))
+
+  # only bound for alpha error given: minimize beta error under constraint that
+  # bound for alpha error is met
   if (!missing(ny))
   {
-    min_ind <- which.min(FP_err_unique[FN_err_unique<=ny])
-    return(as.numeric(weights_unique[FN_err_unique<=ny][min_ind]))
+    min_ind <- which.min(betaErr[alphaErr<=ny])
+    return(as.numeric(classWeights[alphaErr<=ny][min_ind]))
+  }
+
+  # only bound for beta error given: minimize alpha error under constraint that
+  # bound for beta error is met
+  if (!missing(my))
+  {
+    min_ind <- which.min(alphaErr[betaErr<=my])
+    return(as.numeric(classWeights[betaErr<=my][min_ind]))
   }
 }
-
-
-

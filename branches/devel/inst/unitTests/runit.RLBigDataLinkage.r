@@ -306,6 +306,14 @@ test.RLBigDataLinkage <- function()
     header=TRUE)
   checkEquals(testResult, reqResult, msg=" (check reserved words in data)")
 
+  # rownames attached to data should not confuse construction of pairs
+  dataRowNames <- data1
+  rownames(dataRowNames) <- nrow(data1):1
+  testResult <- testResultFun(dataRowNames, data2)
+  reqResult <- testResultFun(data1, data2)
+  checkEquals(testResult, reqResult,
+    msg = "Check that row names are ignored")
+
   # Check for bug that row names were stored as strings, resulting in an
   # unexpected ordering
   rpairs <- RLBigDataLinkage(data1, data2)
@@ -316,6 +324,47 @@ test.RLBigDataLinkage <- function()
   testResult <- dbGetQuery(rpairs@con, "select row_names as id from data2")
   checkTrue(is.numeric(testResult$id),
     msg = "Check that record ids are stored as numbers")
+
+  # check that SQL keywords as column names are handled correctly
+  # also if column appears in blocking, string comparison or phonetic code
+  data1SQLnames <- data1
+  colnames(data1SQLnames)=c("fname.c1", "fname.c2", "lname.c1", "lname.c2", "by", "where", "select")
+
+  rpairs <- RLBigDataLinkage(data1SQLnames, data2)
+  begin(rpairs)
+  pairs <- nextPairs(rpairs)
+  checkEquals(colnames(pairs)[-c(1,2,ncol(pairs))], colnames(data1SQLnames),
+    msg = " check SQL keywords as column names")
+  clear(rpairs)
+
+  rpairs <- RLBigDataLinkage(data1SQLnames, data2)
+  invisible(begin(rpairs))
+  pairs <- nextPairs(rpairs)
+  checkEquals(colnames(pairs)[-c(1,2,ncol(pairs))], colnames(data1SQLnames),
+    msg = " check SQL keywords as column names (in blocking)")
+  clear(rpairs)
+
+  rpairs <- RLBigDataLinkage(data1SQLnames, data2)
+  invisible(begin(rpairs))
+  pairs <- nextPairs(rpairs)
+  checkEquals(colnames(pairs)[-c(1,2,ncol(pairs))], colnames(data1SQLnames),
+    msg = " check SQL keywords as column names (with string comparison)")
+  clear(rpairs)
+
+  # in this case
+  rpairs <- RLBigDataLinkage(data1SQLnames, data2, phonetic=5:7)
+  invisible(begin(rpairs))
+  pairs <- nextPairs(rpairs)
+  checkEquals(colnames(pairs)[-c(1,2,ncol(pairs))], colnames(data1SQLnames),
+    msg = " check SQL keywords as column names (with phonetic code)")
+  clear(rpairs)
+
+  # check case when all columns except one are excluded (fix in rev 327)
+  testResult=testResultFun(data2,data3, exclude=2:ncol(data2)) # default case: no blocking whatsoever
+  reqResult=read.table("result8.compare.txt",sep=",",colClasses="double",
+    header=TRUE)
+  reqResult <- reqResult[,c(1:3, ncol(reqResult))]
+  checkEquals(testResult, reqResult, msg=" (all columns excluded except one)")
 
 }
 
