@@ -2,6 +2,11 @@ Changes in version 0.3-3
 	-bug fixes:
 		- string comparators crashed for character(0) input
 		  (reported by Dominik Reusser)
+	-various performance improvements
+	-renamed vignette "Fellegi-Sunter Deduplication" to 
+	 "Weight-based deduplication"
+	-package is now in a namespace
+
 Changes in version 0.3-2
 	- performance improvements in various functions
 	- bug fixes:
