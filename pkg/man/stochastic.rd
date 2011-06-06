@@ -34,11 +34,12 @@
 \arguments{
   \item{rpairs}{The record pairs to be classified.}
   \item{threshold.upper}{A numeric value between 0 and 1.}
-  \item{threshold.lower}{A numeric value between 0 and 1 lower than \code{threshold.upper}}
+  \item{threshold.lower}{A numeric value between 0 and 1 lower than \code{threshold.upper}.}
   \item{m, u}{Numeric vectors. m- and u-probabilities of matching variables, see Details.}
   \item{withProgressBar}{Logical. Whether to display a progress bar.}
   \item{cutoff}{Numeric value. Threshold for converting string comparison values
     to binary values.}
+  \item{...}{Arguments passed to emClassify.}
 }
 
 \details{
@@ -57,7 +58,7 @@
   \code{threshold.lower} are classified as possible links. All remaining
   records are classified as non-links.
 
-  The \code["ReclinkData"} method is a shortcut for \code{\link{emClassify}}.
+  The \code{"RecLinkData"} method is a shortcut for \code{\link{emClassify}}.
 
   The \code{"RLBigData"} method checks if weights are
   present in the underlying database. If this is the case, classification
@@ -75,7 +76,7 @@
 \value{
   \code{fsWeights} returns a copy of the object with the calculated weights
   added. Note that \code{"\linkS4class{RLBigData}"} objects have some
-  reference-style semantics, see topic \link{serialization} for more information.
+  reference-style semantics, see \link{clone} for more information.
 
   For the \code{"\link{RecLinkData}"} method, \code{fsClassify} returns a S3 object
   of class \code{"\link{RecLinkResult}"} that represents a copy
@@ -99,10 +100,10 @@
 \examples{
 # generate record pairs
 data(RLdata500)
-rpairsp=compare.dedup(RLdata500, blockfld=list(1,3,5,6,7), identity=identity.RLdata500)
+rpairs <- compare.dedup(RLdata500, blockfld=list(1,3,5,6,7), identity=identity.RLdata500)
 
 # calculate weights
-rpairs=fsWeights(p)
+rpairs <- fsWeights(rpairs)
 
 # classify and show results
 summary(fsClassify(rpairs,0))

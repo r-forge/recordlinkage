@@ -10,7 +10,7 @@
 #   U:  u-probabilities of distinct binary patterns
 #   W:  weights of distinct binary patterns
 #   Wdata: weights of actual data
-fsWeightsBackend <- function(patterns, m, u, cutoff)
+.fsWeightsBackend <- function(patterns, m, u, cutoff)
 {
   # calculate weights for set of distinct binary patterns
   distinctPat <- t(bincombinations(ncol(patterns)))
@@ -69,7 +69,7 @@ setMethod(
       stop("m-probability must be greater than or equal to u-probability for every attribute!")
 
     pairs <-rpairs$pairs[,-c(1,2,ncol(rpairs$pairs)), drop=FALSE]
-    result <- fsWeightsBackend(pairs, m=m, u=u, cutoff=cutoff)
+    result <- .fsWeightsBackend(pairs, m=m, u=u, cutoff=cutoff)
     rpairs$M <- result$M
     rpairs$U <- result$U
     rpairs$W <- result$W
@@ -135,7 +135,7 @@ setMethod(
     {
       ids <- slice[,1:2]
       slice <- slice[,-c(1,2,ncol(slice))]
-      Wdata <- fsWeightsBackend(slice, m=m, u=u, cutoff=cutoff)$Wdata
+      Wdata <- .fsWeightsBackend(slice, m=m, u=u, cutoff=cutoff)$Wdata
 
       if (any(is.na(Wdata)))
         warning("Some weights have illegal values. Check parameters!")
@@ -224,7 +224,7 @@ setMethod(
       rpairs <- begin(rpairs)
       while(nrow(slice <- nextPairs(rpairs, n)) > 0)
       {
-        Wdata <- fsWeightsBackend(slice[,-c(1,2,ncol(slice)),drop=FALSE],
+        Wdata <- .fsWeightsBackend(slice[,-c(1,2,ncol(slice)),drop=FALSE],
           m=m, u=u, cutoff=cutoff)$Wdata
         if (any(is.na(Wdata)))
           warning("Some weights have illegal values. Check error rate and frequencies!")
