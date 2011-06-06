@@ -200,7 +200,7 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
      }
    }
 	 }
-   } else
+   } else # with blocking
    { 
      for (blockelem in blockfld) # loop over blocking definitions
      {
@@ -224,7 +224,6 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
       {
         is.na(blockstr)=is.na(block_data[,i])
       }
-#    	blockstr=gsub("NA", NA, blockstr)
       rm(block_data)
      id_vec=tapply(1:ndata,blockstr,function(x) if(length(x)>1) return(x))
      id_vec=delete.NULLs(id_vec)
@@ -242,8 +241,9 @@ compare.dedup <- function(dataset, blockfld=FALSE, phonetic=FALSE,
     }
     pair_ids <- data.table(pair_ids)
     key(pair_ids) <- names(pair_ids)
-    pair_ids <- as.matrix(pair_ids[,1,by=names(pair_ids)], rownames.force=FALSE)[,1:2]
-    pair_ids=as.matrix(unique(as.data.frame(pair_ids)), rownames.force=FALSE)  # runs faster with data frame
+#    browser()
+    pair_ids <- as.matrix(pair_ids[,1, by=names(pair_ids)], rownames.force=FALSE)[,1:2, drop=FALSE]
+#    pair_ids=as.matrix(unique(as.data.frame(pair_ids)), rownames.force=FALSE)  # runs faster with data frame
    } # end else
     
 
