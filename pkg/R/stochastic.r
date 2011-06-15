@@ -107,10 +107,6 @@ setMethod(
 
     dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W real)")
 
-    # create index, this speeds up the join operation of getPairs
-    # significantly
-    dbGetQuery(rpairs@con, "create index index_Wdata_id on Wdata (id1, id2)")
-    dbGetQuery(rpairs@con, "create index index_Wdata_W on Wdata (W)")
 
     if (withProgressBar)
     {
@@ -151,6 +147,12 @@ setMethod(
       }
     }
     if (withProgressBar) close(pgb)
+
+    # create index, this speeds up the join operation of getPairs
+    # significantly
+    dbGetQuery(rpairs@con, "create index index_Wdata_id on Wdata (id1, id2)")
+    dbGetQuery(rpairs@con, "create index index_Wdata_W on Wdata (W)")
+
     dbCommit(rpairs@con)
 
     # remove copied database
