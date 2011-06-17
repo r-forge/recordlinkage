@@ -1,4 +1,5 @@
 Changes in version 0.3-3
+	-added new classification method "bumping", see ?trainSupv
 	-bug fixes:
 		- string comparators crashed for character(0) input
 		  (reported by Dominik Reusser)
