@@ -13,7 +13,7 @@ LinkingTo: RSQLite
 URL:https://r-forge.r-project.org/projects/recordlinkage/, http://journal.r-project.org/archive/2010-2/RJournal_2010-2_Sariyar+Borg.pdf
 Collate: register-S3-classes.r RLBigData-classes.r RLResult-class.r 
          accessor-methods.r evt.r               
-         classify.r firstlib.r classifySupv-methods.r genSamples.r strcmp.r
+         classify.r classifySupv-methods.r genSamples.r strcmp.r
          compare.r getPairs.r summary.r em-methods.r internals.r
-         em.r mygllm.r epilink-methods.r phonetics.r  
+         em.r mygllm.r epilink-methods.r phonetics.r onAttach.r 
 	 getPairs-methods.r serialization.r tools.r stochastic.r
