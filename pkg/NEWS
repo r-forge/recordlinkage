@@ -3,6 +3,7 @@ Changes in version 0.3-3
 	-bug fixes:
 		- string comparators crashed for character(0) input
 		  (reported by Dominik Reusser)
+		- getPairs could fail when the result is emtpy
 	-various performance improvements
 	-renamed vignette "Fellegi-Sunter Deduplication" to 
 	 "Weight-based deduplication"
