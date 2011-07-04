@@ -232,6 +232,30 @@ print.summaryRLBigDataLinkage <- function(x, ...)
 }
 
 
+setMethod(
+  f = "summary",
+  signature = "RLResult",
+  definition = function(object)
+  {
+    val <- list()
+    val[["nPairs"]] <- result@nPairs
+    val[["nLinks"]] <- nrow(result@links)
+    val[["nPossibleLinks"]] <- nrow(result@possibleLinks)
+    class(val) <- "summaryRLResult"
+    val
+  }
+)
+
+print.summaryRLResult <- function(x, ...)
+{
+  cat("RLBigDataResult object\n")
+  cat("\n")
+  cat("Number of record pairs:", x$nPairs, "\n")
+  cat("Number of detected links:", x$nLinks, "\n")
+  cat("Number of detected possible links:", x$nPossibleLinks, "\n")
+}
+
+
 # get accuracy, alpha-error, beta-error etc. from result object
 setGeneric(
   name = "getErrorMeasures",

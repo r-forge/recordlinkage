@@ -1,3 +1,5 @@
+Changes in version 0.3-4
+	added summary method for RLResult objects
 Changes in version 0.3-3
 	-added new classification method "bumping", see ?trainSupv
 	-bug fixes:
