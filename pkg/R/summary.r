@@ -62,19 +62,23 @@ summary.RecLinkResult <- function (object, ...)
 
     cat("\n")
 
+    # print the following summary only if matching status is known at leas
+    # for some pairs
+    if (nrow(crossTable) >= 2)
+    {
+      TP=crossTable["TRUE", "L"] # true positive
+      FP=crossTable["FALSE", "L"] # false positive
+      TN=crossTable["FALSE", "N"] # true negative
+      FN=crossTable["TRUE", "N"] # false negative
 
-    TP=crossTable["TRUE", "L"] # true positive
-    FP=crossTable["FALSE", "L"] # false positive
-    TN=crossTable["FALSE", "N"] # true negative
-    FN=crossTable["TRUE", "N"] # false negative
-
-    alpha=FN/(TP+FN)
-    beta=FP/(TN+FP)
-    accuracy=(TP+TN)/(TP+TN+FP+FN)
-    cat(sprintf("alpha error: %f\n",alpha))
-    cat(sprintf("beta error: %f\n",beta))
-    cat(sprintf("accuracy: %f\n",accuracy))
-    cat("\n\n")
+      alpha=FN/(TP+FN)
+      beta=FP/(TN+FP)
+      accuracy=(TP+TN)/(TP+TN+FP+FN)
+      cat(sprintf("alpha error: %f\n",alpha))
+      cat(sprintf("beta error: %f\n",beta))
+      cat(sprintf("accuracy: %f\n",accuracy))
+      cat("\n\n")
+    }
     cat("Classification table:\n\n")
     print(crossTable)
   	return(invisible(NULL))
