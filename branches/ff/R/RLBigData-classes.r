@@ -182,6 +182,8 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
   expectedSize <- getExpectedSize(dataset, blockfld)
   pairsff <- .toFF(res, withProgressBar = (sink.number()==0), expectedSize)
 
+  dbClearResult(res)
+  
     # column names may have changed due to SQL conform conversion, reset them
   colnames(pairsff)[-c(1,2,ncol(pairsff))] <-
     if(length(exclude) > 0) colnames(dataset)[-exclude]
@@ -198,6 +200,7 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
     frequencies = sapply(dataset, function(x) 1/length(unique(x))),
     pairs = pairsff, Wdata = Wdata, WdataInd = WdataInd)
 
+  dbDisconnect(con)
   return(object)
 }
 
@@ -283,11 +286,19 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   con <- dbConnect(drv, dbname=tmpfile)
   coln <- make.db.names(con,colnames(dataset1))
 
+  # convert identity to factors (so that only level indices are used in the
+  # database), enforce same levels
+  if (class(identity1) != class(identity2))
+    warning("identity1 and identity2 have different types!")
+  identLevels <- as.character(unique(c(identity1, identity2)))
+  identity1 <- factor(identity1, levels = identLevels)
+  identity2 <- factor(identity2, levels = identLevels)
+
   # write records to database
   dbWriteTable(con, "data1", data.frame(row_names = 1:nrow(dataset1), dataset1, identity = identity1),
     row.names=FALSE)
 
-  dbWriteTable(con, "data2", data.frame(row_names = 1:nrow(dataset2), dataset1, identity = identity2),
+  dbWriteTable(con, "data2", data.frame(row_names = 1:nrow(dataset2), dataset2, identity = identity2),
     row.names=FALSE)
 
   # create indices to speed up blocking
@@ -321,7 +332,8 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
   res <- dbSendQuery(con, query)
   expectedSize <- getExpectedSize(rbind(dataset1, dataset2), blockfld)
   pairsff <- .toFF(res, withProgressBar = (sink.number()==0), expectedSize)
-
+  dbClearResult(res)
+  
     # column names may have changed due to SQL conform conversion, reset them
   colnames(pairsff)[-c(1,2,ncol(pairsff))] <-
     if(length(exclude) > 0) colnames(dataset1)[-exclude]
@@ -343,6 +355,7 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
     frequencies = frequencies,
     pairs = pairsff, Wdata = Wdata, WdataInd = WdataInd)
 
+  dbDisconnect(con)
   return(object)
 }
 
