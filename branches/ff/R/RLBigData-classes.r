@@ -349,9 +349,11 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
 .toFF <- function(res, withProgressBar, expectedSize)
 {
     n <- 20000
-    if (withProgressBar) pgb <- txtProgressBar(1, expectedSize)
     slice <- fetch(res, n)
     if(nrow(slice)==0) stop("No pairs generated. Check blocking criteria.")
+    # expected size can be 0 when there is really 1 record pair, make
+    # sure txtProgressBar gets a legal value
+    if (withProgressBar) pgb <- txtProgressBar(0, max(expectedSize, nrow(slice)))
     # Spalten, die nur NA enthalten, werden als character ausgegeben, deshalb
     # Umwandlung nicht-numerischer Spalten in numeric
     for (i in 1:ncol(slice))

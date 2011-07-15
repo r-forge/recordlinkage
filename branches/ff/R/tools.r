@@ -33,6 +33,7 @@ setMethod(
           )
         )
       )
+      if (nrow(freq)==0) return(1)
       1 - (sum(sapply(freq,  function(x) x * (x-1) /2)) / nAll)
     }
     res <- nAll * (1-prod(sapply(blockfld, blockelemFun)))
