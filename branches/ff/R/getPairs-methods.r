@@ -466,3 +466,102 @@ getFalse <- function(object, single.rows=FALSE)
     getFalseNeg(object, single.rows = single.rows)
   )
 }
+
+setMethod(
+  f = "getPairs",
+  signature = "RLResult",
+  definition = function(object, filter.match = c("match", "unknown", "nonmatch"),
+    filter.link = c("nonlink", "possible", "link"), max.weight = Inf, min.weight = -Inf,
+    withMatch = TRUE, withClass=TRUE, withWeight=dbExistsTable(object@data@con, "Wdata"),
+    single.rows = FALSE, sort=withWeight)
+  {
+    minInd <- searchThreshold(object@data@Wdata, min.weight, o=object@data@WdataInd)
+    maxInd <- searchThreshold(object@data@Wdata, max.weight, o=object@data@WdataInd)
+
+    # reverse to get weights in descending order
+    pairIds <- rev(object@data@WdataInd[minInd:maxInd])
+    # filter by link result if desired
+    if (!all(c("nonlink", "possible", "link") %in% filter.link))
+    {
+      # list with respective factor levels
+      lev <- list(link = "L", possible = "P", nonlink = "N")
+      for (filterElem in filter.link)
+      {
+        pairIds <- pairIds[object@prediction[pairIds]==lev[[filterElem]]]
+      }
+    }
+
+    # filter by match status if desired
+    if (!all(c("match", "nonmatch", "unknown") %in% filter.match))
+    {
+      # list with respective factor levels
+      lev <- list(match = TRUE, nonmatch = FALSE, unknown = NA)
+      for (filterElem in filter.match)
+      {
+        if (is.na(filterElem))
+          pairIds <- pairIds[is.na(object@pairs[pairIds,is_match])]
+        else
+          pairIds <- pairIds[object@pairs[pairIds,is_match]==lev[filterElem]]
+      }
+    }
+
+    # what to return if result is empty?
+    dataIds <- object@data@pairs[pairIds, 1:2]
+    result <- list(id.1 = dataIds[,1], object@data@data[dataIds$id1,],
+      id.2 = dataIds[,2], object@data@data[dataIds$id2,],
+      is_match = if (withMatch) as.logical(object@data@pairs$is_match[pairIds]) else NULL,
+      Class = if (withClass) object@prediction[pairIds] else NULL,
+      Weight = if (withWeight) object@data@Wdata[pairIds] else NULL)
+    # delete NULL entries before converting to data.frame
+    result <- data.frame(result[!sapply(result, is.null)])
+    if(single.rows)
+      result
+    else
+    {
+
+      cnames=c("id",
+        colnames(switch(class(object@data),
+          RLBigDataDedup = object@data@data,
+          RLBigDataLinkage = object@data@data1,
+          stop(paste("Unexpected class of object:", class(object)))
+        )))
+      if (withMatch)
+        cnames <- c(cnames, "is_match")
+      if (withClass)
+        cnames <- c(cnames, "Class")
+      if (withWeight)
+        cnames <- c(cnames, "Weight")
+
+      if (nrow(result)==0)
+        return(data.frame(matrix(nrow=0, ncol=length(cnames),
+          dimnames=list(character(0), cnames))))
+      # if pairs are to be printed on consecutive lines, some formatting is
+      # necassery
+
+      # This function inserts some white space:
+      #   1. The second row of every pair has possible the matching status,
+      #       classification and weight, the other one blank fields
+      #   2. A line of white space seperates record pairs
+
+      # compute number of additional fields (weight etc)
+      nAdditional <- as.numeric(withMatch) + as.numeric(withWeight) + as.numeric(withClass)
+    	printfun=function(x)
+      {
+        c(x[1:((length(x)-nAdditional)/2)],rep("", nAdditional),
+          x[((length(x)-nAdditional)/2 + 1):length(x)],
+          rep("", (length(x)+nAdditional)/2)) # blank line
+
+      }
+
+      # Apply helper function to every line
+      m=apply(result,1,printfun)
+      # reshape result into a table of suitable format
+      m=as.data.frame(matrix(m[TRUE],nrow=ncol(m)*3,ncol=nrow(m)/3,byrow=TRUE))
+
+      colnames(m) <- cnames
+      return(m)
+    }
+  }
+
+)
+

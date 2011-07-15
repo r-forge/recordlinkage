@@ -12,18 +12,19 @@ setMethod(
   definition = function(object, blockfld=list())
   {
     if(!is.list(blockfld)) blockfld = list(blockfld)
-    rpairs <- RLBigDataDedup(object)
+    con <- dbConnect(dbDriver("SQLite"))
+    dbWriteTable(con, "data", object)
     nData <- nrow(object)
     nAll <- nData * (nData - 1) / 2
     if (length(blockfld)==0) return(nAll)
-    coln <- make.db.names(rpairs@con, colnames(object))
+    coln <- make.db.names(con, colnames(object))
 
     # ergibt Wahrscheinlichkeit, dass mit gegebenen Blockingfeldern
     # ein Paar nicht gezogen wird
     blockelemFun <- function(blockelem)
     {
       if(is.character(blockelem)) blockelem <- match(blockelem, colnames(object))
-      freq <- dbGetQuery(rpairs@con,
+      freq <- dbGetQuery(con,
         sprintf("select count(*) as c from data group by %s having c > 1 and %s",
           paste("\"", coln[blockelem], "\"", sep="", collapse=", "),
           paste(
@@ -35,11 +36,7 @@ setMethod(
       1 - (sum(sapply(freq,  function(x) x * (x-1) /2)) / nAll)
     }
     res <- nAll * (1-prod(sapply(blockfld, blockelemFun)))
-
-    # avoid clutter from temporary files
-    dbDisconnect(rpairs@con)
-    unlink(rpairs@dbFile)
-
+    dbDisconnect(con)
     round(res)
   }
 )
@@ -165,3 +162,40 @@ setMethod(
     ret
   }
 )
+
+# determine position with smalles x > or >= given threshold by binary search
+# x must be sorted in ascending order or order be given in o
+searchThreshold <- function(x, threshold, inclusive=TRUE, o=NA)
+{
+  if (missing(o)) getX <- function(i) x[i] else getX <- function(i) x[o[i]]
+  # choose appropriate comparison operator
+  compFun <- if (inclusive) `>=` else `>`
+  # return NA if all data are below threshold <=> the largest element of x does
+  # not satisfy the condition
+  if (!compFun(getX(length(x)), threshold)) return(NA)
+  # if smallest value satisfies the condition, all of x do
+  if (compFun(getX(1), threshold)) return(1)
+  else
+  {
+    lower <- 1
+    upper <- length(x)
+    minInd <- round(length(x) / 2)
+    # search until current value satisfies condition and its lower neighbour
+    # does not
+    while(!(compFun(getX(minInd), threshold) && !compFun(getX(minInd-1), threshold)))
+    {
+#      message(minInd)
+      if (!compFun(getX(minInd), threshold)) # zu far left
+      {
+        lower <- minInd
+        minInd <- ceiling((minInd + upper) / 2)
+      } else
+      {
+        upper <- minInd
+        minInd <- floor((lower + minInd) / 2)
+      }
+    }
+  }
+  minInd
+}
+

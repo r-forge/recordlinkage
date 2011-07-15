@@ -156,8 +156,6 @@ setMethod(
   definition = function (rpairs, cutoff=0.95, store.weights = TRUE,
     verbose = TRUE, ...)
   {
-    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
-      "See '?saveRLObject' on how to make persistant copies of such objects."))
 
     u=getFrequencies(rpairs)
     # get number of attributes from frequency vector: this way excluded
@@ -194,62 +192,24 @@ setMethod(
     M=res[(n_patterns+1):(2*n_patterns)]/n_matches
     W=log(M/U, base=2)
 
-    # Delete old weights if they exist
-    # vacuum to keep file compact
-    dbGetQuery(rpairs@con, "drop table if exists Wdata")
-    dbGetQuery(rpairs@con, "vacuum")
-
-    # store probabilities and weights per comparison patterns
-    dbWriteTable(rpairs@con, "M", data.frame(id = 1:n_patterns, M = M), row.names = FALSE, overwrite = TRUE)
-    dbWriteTable(rpairs@con, "U", data.frame(id = 1:n_patterns, U=U), row.names = FALSE, overwrite = TRUE)
-    dbWriteTable(rpairs@con, "W", data.frame(id = 1:n_patterns, W=W), row.names = FALSE, overwrite = TRUE)
-
-    if (store.weights) # by default, a table of individual weights is stored in the database
+    Wdata <- ff(0, length=nrow(rpairs@pairs))
+    if (verbose)
     {
-      if (verbose) message("Calculate and store individual weights...")
-      # Create a copy of the record pairs from which comparison patterns will
-      # be generated. This allows concurrent writing of calculated weights.
-      rpairs_copy <- clone(rpairs)
-
-
-
-      dbBeginTransaction(rpairs@con)
-
-      # Create table for individual weights
-      dbGetQuery(rpairs@con, "create table Wdata (id1 integer, id2 integer, W double)")
-
-
-      rpairs_copy <- begin(rpairs_copy)
-
-
-      n <- 10000
-      i = n
-      while(nrow(slice <- nextPairs(rpairs_copy, n)) > 0)
+      pgb <- txtProgressBar(0, n_data)
+    }
+    ffrowapply(
       {
-        # auch hier vorläufiger Code! es muss noch ein tragfähiges Konzept her,
-        # auf welche Weise Links und Possible Links ausgegeben werden!
+        slice <- as.matrix(as.ram(rpairs@pairs[i1:i2, 3:(ncol(rpairs@pairs) - 1)]))
         slice[is.na(slice)] <- 0
         slice[slice < cutoff] <- 0
         slice[slice >= cutoff & slice < 1] <- 1
-        indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
-        dbGetPreparedQuery(rpairs@con, "insert into Wdata values (?, ?, ?)",
-          data.frame(slice[,1:2], W[indices]))
-        i <- i + n
-      }
+        indices=colSums(t(slice)*(2^(n_attr:1-1))) + 1
+        Wdata[i1:i2] <- W[indices]
+        if(verbose) setTxtProgressBar(pgb, i2)
+      }, X = rpairs@pairs)
+    if (verbose) close(pgb)
 
-      # Create index, this speeds up the join operation of getPairs
-      # significantly
-      # The index for W helps when only a small range of weights is selected
-      dbGetQuery(rpairs@con, "create index index_Wdata_id on Wdata (id1, id2)")
-      dbGetQuery(rpairs@con, "create index index_Wdata_W on Wdata (W)")
-
-      dbCommit(rpairs@con)
-
-      # remove copied database
-      clear(rpairs_copy)
-      dbDisconnect(rpairs_copy@con)
-      unlink(rpairs_copy@dbFile)
-    } # end if (store.weights)
+    rpairs@Wdata <- Wdata
     return(rpairs)
   }
 ) # end of setMethod

@@ -10,16 +10,14 @@ setClass(
   Class = "RLResult",
   representation = representation(
     data = "RLBigData",
-    links = "matrix",
-    possibleLinks = "matrix",
-    nPairs = "numeric"
-  ),
-  prototype = prototype(
-    data = NULL,
-    links = matrix(numeric(0), ncol=2, nrow=0),
-    possibleLinks = matrix(numeric(0), ncol=2, nrow=0),
-    nPairs = numeric(0)
-  )
+    prediction = "ff_vector"
+  )#,
+#  prototype = prototype(
+#    data = NULL,
+#    links = matrix(numeric(0), ncol=2, nrow=0),
+#    possibleLinks = matrix(numeric(0), ncol=2, nrow=0),
+#    nPairs = numeric(0)
+#  )
 )
 
 # no constructor, is created by classifying methods
@@ -66,34 +64,13 @@ setMethod(
   signature = "RLResult",
   definition = function(object, ...)
   {
-    identity1 <- switch(class(object@data),
-      RLBigDataDedup = object@data@identity,
-      RLBigDataLinkage = object@data@identity1)
+    tab <- table.ff(object@data@pairs$is_match, object@prediction,
+      useNA = "ifany")
+    names(dimnames(tab)) <- c("true status", "classification")
+    dimnames(tab)[dimnames(tab)=="1"] <- "TRUE"
+    dimnames(tab)[dimnames(tab)=="0"] <- "FALSE"
 
-    identity2 <- switch(class(object@data),
-      RLBigDataDedup = object@data@identity,
-      RLBigDataLinkage = object@data@identity2)
-    # TP: true positive, FP: false positive, TN: true negative,
-    # FN: false negative
-    TP <- sum(identity1[object@links[,1]]==identity2[object@links[,2]], na.rm=TRUE)
-    FP <- sum(identity1[object@links[,1]]!=identity2[object@links[,2]], na.rm=TRUE)
-    nMatch <- getMatchCount(object@data)
-    matchPossible <- sum(identity1[object@possibleLinks[,1]]==identity2[object@possibleLinks[,2]], na.rm=TRUE)
-    FN <- nMatch - TP - matchPossible
-    NAPossible <- sum(is.na(identity1[object@possibleLinks[,1]]==identity2[object@possibleLinks[,2]]))
-    nonmatchPossible <- nrow(object@possibleLinks) - NAPossible - matchPossible
-    NALink <- sum(is.na(identity1[object@links[,1]]==identity2[object@links[,2]]))
-    NANonLink <- getNACount(object@data) - NALink - NAPossible
-    TN <- object@nPairs - sum(TP, FP, NALink, matchPossible, nonmatchPossible,
-      NAPossible, FN, NANonLink)
-    tab <- matrix(c(TN, NANonLink, FN, nonmatchPossible,
-      NAPossible, matchPossible, FP, NALink, TP), ncol=3, nrow=3,
-      dimnames = list('true status' = c("FALSE", NA, "TRUE"),
-                          'classification' = c("N", "P", "L")))
-    # remove row with NAs (unknown matching status) if there are no such pairs
-    if (all(tab[2,]==0))
-      tab <- tab[-2,]
-    as.table(tab)
+    tab
   }
 )
 
