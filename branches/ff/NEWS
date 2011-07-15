@@ -1,0 +1,65 @@
+Changes in version 0.3-4
+	-added summary method for RLResult objects
+	-bug fixes:
+		-summary.RecLinkResult failed for object without known
+		 matching status
+Changes in version 0.3-3
+	-added new classification method "bumping", see ?trainSupv
+	-bug fixes:
+		- string comparators crashed for character(0) input
+		  (reported by Dominik Reusser)
+		- getPairs could fail when the result is emtpy
+	-various performance improvements
+	-renamed vignette "Fellegi-Sunter Deduplication" to 
+	 "Weight-based deduplication"
+	-package is now in a namespace
+
+Changes in version 0.3-2
+	- performance improvements in various functions
+	- bug fixes:
+		- epiClassify failed for datasets with only one column
+		  (reported by Richard Herron)
+		- getErrorMeasures returned wrong values in rare cases
+
+Changes in version 0.3-1
+	- fixed bug in emClassify that threw an error during  classification 
+	  with on-the-fly calculation of weights
+	- added checks in unit tests
+	- fixed bug in optimalThreshold which caused wrong results in some
+	  cases when ny was supplied
+	- added status messages and progress bars to various classification functions
+	- fixed numerical problem that produced wrong thresholds in some cases
+    for emClassify (with my / ny supplied) 
+
+Changes in version 0.3-0
+
+	- A framework of S4 methods and classes tailored for processing large
+	  data sets has been added. See the vignette 'BigData' for details.
+  	- The output format of getPairs (existing method for RecLinkData and
+	  RecLinkResult objects) has changed: Column "Weight" is now last instead
+	  of first. Also, for single.rows=FALSE, record pairs are speparated by
+	  a blank line.
+
+Changes in version 0.2-6
+
+	- added subset operator [ for RecLinkData and RecLinkPairs objects
+	- improved running time of epiWeights significantly
+
+Changes in version 0.2-5
+
+	- Fixed a bug in getMinimalTrain which caused the function to fail
+
+Changes in version 0.2-4
+
+	- Fixed a bug in getMinimalTrain that caused pairs with unknown
+		matching status to become non-matches in the training set.
+	- Some examples were modified to reduce execution time.
+	- Unit tests have been added in inst/unitTests.
+	- Checking of arguments improved in some functions.
+	- Small documentation changes.
+Changes in version 0.2-3
+
+  - getParetoThreshold now prompts a message if no data lies in the
+    interactively selected interval and asks the user to choose again
+  - Corrected maintainer e-mail address
+  - Several bug fixes 
