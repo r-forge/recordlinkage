@@ -305,11 +305,6 @@ setMethod(
                         ny = Inf, ...)
   {
 
-    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
-    "See '?saveRLObject' on how to make persistant copies of such objects."))
-
-    if(!dbExistsTable(rpairs@con, "W"))
-      stop("No EM weights have been calculated for rpairs! Call emWeights first.")
 
     if (!is.numeric(my))
       stop(sprintf("Illegal type for my: %s", class(my)))
@@ -341,11 +336,6 @@ setMethod(
                         ny = Inf, withProgressBar = (sink.number()==0))
   {
 
-    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
-      "See '?saveRLObject' on how to make persistant copies of such objects."))
-
-    if(!dbExistsTable(rpairs@con, "W"))
-      stop("No EM weights have been calculated for rpairs! Call emWeights first.")
 
     if (!is.numeric(threshold.upper))
       stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
@@ -358,57 +348,10 @@ setMethod(
         threshold.upper, threshold.lower))
 
 
-    # check if weights are stored in database
-    if (dbExistsTable(rpairs@con, "Wdata"))
-    { # if true, a simple query is sufficent
-      query <- "select id1, id2 from Wdata where W >= :upper"
-      links <- dbGetPreparedQuery(rpairs@con, query, data.frame(upper = threshold.upper))
-      query <- "select id1, id2 from Wdata where W < :upper and W >= :lower"
-      possibleLinks <- dbGetPreparedQuery(rpairs@con, query,
-        data.frame(upper = threshold.upper, lower = threshold.lower))
-      nPairs <- dbGetQuery(rpairs@con, "select count(*) from Wdata")[1,1]
-    }
-    else
-    { # otherwise iterate through pairs and calculate on the fly
-      n <- 10000
-      i = n
-      links <- matrix(nrow=0, ncol=2)
-      possibleLinks <- matrix(nrow=0, ncol=2)
-      n_attr <- length(getFrequencies(rpairs))
-      nPairs <- 0
+    # check if weights are stored in object
+    # TODO
 
-      W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
-
-      if (withProgressBar)
-      {
-        expPairs <- getExpectedSize(rpairs)
-        pgb <- txtProgressBar(max=expPairs)
-      }
-
-      on.exit(clear(rpairs))
-      rpairs <- begin(rpairs)
-
-      while(nrow(slice <- nextPairs(rpairs, n)) > 0)
-      {
-        slice[is.na(slice)] <- 0
-        indices=colSums(t(slice[,-c(1:2, ncol(slice))])*(2^(n_attr:1-1)))+1
-        links <- rbind(links, as.matrix(slice[W[indices] >= threshold.upper,1:2]))
-        possibleLinks <- rbind(possibleLinks,
-          as.matrix(slice[W[indices] < threshold.upper &
-          W[indices] >= threshold.lower ,1:2]))
-        i <- i + n
-        nPairs <- nPairs + nrow(slice)
-        if (withProgressBar)
-        {
-          setTxtProgressBar(pgb, nPairs)
-          flush.console()
-        }
-      }
-      if (withProgressBar) close(pgb)
-    }
-    
-    new("RLResult", data = rpairs, links = as.matrix(links),
-      possibleLinks = as.matrix(possibleLinks), nPairs = nPairs)
+    .ffWeightClassify(rpairs, threshold.upper, threshold.lower)
   }
 ) # end of SetMethod
 

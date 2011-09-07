@@ -72,9 +72,6 @@ test.fsWeights.exceptions <- function()
   checkException(fsWeights(rpairs, m=c(0.99,0.5,0.9,0.5,0.98,0.92,0.97),
     u=0.55), msg = "m < u for some attributes")
 
-  rpairsBig <- RLBigDataDedup(RLdata500, blockfld = list(1,3,5,6,7))
-  dbDisconnect(rpairsBig@con)
-  checkException(fsWeights(rpairsBig), msg = "invalid SQLite connection")
 }
 
 
@@ -135,12 +132,6 @@ test.fsClassify.exceptions <- function()
   # runif will not generate 0 (see doc), is greater than 0
   checkException(fsClassify(rpairs, threshold.upper=0, threshold.lower=runif(1)),
     msg = "lower threshold greater than upper threshold")
-
-  # RLBigData object with expired SQLite connection
-  rpairsBig <- RLBigDataDedup(RLdata500, blockfld = list(1,3,5,6,7))
-  rpairsBig <- fsWeights(rpairsBig)
-  dbDisconnect(rpairsBig@con)
-  checkException(fsClassify(rpairsBig, 0.6), msg = "invalid SQLite connection")
 
 
 }
@@ -253,16 +244,12 @@ test.fsWeights.RLBigDataDedup <- function()
   rpairs <- RLBigDataDedup(RLdata500, blockfld=list(1,3,5,6,7), strcmp=1:4)
   rpairs <- fsWeights(rpairs)
 
-  W <- getWeights(rpairs)
   # generate control object with same weights
   rpairs2 <- fsWeights(compare.dedup(RLdata500, blockfld=list(1,3,5,6,7), strcmp=1:4))
 
-  # Both methods should generate the same weights. A weak test on the sorted
-  # vector is conducted because the order of pairs differs.
-  checkEqualsNumeric(sort(W), sort(rpairs2$Wdata))
-  # Record pairs should be identified by id1, id2 with id1 < id2
-  ids <- dbReadTable(rpairs@con, "Wdata")[,1:2]
-  checkTrue(all(ids[,1] < ids[,2]),
-    msg = "Check id1 < id2 for all entries in Wdata")
-  
+  # Both methods should generate the same weights.
+  checkEqualsNumeric(as.ram(rpairs@Wdata[fforder(rpairs@pairs$id1, rpairs@pairs$id2)]),
+    rpairs2$Wdata[order(rpairs2$pairs$id1, rpairs2$pairs$id2)],
+    msg = "check that weights are equal to those of S3 method")
+
 }

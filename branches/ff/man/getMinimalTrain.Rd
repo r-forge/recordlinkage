@@ -1,6 +1,10 @@
 \name{getMinimalTrain}
 \Rdversion{1.1}
 \alias{getMinimalTrain}
+\alias{getMinimalTrain-methods}
+\alias{getMinimalTrain,RecLinkData-method}
+\alias{getMinimalTrain,RLBigData-method}
+
 
 \title{
   Create a minimal training set
@@ -13,6 +17,8 @@
 
 \usage{
 getMinimalTrain(rpairs, nEx = 1)
+\S4method{getMinimalTrain}{RecLinkData}(rpairs, nEx = 1)
+\S4method{getMinimalTrain}{RLBigData}(rpairs, nEx = 1)
 }
 
 \arguments{

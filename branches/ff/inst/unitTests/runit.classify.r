@@ -390,10 +390,12 @@ test.classifySupv.exceptions <- function()
     checkException(classifySupv(model2, newdata,
       msg = "wrong method"))
 
-    model2 <- model
-    class(model2$model) <- "glm"
-    checkException(classifySupv(model2, newdata,
-      msg = "wrong model"))
+# Removed the following check because the error is to obscure.
+# Will give an error message (passed from predict.lm) anyway.
+#    model2 <- model
+#    class(model2$model) <- "glm"
+#    checkException(classifySupv(model2, newdata,
+#      msg = "wrong model"))
 
   # errors concerning newdata
     # wrong class
@@ -416,10 +418,6 @@ test.classifySupv.exceptions <- function()
     checkException(classifySupv(model, newdata2,
       msg = "format of newdata does not match model"))
       
-  # RLBigData object with expired SQLite connection
-  rpairsBig <- RLBigDataDedup(RLdata500)
-  dbDisconnect(rpairsBig@con)
-  checkException(classifySupv(model, rpairsBig), msg = "invalid SQLite connection")
 }
 
 test.classifySupv <- function()
@@ -486,11 +484,9 @@ test.classifySupv.RLBigData <- function()
 
     # check that result is equal when applying the RecLinkData-method
     resultS3 <- classifySupv(classif, newdataS3)
-    linkIds <- result@links
-    linkIds <- linkIds[order(linkIds[,1], linkIds[,2]),]
-    linkIdsS3 <- as.matrix(resultS3$pairs[resultS3$prediction=="L", 1:2])
-    linkIdsS3 <- linkIdsS3[order(linkIdsS3[,1], linkIdsS3[,2]),]
-    checkEqualsNumeric(linkIds, linkIdsS3, msg = paste("check that result is",
+    checkEqualsNumeric(as.ram(result@prediction[fforder(result@data@pairs$id1,
+      result@data@pairs$id2)]), resultS3$prediction[order(resultS3$pairs$id1,
+      resultS3$pairs$id1)], msg = paste("check that result is",
       "equal to that of RecLinkData-method for", method))
 
   }

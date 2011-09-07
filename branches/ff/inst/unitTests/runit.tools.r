@@ -1,6 +1,6 @@
 # Test File for Package Record Linkage
 #
-# Test Functions in tools.r
+# Test Functions for tools.r and internals.r
 
 test.unorderedPairs <- function()
 {
@@ -286,4 +286,48 @@ test.show <- function()
 # deactivated: show was modified, this information is now in summary()
 #  checkTrue(any(grepl("1 match", testResult)))
 #  checkTrue(any(grepl("0 pairs with unknown status", testResult)))
+}
+
+
+test.searchThreshold <- function()
+{
+  # generate vector of random numbers
+  # X has uneven length in order to get a robust median
+  X <- sample(1:10000, 999)
+  o <- order(X)
+
+  # tests inclusive threshold with order of elements supplied
+  threshold <- median(X)
+  result <- searchThreshold(X, threshold, TRUE, o)
+  checkTrue(all(X[o[result:length(X)]] >= threshold),
+    msg = "inclusive, unsorted vector")
+  checkEqualsNumeric(X[o[result]], threshold,
+    msg = "inclusive, unsorted vector")
+
+  # exclusive threshold with order of elements supplied
+  threshold <- median(X)
+  result <- searchThreshold(X, threshold, FALSE, o)
+  checkTrue(all(X[o[result:length(X)]] > threshold),
+    msg = "exclusive, unsorted vector")
+  checkEqualsNumeric(X[o[result-1]], threshold,
+    msg = "exclusive, unsorted vector")
+
+  # tests inclusive threshold with sorted vector
+  Xsorted <- sort(X)
+  threshold <- median(Xsorted)
+  result <- searchThreshold(Xsorted, threshold, TRUE)
+  checkTrue(all(Xsorted[result:length(Xsorted)] >= threshold),
+    msg = "inclusive, sorted vector")
+  checkEqualsNumeric(Xsorted[result], threshold,
+    msg = "inclusive, unsorted vector")
+
+  # tests exclusive threshold with sorted vector
+  Xsorted <- sort(X)
+  threshold <- median(Xsorted)
+  result <- searchThreshold(Xsorted, threshold, FALSE)
+  checkTrue(all(Xsorted[result:length(Xsorted)] > threshold),
+    msg = "exclusive, sorted vector")
+  checkEqualsNumeric(Xsorted[result-1], threshold,
+    msg = "exclusive, unsorted vector")
+
 }

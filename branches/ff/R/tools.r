@@ -164,7 +164,7 @@ setMethod(
   }
 )
 
-# determine position with smalles x > or >= given threshold by binary search
+# determine position with smallest x > or >= given threshold by binary search
 # x must be sorted in ascending order or order be given in o
 searchThreshold <- function(x, threshold, inclusive=TRUE, o=NA)
 {
@@ -200,3 +200,33 @@ searchThreshold <- function(x, threshold, inclusive=TRUE, o=NA)
   minInd
 }
 
+# backend function for weight-based classification of big data sets
+.ffWeightClassify <- function(rpairs, threshold.upper, threshold.lower)
+{
+    # get breakpoints between links, possible links and non-links
+    # in sorted vector of weights
+    minMatchInd <- searchThreshold(rpairs@Wdata, threshold.upper, o=rpairs@WdataInd)
+    minPossibleInd <- searchThreshold(rpairs@Wdata, threshold.lower, o=rpairs@WdataInd)
+    # if NA is returned (threshold too large), assign length + 1
+    if (is.na(minMatchInd)) minMatchInd <- length(rpairs@Wdata) + 1
+    if (is.na(minPossibleInd)) minPossibleInd <- length(rpairs@Wdata) + 1
+    # determine number of links etc. by positions of breakpoints
+    nMatches <- length(rpairs@Wdata) - minMatchInd + 1
+    nPossibles <- length(rpairs@Wdata) - nMatches - minPossibleInd + 1
+    nNonMatches <- length(rpairs@Wdata) - nMatches - nPossibles
+    # index ranges for non-matches, possible matches, matches
+    threshInd <- c(0, minPossibleInd-1, minMatchInd-1, length(rpairs@Wdata))
+    # fill prediciton vector with the value that occurs most, fill in the others
+    lev <- c("N", "P", "L")
+    predOrder <- order(c(nNonMatches, nPossibles, nMatches))
+    prediction <- ff(lev[predOrder[3]], levels=lev, length=length(rpairs@Wdata))
+    for (i in 1:2)
+    {
+      # calculate Indices of lowest and highest weight of the current classification
+      ind1 <- threshInd[predOrder[i]] + 1
+      ind2 <- threshInd[predOrder[i]+1]
+      if(ind2 >= ind1)
+        prediction[rpairs@WdataInd[ind1:ind2]] <- lev[predOrder[i]]
+    }
+    new("RLResult", data = rpairs, prediction = prediction)
+}

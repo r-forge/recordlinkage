@@ -30,10 +30,6 @@ test.emWeights.exceptions <- function()
   checkException(emWeights(rpairs, cutoff = -0.3),
     msg = "cutoff too low")  
 
-  # RLBigData object with expired SQLite connection
-  rpairsBig <- RLBigDataDedup(RLdata500)
-  dbDisconnect(rpairsBig@con)
-  checkException(emWeights(rpairsBig, tol=0.01), msg = "invalid SQLite connection")
 }
 
 test.emWeights <- function()
@@ -89,10 +85,8 @@ test.emWeights.RLBigData <- function()
   rpairs1 <- emWeights(rpairs1, tol=0.01)
   rpairs2 <- RLBigDataDedup(RLdata500, blockfld=list(1,3,5,6,7))
   rpairs2 <- emWeights(rpairs2, tol=0.01)
-  ids <- rpairs1$pairs[,1:2]
-  Wdata2 <- dbGetPreparedQuery(rpairs2@con,
-    "select W from Wdata where id1=? and id2=?", ids)$W
-  checkEqualsNumeric(Wdata2, rpairs1$Wdata)
+  checkEqualsNumeric(rpairs1$Wdata[order(rpairs1$pairs$id1, rpairs1$pairs$id2)],
+    as.ram(rpairs2@Wdata[fforder(rpairs2@pairs$id1, rpairs2@pairs$id2)]))
 
 }
 

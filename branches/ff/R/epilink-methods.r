@@ -63,27 +63,7 @@ setMethod(
       stop(sprintf("Upper threshold %g lower than lower threshold %g",
       threshold.upper, threshold.lower))
 
-    minMatchInd <- searchThreshold(rpairs@Wdata, threshold.upper, o=rpairs@WdataInd)
-    minPossibleInd <- searchThreshold(rpairs@Wdata, threshold.lower, o=rpairs@WdataInd)
-#    revInd <- fforder(rpairs@WdataInd)
-    nMatches <- length(rpairs@Wdata) - minMatchInd + 1
-    nPossibles <- length(rpairs@Wdata) - nMatches - minPossibleInd + 1
-    nNonMatches <- length(rpairs@Wdata) - nMatches - nPossibles
-    # index ranges for non-matches, possible matches, matches
-    threshInd <- c(0, minPossibleInd, minMatchInd, length(rpairs@Wdata))
-    # fill prediciton vector with the value that occurs most, fill in the others
-    lev <- c("N", "P", "L")
-    predOrder <- order(c(nNonMatches, nPossibles, nMatches))
-    prediction <- ff(lev[predOrder[3]], levels=lev, length=length(rpairs@Wdata))
-    for (i in 1:2)
-    {
-      # calculate Indices of lowest and highest weight of the current classification
-      ind1 <- threshInd[predOrder[i]]
-      ind2 <- threshInd[predOrder[i]+1] - 1
-      if(ind2 >= ind1)
-        prediction[rpairs@WdataInd[ind1:ind2]] <- lev[predOrder[i]]
-    }
-    new("RLResult", data = rpairs, prediction = prediction)
+    .ffWeightClassify(rpairs, threshold.upper, threshold.lower)
   }
 ) # end of setMethod
 

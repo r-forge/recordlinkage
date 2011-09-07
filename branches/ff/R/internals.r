@@ -207,19 +207,19 @@ setMethod(
   {
     if (withProgressBar)
     {
-      pgb <- txtProgressBar(max=nrow(rpairs@pairs))
+      pgb <- txtProgressBar(max=nrow(x@pairs))
     }
 
     patternCounts <- 0L
     ffrowapply(
       {
-        slice <- as.ram(rpairs@pairs[i1:i2, 3:(ncol(rpairs@pairs)-1)])
+        slice <- as.ram(x@pairs[i1:i2, 3:(ncol(x@pairs)-1)])
         slice[is.na(slice)] <- 0
         slice[slice < cutoff] <- 0
         slice[slice >= cutoff] <- 1
         patternCounts <- patternCounts + countpattern(slice)
         if (withProgressBar) setTxtProgressBar(pgb, i2)
-      }, X = rpairs@pairs)
+      }, X = x@pairs)
       patternCounts
   }
 )
