@@ -84,9 +84,15 @@ setMethod(
   definition = function (rpairs, m=0.95, u=getFrequencies(rpairs),
     cutoff=1, withProgressBar = (sink.number()==0))
   {
-
-    rpairs@Wdata <- ffrowapply(.fsWeightsBackend(rpairs@pairs[i1:i2,3:(ncol(rpairs@pairs)-1)],
-    m=m, u=u, cutoff=cutoff)$Wdata, X=rpairs@pairs, RETURN = TRUE, RETCOL=NULL, VMODE="double")
+    if (withProgressBar)
+      pgb <- txtProgressBar(0, nrow(rpairs@pairs))
+    rpairs@Wdata <- ffrowapply(
+      {
+        if (withProgressBar) setTxtProgressBar(pgb, i2)
+        .fsWeightsBackend(rpairs@pairs[i1:i2,3:(ncol(rpairs@pairs)-1)],
+          m=m, u=u, cutoff=cutoff)$Wdata
+      }, X=rpairs@pairs, RETURN = TRUE, RETCOL=NULL, VMODE="double")
+    if (withProgressBar) close(pgb)
     rpairs@WdataInd <- fforder(rpairs@Wdata)
     rpairs
   }
