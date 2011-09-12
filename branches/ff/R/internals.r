@@ -304,7 +304,7 @@ unorderedPairs <- function (x)
 
 isFALSE <- function(x) identical(x,FALSE)
 
-delete.NULLs  <-  function(x)
+deleteNULLs  <-  function(x)
     x[unlist(lapply(x, length) != 0)]
 
 # interprets a scalar x as a set with 1 element (see also man page for sample)
