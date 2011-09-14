@@ -387,3 +387,21 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
     if (withProgressBar) close(pgb)
     pairsff
 }
+
+# Function to check (implementation-independent) if RL object has weights
+setGeneric(
+  name = "hasWeights",
+  def = function(object) standardGeneric("hasWeights")
+)
+
+setMethod(
+  f = "hasWeights",
+  signature = "RecLinkData",
+  def = function(object) !is.null(object$Wdata)
+)
+
+setMethod(
+  f = "hasWeights",
+  signature = "RLBigData",
+  def = function(object) range(object@Wdata) != c(0,0)
+)
