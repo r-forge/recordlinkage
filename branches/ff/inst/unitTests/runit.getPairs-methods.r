@@ -326,8 +326,7 @@ test.getPairs.RLResult <- function()
   # link status set to:            L L P  N N  N
   rpairs <- RLBigDataDedup(data1, identity = identity1)
   result <- new("RLResult", data = rpairs,
-    links = matrix(c(1,2,1,3), ncol = 2, byrow = TRUE),
-    possibleLinks=matrix(c(1,4), ncol=2, nrow=1), nPairs = 6)
+    prediction = ff(c("L", "L", "P", "N", "N", "N"), levels = c("N", "L", "P")))
 
   # read reference result, sort by ids
   reqResult <- read.table("result3.getPairs.txt",sep=",",header=TRUE, colClasses="factor")

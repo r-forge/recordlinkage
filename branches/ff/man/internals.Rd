@@ -47,7 +47,8 @@
   nextPairs(x, n = 10000, ...)
   clear(x, ...)
   blockfldfun(blockfld, phoneticFld, phoneticFun, coln)
-  getSQLStatement(object)
+  getSQLStatement(data1, data2 = data1, con, type, blockFld, excludeFld,
+    strcmpFld, strcmpFun, phoneticFld, phoneticFun)
   init_sqlite_extensions(db)
   .allows_extensions(db)
   .lib_path()
@@ -70,6 +71,13 @@
   \item{phoneticFld}{Indices of attributes for which phonetic code should be used.}
   \item{phoneticFun}{Name of phonetic function as in
     \code{\link[=RLBigDataDedup]{RLBigData*}}.}
+  \item{data1, data2}{Data frame with records.}
+  \item{type}{"linkage" or "deduplication", the type of linkage.}
+  \item{excludeFld}{Indices or names of fields to exclude from comparison.}
+  \item{strcmpFld}{Indices of attributes for which string comparison should be used.}
+  \item{strcmpFun}{Name of string comparison function as in
+    \code{\link[=RLBigDataDedup]{RLBigData*}}.}
+  \item{con}{A SQLite database connection.}
   \item{coln}{Column names of records.}
   \item{db}{Database connection.}
   \item{cutoff}{Threshold from which string comparison values are rounded to 1.}

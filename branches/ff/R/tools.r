@@ -166,7 +166,7 @@ setMethod(
 
 # determine position with smallest x > or >= given threshold by binary search
 # x must be sorted in ascending order or order be given in o
-searchThreshold <- function(x, threshold, inclusive=TRUE, o=NA)
+.searchThreshold <- function(x, threshold, inclusive=TRUE, o=NA)
 {
   if (missing(o)) getX <- function(i) x[i] else getX <- function(i) x[o[i]]
   # choose appropriate comparison operator
@@ -205,8 +205,8 @@ searchThreshold <- function(x, threshold, inclusive=TRUE, o=NA)
 {
     # get breakpoints between links, possible links and non-links
     # in sorted vector of weights
-    minMatchInd <- searchThreshold(rpairs@Wdata, threshold.upper, o=rpairs@WdataInd)
-    minPossibleInd <- searchThreshold(rpairs@Wdata, threshold.lower, o=rpairs@WdataInd)
+    minMatchInd <- .searchThreshold(rpairs@Wdata, threshold.upper, o=rpairs@WdataInd)
+    minPossibleInd <- .searchThreshold(rpairs@Wdata, threshold.lower, o=rpairs@WdataInd)
     # if NA is returned (threshold too large), assign length + 1
     if (is.na(minMatchInd)) minMatchInd <- length(rpairs@Wdata) + 1
     if (is.na(minPossibleInd)) minPossibleInd <- length(rpairs@Wdata) + 1

@@ -235,10 +235,24 @@ setMethod(
   signature = "RLBigData",
   definition = function(object)
   {
-    sum.ff(rpairs@pairs$is_match, na.rm=TRUE)
+    sum.ff(object@pairs$is_match, na.rm=TRUE)
   }
 )
 
+# get number of non-matches
+setGeneric(
+  name = "getNonMatchCount",
+  def = function(object) standardGeneric("getNonMatchCount")
+)
+
+setMethod(
+  f = "getNonMatchCount",
+  signature = "RLBigData",
+  definition = function(object)
+  {
+    sum(chunkify(function(x) x==0)(object@pairs$is_match), na.rm=TRUE)
+  }
+)
 
 # Get the number of pairs with unknown matching status
 setGeneric(
@@ -251,7 +265,6 @@ setMethod(
   signature = "RLBigData",
   definition = function(object)
   {
-    # could be more efficient if index was used
     sum(chunkify(is.na)(object@pairs$is_match))
   }
 )

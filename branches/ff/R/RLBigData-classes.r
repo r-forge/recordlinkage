@@ -403,5 +403,5 @@ setMethod(
 setMethod(
   f = "hasWeights",
   signature = "RLBigData",
-  def = function(object) range(object@Wdata) != c(0,0)
+  def = function(object) !isTRUE(all.equal(range(object@Wdata), c(0,0)))
 )

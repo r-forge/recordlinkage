@@ -84,7 +84,7 @@ gpdEst <- function(Wdata, thresh=-Inf, quantil=0.95)
 }
 
 # MRL plot
-plotMRL <- function(rpairs,l=.computeMRL(sort(rpairs$Wdata)))
+plotMRL <- function(rpairs,l = .computeMRL(sort(as.ram((rpairs$Wdata)))))
 {
   plot(l$x,l$y,type="l",lty="blank",xlab="Threshold",ylab="MRL")
   # Draw grid

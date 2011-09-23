@@ -99,89 +99,94 @@ setMethod(
 ) # end of setMethod
 
 
-setGeneric(
-  name = "fsClassify",
-  def = function(rpairs, ...) standardGeneric("fsClassify")
-)
+
+# TODO: my / ny erlauben
+fsClassify <- function(...) emClassify(...)
 
 
-
-# classification works the same as for EM weights
-setMethod(
-  f = "fsClassify",
-  signature = "RecLinkData",
-  definition = function(rpairs, ...) emClassify(rpairs, ...)
-)
-
-
-
-setMethod(
-  f = "fsClassify",
-  signature = "RLBigData",
-  definition = function (rpairs, threshold.upper,
-                        threshold.lower=threshold.upper, m=0.95,
-                        u=getFrequencies(rpairs), withProgressBar = (sink.number()==0),
-                        cutoff=1)
-  {
-    if (!is.numeric(threshold.upper))
-      stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
-
-    if (!is.numeric(threshold.lower))
-      stop(sprintf("Illegal type for threshold.lower: %s", class(threshold.lower)))
-
-    if (threshold.upper < threshold.lower)
-      stop(sprintf("Upper threshold %g lower than lower threshold %g",
-      threshold.upper, threshold.lower))
-
-    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
-      "See '?saveRLObject' on how to make persistant copies of such objects."))
-
-    if (dbExistsTable(rpairs@con, "Wdata"))
-    {
-      query <- "select id1, id2 from Wdata where W >= :upper"
-      links <- dbGetPreparedQuery(rpairs@con, query, data.frame(upper = threshold.upper))
-      query <- "select id1, id2 from Wdata where W < :upper and W >= :lower"
-      possibleLinks <- dbGetPreparedQuery(rpairs@con, query,
-        data.frame(upper = threshold.upper, lower = threshold.lower))
-      nPairs <- dbGetQuery(rpairs@con, "select count(*) as c from Wdata")$c
-    } else
-    {
-
-      if (withProgressBar)
-      {
-        expPairs <- getExpectedSize(rpairs)
-        pgb <- txtProgressBar(max=expPairs)
-      }
-      nPairs <- 0
-      n <- 10000
-      links <- matrix(nrow=0, ncol=2)
-      possibleLinks <- matrix(nrow=0, ncol=2)
-      on.exit(clear(rpairs))
-      rpairs <- begin(rpairs)
-      while(nrow(slice <- nextPairs(rpairs, n)) > 0)
-      {
-        Wdata <- .fsWeightsBackend(slice[,-c(1,2,ncol(slice)),drop=FALSE],
-          m=m, u=u, cutoff=cutoff)$Wdata
-        if (any(is.na(Wdata)))
-          warning("Some weights have illegal values. Check error rate and frequencies!")
-        links <- rbind(links, as.matrix(slice[Wdata >= threshold.upper,1:2]))
-        possibleLinks <- rbind(possibleLinks,
-          as.matrix(slice[Wdata >= threshold.lower & Wdata < threshold.upper, 1:2]))
-        nPairs <- nPairs + nrow(slice)
-        if (withProgressBar)
-        {
-          setTxtProgressBar(pgb, nPairs)
-          flush.console()
-        }
-      }
-      if (withProgressBar) close(pgb)
-    }
-
-    new("RLResult", data = rpairs, links = as.matrix(links),
-      possibleLinks = as.matrix(possibleLinks),
-      nPairs = nPairs)
-  }
-) # end of setMethod
-
-
+#setGeneric(
+#  name = "fsClassify",
+#  def = function(rpairs, ...) standardGeneric("fsClassify")
+#)
+#
+#
+#
+## classification works the same as for EM weights
+#setMethod(
+#  f = "fsClassify",
+#  signature = "RecLinkData",
+#  definition = function(rpairs, ...) emClassify(rpairs, ...)
+#)
+#
+#
+#
+#setMethod(
+#  f = "fsClassify",
+#  signature = "RLBigData",
+#  definition = function (rpairs, threshold.upper,
+#                        threshold.lower=threshold.upper, m=0.95,
+#                        u=getFrequencies(rpairs), withProgressBar = (sink.number()==0),
+#                        cutoff=1)
+#  {
+#    if (!is.numeric(threshold.upper))
+#      stop(sprintf("Illegal type for threshold.upper: %s", class(threshold.upper)))
+#
+#    if (!is.numeric(threshold.lower))
+#      stop(sprintf("Illegal type for threshold.lower: %s", class(threshold.lower)))
+#
+#    if (threshold.upper < threshold.lower)
+#      stop(sprintf("Upper threshold %g lower than lower threshold %g",
+#      threshold.upper, threshold.lower))
+#
+#    if(!isIdCurrent(rpairs@con)) stop(paste("Invalid SQLite connection in rpairs!",
+#      "See '?saveRLObject' on how to make persistant copies of such objects."))
+#
+#    if (dbExistsTable(rpairs@con, "Wdata"))
+#    {
+#      query <- "select id1, id2 from Wdata where W >= :upper"
+#      links <- dbGetPreparedQuery(rpairs@con, query, data.frame(upper = threshold.upper))
+#      query <- "select id1, id2 from Wdata where W < :upper and W >= :lower"
+#      possibleLinks <- dbGetPreparedQuery(rpairs@con, query,
+#        data.frame(upper = threshold.upper, lower = threshold.lower))
+#      nPairs <- dbGetQuery(rpairs@con, "select count(*) as c from Wdata")$c
+#    } else
+#    {
+#
+#      if (withProgressBar)
+#      {
+#        expPairs <- getExpectedSize(rpairs)
+#        pgb <- txtProgressBar(max=expPairs)
+#      }
+#      nPairs <- 0
+#      n <- 10000
+#      links <- matrix(nrow=0, ncol=2)
+#      possibleLinks <- matrix(nrow=0, ncol=2)
+#      on.exit(clear(rpairs))
+#      rpairs <- begin(rpairs)
+#      while(nrow(slice <- nextPairs(rpairs, n)) > 0)
+#      {
+#        Wdata <- .fsWeightsBackend(slice[,-c(1,2,ncol(slice)),drop=FALSE],
+#          m=m, u=u, cutoff=cutoff)$Wdata
+#        if (any(is.na(Wdata)))
+#          warning("Some weights have illegal values. Check error rate and frequencies!")
+#        links <- rbind(links, as.matrix(slice[Wdata >= threshold.upper,1:2]))
+#        possibleLinks <- rbind(possibleLinks,
+#          as.matrix(slice[Wdata >= threshold.lower & Wdata < threshold.upper, 1:2]))
+#        nPairs <- nPairs + nrow(slice)
+#        if (withProgressBar)
+#        {
+#          setTxtProgressBar(pgb, nPairs)
+#          flush.console()
+#        }
+#      }
+#      if (withProgressBar) close(pgb)
+#    }
+#
+#    new("RLResult", data = rpairs, links = as.matrix(links),
+#      possibleLinks = as.matrix(possibleLinks),
+#      nPairs = nPairs)
+#  }
+#) # end of setMethod
+#
+#
 

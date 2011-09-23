@@ -243,10 +243,6 @@ setMethod(
   signature = "RLBigData",
   definition = function(rpairs, nEx=1)
   {
-    # catch erronous input
-    if (!(("RecLinkData" %in% class(rpairs)) ||
-      "RecLinkResult" %in% class(rpairs)))
-      stop("Wrong class for rpairs!")
 
     if (nEx < 1)
       stop(sprintf("Illegal value for nEx: %d!", nEx))
@@ -281,9 +277,10 @@ setMethod(
     }
     trainPairs <- pairs[unlist(trainInd),]
 
-    retObject <- rpairs
-    rpairs@pairs <- as.ffdf(trainPairs)
-    rpairs
-
+    retObject <- list(data = rpairs@data, pairs = as.data.frame(trainPairs),
+      frequencies = getFrequencies(rpairs), type = switch(class(rpairs),
+      RLBigDataDedup = "deduplication", RLBigDataLinkage = "linkage"))
+    class(retObject) <- "RecLinkData"
+    retObject
   }
 )

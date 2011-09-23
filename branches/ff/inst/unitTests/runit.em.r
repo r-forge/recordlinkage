@@ -312,6 +312,7 @@ test.emClassify <- function()
   checkEqualsNumeric(ny, resultTab["TRUE", "N"] / sum(resultTab["TRUE",]))
 }
 
+
 test.emClassify.RLBigData <- function()
 {
   # create two test objects, on with weights stored per pattern, one
@@ -512,7 +513,7 @@ test.optimalThreshold.exceptions <- function()
 
 }
 
-test.optimalThreshold <- function()
+test.optimalThreshold.RecLinkData <- function()
 {
   load("rpairs.em.rda")
 
@@ -577,6 +578,96 @@ test.optimalThreshold <- function()
     for (thresh_iter in W_unique)
     {
       errM <- errorMeasures(emClassify(rpairs, thresh_iter))
+      if (errM$alpha <= ny)
+      {
+        beta_all[[as.character(thresh_iter)]] <- errM$beta
+      }
+    }
+    checkEqualsNumeric(beta_result, min(unlist(beta_all), na.rm=TRUE),
+      msg = sprintf("check for ny=%g", ny))
+  }
+  # pairs with NA should be ignored, i.e. the result should be the same as if
+  # these pairs were missing
+  rpairs2 <- rpairs
+  nPairs <- nrow(rpairs$pairs)
+  s <- sample(nPairs, nPairs / 2)
+  rpairs3 <- rpairs[-s]
+  is.na(rpairs2$pairs$is_match[s]) <- TRUE
+  checkEquals(optimalThreshold(rpairs2), optimalThreshold(rpairs3),
+    msg = "check that unknown pairs are ignored")
+
+}
+
+
+test.optimalThreshold.RLBigData <- function()
+{
+  load("rpairs.em.rda")
+  rpairsS3 <- rpairs
+  Wdata=ff(rpairsS3$Wdata)
+  rpairs <- new("RLBigDataDedup", data = rpairsS3$data, pairs=as.ffdf(rpairsS3$pairs),
+    frequencies=rpairsS3$frequencies, Wdata=Wdata, WdataInd=fforder(Wdata))
+
+  # test default case: minimize overall error
+  # check that the value with maximal accuracy is selected
+  thresh <- optimalThreshold(rpairs)
+  acc_result <- getErrorMeasures(emClassify(rpairs, thresh))$accuracy
+  W_unique <- unique(as.ram(rpairs@Wdata))
+  acc=numeric(length(W_unique))
+  names(acc) <- W_unique
+  for (thresh_iter in W_unique)
+  {
+
+    acc[as.character(thresh_iter)] <- getErrorMeasures(emClassify(rpairs, thresh_iter))$accuracy
+  }
+  checkEquals(max(acc), acc_result, msg = "check that maximal accuracy is found")
+
+  # test with threshold for my/ny: check that the minimal alpha error
+  # for which the error bound holds is obtained
+
+  # calculate thresholds for all relevant values of beta
+  W_unique <- unique(as.ram(rpairs@Wdata))
+  allBeta <- unique(sapply(W_unique, function(thresh_iter)
+    {
+      getErrorMeasures(emClassify(rpairs, thresh_iter))$beta
+    }
+  ))
+
+  for (my in allBeta)
+  {
+    thresh <- optimalThreshold(rpairs, my=my)
+    alpha_result <- getErrorMeasures(emClassify(rpairs, thresh))$alpha
+    alpha=list()
+    for (thresh_iter in W_unique)
+    {
+      errM <- getErrorMeasures(emClassify(rpairs, thresh_iter))
+      if (errM$beta <= my)
+      {
+        alpha[[as.character(thresh_iter)]] <- errM$alpha
+      }
+    }
+    checkEqualsNumeric(alpha_result, min(unlist(alpha),na.rm=TRUE),
+      msg = sprintf("check for my=%g", my))
+  }
+
+  # corresponding check for ny. threshold.upper must be used to obtain
+  # legal beta errors
+
+  # calculate thresholds for all relevant values of alpha
+  W_unique <- unique(as.ram(rpairs@Wdata))
+  allAlpha <- unique(sapply(W_unique, function(thresh_iter)
+    {
+      getErrorMeasures(emClassify(rpairs, thresh_iter))$alpha
+    }
+  ))
+
+  for (ny in allAlpha)
+  {
+    thresh <- optimalThreshold(rpairs, ny=ny)
+    beta_result <- getErrorMeasures(emClassify(rpairs, thresh))$beta
+    beta_all=list()
+    for (thresh_iter in W_unique)
+    {
+      errM <- getErrorMeasures(emClassify(rpairs, thresh_iter))
       if (errM$alpha <= ny)
       {
         beta_all[[as.character(thresh_iter)]] <- errM$beta
