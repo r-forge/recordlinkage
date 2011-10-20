@@ -47,11 +47,11 @@ setMethod(
   definition = function(model, newdata, convert.na = TRUE, withProgressBar = (sink.number()==0), ...)
   {
     prediction=switch(model$method,
-  		svm=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, ...),
-	 	 rpart=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, type="class",...),
-		  ada=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, type="vector",...),
-		  bagging=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, type="class",...),
-		  nnet=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, type="class",...),
+  		svm=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, convert.na, ...),
+	 	 rpart=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, convert.na, type="class",...),
+		  ada=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, convert.na, type="vector",...),
+		  bagging=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, convert.na, type="class",...),
+		  nnet=.ffpredict(model$model, newdata=newdata@pairs, withProgressBar, convert.na, type="class",...),
       stop("Illegal classification method!"))
 
     result <- new("RLResult", data = newdata, prediction = prediction)
@@ -59,7 +59,7 @@ setMethod(
 )
 
 
-.ffpredict <- function(model, newdata, withProgressBar, ...)
+.ffpredict <- function(model, newdata, withProgressBar, convert.na, ...)
 {
     if (withProgressBar)
     {
@@ -69,7 +69,9 @@ setMethod(
     prediction <- ff("N", length = nrow(newdata), levels = c("N", "P", "L"))
     ffrowapply(
       {
-        prediction[i1:i2] <- predict(model, newdata[i1:i2,,drop = FALSE], ...)
+        slice <- newdata[i1:i2,,drop = FALSE]
+        if (convert.na) slice[is.na(slice)] <- 0
+        prediction[i1:i2] <- predict(model, slice, ...)
         if (withProgressBar) setTxtProgressBar(pgb, i2)
       },
       X = newdata)
