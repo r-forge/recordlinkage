@@ -199,7 +199,7 @@ setMethod(
     }
     ffrowapply(
       {
-        slice <- as.matrix(as.ram(rpairs@pairs[i1:i2, 3:(ncol(rpairs@pairs) - 1)]))
+        slice <- as.matrix(as.ram(rpairs@pairs[i1:i2, 3:(ncol(rpairs@pairs) - 1), drop=FALSE]))
         slice[is.na(slice)] <- 0
         slice[slice < cutoff] <- 0
         slice[slice >= cutoff & slice < 1] <- 1
@@ -210,6 +210,9 @@ setMethod(
     if (verbose) close(pgb)
 
     rpairs@Wdata <- Wdata
+    rpairs@WdataInd <- fforder(Wdata)
+    rpairs@M <- ff(M)
+    rpairs@U <- ff(U)
     return(rpairs)
   }
 ) # end of setMethod
@@ -316,10 +319,10 @@ setMethod(
     if (!missing(ny) && (ny < 0 || ny > 1))
       stop(sprintf("Illegal value for ny: %g", ny))
 
-    W <- dbGetQuery(rpairs@con, "select W from W order by id asc")$W
-    M <- dbGetQuery(rpairs@con, "select M from M order by id asc")$M
-    U <- dbGetQuery(rpairs@con, "select U from U order by id asc")$U
-
+    M <- as.ram(rpairs@M)
+    U <- as.ram(rpairs@U)
+    W <- log(M/U, base=2)
+    
     thresholds <- getThresholds(W = W, M = M, U = U,
                                 my = my, ny=ny)
     emClassify(rpairs, threshold.upper = thresholds[1],
@@ -342,6 +345,9 @@ setMethod(
 
     if (!is.numeric(threshold.lower))
       stop(sprintf("Illegal type for threshold.lower: %s", class(threshold.lower)))
+
+    if (!hasWeights(rpairs))
+      stop("No weights in rpairs!")
 
     if (threshold.upper < threshold.lower)
       stop(sprintf("Upper threshold %g lower than lower threshold %g",

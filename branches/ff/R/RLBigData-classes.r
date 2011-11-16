@@ -34,7 +34,15 @@ setClass(
     pairs = "ffdf",
     Wdata = "ff_vector",
     WdataInd = "ff_vector",
+    M = "ff_vector",
+    U = "ff_vector",
     "VIRTUAL"
+  ),
+  prototype = prototype(
+    M = ff(0),
+    U = ff(0),
+    Wdata = ff(0),
+    WdataInd = ff(0)
   )
 )    
 
@@ -189,8 +197,9 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
     if(length(exclude) > 0) colnames(dataset)[-exclude]
     else colnames(dataset)
 
-  # create empty weight vector
+  # create empty weight vectors
   Wdata <- WdataInd <- ff(length = nrow(pairsff), vmode = "double")
+  M <- U <- ff(length = 2^(ncol(pairsff) - 3), vmode="double")
 
 
   # construct object  
@@ -198,7 +207,7 @@ RLBigDataDedup <- function(dataset, identity = NA, blockfld = list(),
     blockFld = blockfld, excludeFld = exclude, strcmpFld = strcmp,
     strcmpFun = strcmpfun, phoneticFld = phonetic, phoneticFun = phonfun,
     frequencies = sapply(dataset, function(x) 1/length(unique(x))),
-    pairs = pairsff, Wdata = Wdata, WdataInd = WdataInd)
+    pairs = pairsff, Wdata = Wdata, WdataInd = WdataInd, M = M, U = U)
 
   dbDisconnect(con)
   return(object)
@@ -339,8 +348,9 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
     if(length(exclude) > 0) colnames(dataset1)[-exclude]
     else colnames(dataset1)
 
-  # create empty weight vector
+  # create empty weight vectors
   Wdata <- WdataInd <- ff(length = nrow(pairsff), vmode = "double")
+  M <- U <- ff(length = 2^(ncol(pairsff) - 3), vmode="double")
 
   # calculate average value frequency
   frequencies = sapply(rbind(dataset1, dataset2),
@@ -353,7 +363,7 @@ RLBigDataLinkage <- function(dataset1, dataset2, identity1 = NA,
     blockFld = blockfld, excludeFld = exclude, strcmpFld = strcmp,
     strcmpFun = strcmpfun, phoneticFld = phonetic, phoneticFun = phonfun,
     frequencies = frequencies,
-    pairs = pairsff, Wdata = Wdata, WdataInd = WdataInd)
+    pairs = pairsff, Wdata = Wdata, WdataInd = WdataInd, M = M, U = U)
 
   dbDisconnect(con)
   return(object)

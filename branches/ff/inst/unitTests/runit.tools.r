@@ -2,6 +2,10 @@
 #
 # Test Functions for tools.r and internals.r
 
+# load internal (not exported) objects
+attach(loadNamespace("RecordLinkage"))
+
+
 test.unorderedPairs <- function()
 {
   # illegal cases
@@ -47,17 +51,18 @@ test.isFALSE <- function()
   checkEquals(isFALSE(x), FALSE)
 }
 
-test.delete.NULLs <- function()
-{
-  x <- list(1,c(2,3), NULL, list("A","B"))
-  checkEquals(delete.NULLs(x), list(1,c(2,3), list("A","B")))
-  x <- list(1,c(2,3), "NULL", list("A","B"))
-  checkEquals(delete.NULLs(x), x)
-  x <- list(1,c(2,3), NA, list("A","B"))
-  checkEquals(delete.NULLs(x), x)
-  x <- list(1,c(2,3), NaN, list("A","B"))
-  checkEquals(delete.NULLs(x), x)  
-}
+# not used in this package version
+#test.delete.NULLs <- function()
+#{
+#  x <- list(1,c(2,3), NULL, list("A","B"))
+#  checkEquals(delete.NULLs(x), list(1,c(2,3), list("A","B")))
+#  x <- list(1,c(2,3), "NULL", list("A","B"))
+#  checkEquals(delete.NULLs(x), x)
+#  x <- list(1,c(2,3), NA, list("A","B"))
+#  checkEquals(delete.NULLs(x), x)
+#  x <- list(1,c(2,3), NaN, list("A","B"))
+#  checkEquals(delete.NULLs(x), x)
+#}
 
 test.resample <- function()
 {
@@ -203,6 +208,10 @@ test.getExpectedSize.RLBigDataLinkage <- function()
 
   # check for bug that caused function to fail if one of the blocking columns
   # does not have any matching values (NULL values)
+  testdat2 <- cbind(testdat, 1:nrow(testdat))
+  names(testdat2) <- c("x1", "x2", "x3")
+  checkEquals(getExpectedSize(RLBigDataLinkage(testdat2, testdat2, blockfld=list(1,3))), 9)
+
   testdat2$x3 <- NA
   checkEquals(getExpectedSize(RLBigDataLinkage(testdat2, testdat2, blockfld=list(1,3))), 9)
 
@@ -315,7 +324,7 @@ test.searchThreshold <- function()
 
   # tests inclusive threshold with order of elements supplied
   threshold <- median(X)
-  result <- searchThreshold(X, threshold, TRUE, o)
+  result <- .searchThreshold(X, threshold, TRUE, o)
   checkTrue(all(X[o[result:length(X)]] >= threshold),
     msg = "inclusive, unsorted vector")
   checkEqualsNumeric(X[o[result]], threshold,
@@ -323,7 +332,7 @@ test.searchThreshold <- function()
 
   # exclusive threshold with order of elements supplied
   threshold <- median(X)
-  result <- searchThreshold(X, threshold, FALSE, o)
+  result <- .searchThreshold(X, threshold, FALSE, o)
   checkTrue(all(X[o[result:length(X)]] > threshold),
     msg = "exclusive, unsorted vector")
   checkEqualsNumeric(X[o[result-1]], threshold,
@@ -332,7 +341,7 @@ test.searchThreshold <- function()
   # tests inclusive threshold with sorted vector
   Xsorted <- sort(X)
   threshold <- median(Xsorted)
-  result <- searchThreshold(Xsorted, threshold, TRUE)
+  result <- .searchThreshold(Xsorted, threshold, TRUE)
   checkTrue(all(Xsorted[result:length(Xsorted)] >= threshold),
     msg = "inclusive, sorted vector")
   checkEqualsNumeric(Xsorted[result], threshold,
@@ -341,7 +350,7 @@ test.searchThreshold <- function()
   # tests exclusive threshold with sorted vector
   Xsorted <- sort(X)
   threshold <- median(Xsorted)
-  result <- searchThreshold(Xsorted, threshold, FALSE)
+  result <- .searchThreshold(Xsorted, threshold, FALSE)
   checkTrue(all(Xsorted[result:length(Xsorted)] > threshold),
     msg = "exclusive, sorted vector")
   checkEqualsNumeric(Xsorted[result-1], threshold,

@@ -127,7 +127,7 @@ setMethod(
       cat(sprintf("%d records in first data set",nrow(object@data1)),"\n")
       cat(sprintf("%d records in second data set",nrow(object@data2)),"\n")
     }
-    cat(sprintf("%d record pairs\n", nrow(rpairs@pairs)))
+    cat(sprintf("%d record pairs\n", nrow(object@pairs)))
   }
 )
 
@@ -137,7 +137,7 @@ setMethod(
   definition = function(object)
   {
     cat("\nClassification result for large data set\n\n")
-    cat(sprintf("%d record pairs\n", nrow(rpairs@pairs)))
+    cat(sprintf("%d record pairs\n", nrow(object@pairs)))
   }
 )
 
@@ -354,3 +354,53 @@ errorMeasures <- function(result)
       stop(sprintf("Wrong type for result: %s!", class(result)))
   getErrorMeasures(result)
 }
+
+
+setGeneric(
+  name = "getTable",
+  def = function(object, ...) standardGeneric("getTable")
+)
+
+# constructs a contengency table of matches
+setMethod(
+  f = "getTable",
+  signature = "RecLinkResult",
+  definition = function(object, ...)
+  {
+    TP=length(which(object$pairs$is_match & object$prediction=="L")) # true positive
+    FP=length(which(!object$pairs$is_match & object$prediction=="L")) # false positive
+    TN=length(which(!object$pairs$is_match & object$prediction=="N")) # true negative
+    FN=length(which(object$pairs$is_match & object$prediction=="N")) # false negative
+
+    tab <- table(as.logical(object$pairs$is_match),object$prediction,
+            dnn=list("true status","classification"),useNA="ifany")
+    # if "NA" row appears in the table (for pairs with unknown true status),
+    # put it in the middle
+    if (nrow(tab) == 3)
+      tab[c(1,3,2),]
+    else
+      tab
+  }
+)
+
+setMethod(
+  f = "getTable",
+  signature = "RLResult",
+  definition = function(object, ...)
+  {
+    tab <- table.ff(object@data@pairs$is_match, object@prediction,
+      useNA = "ifany")
+    names(dimnames(tab)) <- c("true status", "classification")
+    dimnames(tab)[dimnames(tab)=="1"] <- "TRUE"
+    dimnames(tab)[dimnames(tab)=="0"] <- "FALSE"
+
+    # if "NA" row appears in the table (for pairs with unknown true status),
+    # put it in the middle
+    if (nrow(tab) == 3)
+      tab[c(1,3,2),]
+    else
+      tab
+
+  }
+)
+

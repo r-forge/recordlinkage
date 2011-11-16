@@ -181,18 +181,17 @@ test.fsClassify.RLBigData <- function()
 {
   rpairs <- RLBigDataDedup(RLdata500, identity=identity.RLdata500, blockfld=list(5:6,6:7,c(5,7)))
   rpairs <- fsWeights(rpairs)
-  Wdata <- dbReadTable(rpairs@con, "Wdata")
-  minWeight <- min(Wdata$W)
-  maxWeight <- max(Wdata$W)
+  Wdata <- as.ram(rpairs@Wdata)
+  minWeight <- min(Wdata)
+  maxWeight <- max(Wdata)
 
   # test with one threshold
   threshold.upper <- runif(1, minWeight, maxWeight)
   result <- fsClassify(rpairs, threshold.upper=threshold.upper)
-  reqLinks <- Wdata[Wdata$W >= threshold.upper, 1:2]
-  checkEqualsNumeric(result@links[order(result@links[,1], result@links[,2]),],
-    as.matrix(reqLinks[order(reqLinks$id1, reqLinks$id2), ]),
+  reqLinks <- which(Wdata >= threshold.upper)
+  checkEqualsNumeric(which(as.ram(result@prediction) == "L"), reqLinks,
     msg = "check links, only upper threshold, feasible value")
-  checkEqualsNumeric(nrow(result@possibleLinks), 0,
+  checkEqualsNumeric(sum(as.ram(result@prediction) == "P"), 0,
     msg = "check possible links, only upper threshold, feasible value")
 
 
@@ -200,42 +199,30 @@ test.fsClassify.RLBigData <- function()
   threshold.upper <- runif(1, 0.6, maxWeight)
   threshold.lower <- runif(1, minWeight, 0.5)
   result <- fsClassify(rpairs, threshold.upper, threshold.lower)
-  reqLinks <- Wdata[Wdata$W >= threshold.upper, 1:2]
-  reqPossibleLinks <- Wdata[Wdata$W < threshold.upper & Wdata$W >= threshold.lower, 1:2]
+  reqLinks <- which(Wdata >= threshold.upper)
+  reqPossibleLinks <- which(Wdata >= threshold.lower & Wdata < threshold.upper)
 
-  checkEqualsNumeric(result@links[order(result@links[,1], result@links[,2]),],
-    as.matrix(reqLinks[order(reqLinks$id1, reqLinks$id2), ]),
-    msg = "check links, only upper threshold, feasible value")
-  checkEqualsNumeric(result@possibleLinks[order(result@possibleLinks[,1],
-    result@possibleLinks[,2]),],
-    as.matrix(reqPossibleLinks[order(reqPossibleLinks$id1, reqPossibleLinks$id2), ]),
+  checkEqualsNumeric(which(as.ram(result@prediction) == "L"), reqLinks,
+    msg = "check links, two thresholda, feasible value")
+  checkEqualsNumeric(which(as.ram(result@prediction) == "P"), reqPossibleLinks,
     msg = "check possible links, two thresholds, feasible value")
 
 
   # check case with only links
   result <- fsClassify(rpairs, threshold.upper=minWeight)
-  reqLinks <- Wdata[ , 1:2]
-  checkEqualsNumeric(result@links[order(result@links[,1], result@links[,2]),],
-    as.matrix(reqLinks[order(reqLinks$id1, reqLinks$id2), ]),
+  checkTrue(all(as.ram(result@prediction) == "L"),
     msg = "check links, only upper threshold, only links")
-  checkEqualsNumeric(nrow(result@possibleLinks), 0,
-    msg = "check possible links, only upper threshold, only links")
 
 
   # check case with only non-links
   result <- fsClassify(rpairs, threshold.upper=maxWeight+0.1)
-  checkEqualsNumeric(nrow(result@links), 0,
-    msg = "check possible links, only upper threshold, only non-links")
-  checkEqualsNumeric(nrow(result@possibleLinks), 0,
-    msg = "check possible links, only upper threshold, only non-links")
+  checkTrue(all(as.ram(result@prediction) == "N"),
+    msg = "check non-links, only upper threshold, only non-links")
 
 
   # check case with only possible links
   result <- fsClassify(rpairs, maxWeight+0.1, minWeight)
-  reqPossibleLinks <- Wdata[ , 1:2]
-  checkEqualsNumeric(result@possibleLinks[order(result@possibleLinks[,1],
-    result@possibleLinks[,2]),],
-    as.matrix(reqPossibleLinks[order(reqPossibleLinks$id1, reqPossibleLinks$id2), ]),
+  checkTrue(all(as.ram(result@prediction) == "P"),
     msg = "check possible links, two thresholds, only possible links")
 }
 

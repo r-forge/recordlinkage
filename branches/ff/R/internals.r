@@ -213,7 +213,7 @@ setMethod(
     patternCounts <- 0L
     ffrowapply(
       {
-        slice <- as.ram(x@pairs[i1:i2, 3:(ncol(x@pairs)-1)])
+        slice <- as.ram(x@pairs[i1:i2, 3:(ncol(x@pairs)-1), drop=FALSE])
         slice[is.na(slice)] <- 0
         slice[slice < cutoff] <- 0
         slice[slice >= cutoff] <- 1

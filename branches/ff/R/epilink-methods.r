@@ -150,7 +150,7 @@ setMethod(
       withProgressBar = (sink.number()==0))
   {
 
-    rpairs@Wdata <- ffrowapply(.epiWeightsBackend(rpairs@pairs[i1:i2,3:(ncol(rpairs@pairs)-1)],
+    rpairs@Wdata <- ffrowapply(.epiWeightsBackend(rpairs@pairs[i1:i2,3:(ncol(rpairs@pairs)-1), drop=FALSE],
     e=e, f=f), X=rpairs@pairs, RETURN = TRUE, RETCOL=NULL, VMODE="double")
     rpairs@WdataInd <- fforder(rpairs@Wdata)
     rpairs

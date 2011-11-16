@@ -131,26 +131,25 @@ setMethod(
     wMatch <- ffdf(W = rpairs@Wdata, is_match = rpairs@pairs$is_match)
 
     pgb <- txtProgressBar(0, nrow(wMatch))
-    system.time(summaryTable <- ffrowapply(
+    summaryTable <- ffrowapply(
       {
         setTxtProgressBar(pgb, i2)
         slice <- data.table(wMatch[i1:i2,])
-        slice$W <- factor(slice$W)
-        slice[,list(nMatch=sum(is_match), nAll=length(is_match)), by=W]
-      }, X = wMatch, RETURN = TRUE, CFUN = "rbind"))
+        # format weight as factor with as many digits as reasonable
+        slice$W <- factor(format(slice$W, digits = 20))
+        # count number of pairs and matches, ignore pairs with match status NA
+        slice[,list(nMatch=sum(is_match, na.rm=TRUE),
+          nAll=sum(!is.na(is_match))), by=W]
+      }, X = wMatch, RETURN = TRUE, CFUN = "rbind")
     close(pgb)
     key(summaryTable) <- "W"
     summaryTable <- summaryTable[,list(nMatch=sum(nMatch), nAll=sum(nAll)), by=W]
     summaryTable$nNonMatch <- summaryTable[,nAll - nMatch]
+#browser()
+    # sort summaryTable in numeric order (data.table converts to factor and
+    # performs sorting by character string
 
-    summaryTable[,as.numeric(levels(W)[W[which.min(misClassError)]])]
-
-    # Count false negatives and positives per weight. The vectors correspond to
-    # unique(sort(rpairsWdata)). Each position holds
-    #   for FN: the number of false negatives if all record pairs with
-    #           smaller or equal weight are classified as non-links
-    #   for FP: the number of false positives if all record pairs with
-    #           greater or equal weight are classified as links
+    summaryTable <- summaryTable[order(as.numeric(levels(W)[W])),]
 
     FN <- summaryTable[,cumsum(nMatch)]
     FP <- summaryTable[,rev(cumsum(rev(nNonMatch)))]
@@ -165,19 +164,23 @@ setMethod(
     accuracy <- (nrow(rpairs@pairs) - (FP + FN)) / nrow(rpairs@pairs)
 
     # set thresholds
+    # the returned threshold is always the mean of the calculated threshold
+    # (equal to a weight in rpairs) and the next lowest weight. This prevents
+    # unexpected classification results due to rounding errors
 
-    classWeights <- as.numeric(summaryTable[,levels(W)[W]])
-
+    classWeights <- c(as.numeric(summaryTable[,levels(W)[W]]), Inf)
     # no error bounds given: maximize accuracy
     if (missing(my) && missing(ny))
-      return(as.numeric(classWeights[which.max(accuracy)]))
-
+    {
+      max_ind <- which.max(accuracy)
+      return(mean(as.numeric(classWeights[c(max_ind - 1, max_ind)])))
+    }
     # only bound for alpha error given: minimize beta error under constraint that
     # bound for alpha error is met
     if (!missing(ny))
     {
       min_ind <- which.min(betaErr[alphaErr<=ny])
-      return(as.numeric(classWeights[alphaErr<=ny][min_ind]))
+      return(mean(as.numeric(classWeights[alphaErr<=ny][c(min_ind - 1, min_ind)])))
     }
 
     # only bound for beta error given: minimize alpha error under constraint that
@@ -185,7 +188,7 @@ setMethod(
     if (!missing(my))
     {
       min_ind <- which.min(alphaErr[betaErr<=my])
-      return(as.numeric(classWeights[betaErr<=my][min_ind]))
+      return(mean(as.numeric(classWeights[betaErr<=my][c(min_ind - 1, min_ind)])))
     }
   }
 )

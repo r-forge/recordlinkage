@@ -47,33 +47,9 @@ setMethod(
   signature = "RLBigDataDedup",
   definition = function(object)
   {
-    blockfld <- object@blockFld
-    if(!is.list(blockfld)) blockfld <- list(blockfld)
-    nData <- nrow(object@data)
-    nAll <- nData * (nData - 1) / 2
-    if (length(blockfld)==0) return(nAll)
-    coln <- make.db.names(object@con, colnames(object@data))
-
-    # ergibt Wahrscheinlichkeit, dass mit gegebenen Blockingfeldern
-    # ein Paar nicht gezogen wird
-    blockelemFun <- function(blockelem)
-    {
-      if(is.character(blockelem)) blockelem <- match(blockelem, colnames(object@data))
-      freq <- as.numeric(dbGetQuery(object@con,
-        sprintf("select count(*) as c from data group by %s having c > 1 and %s",
-          paste("\"", coln[blockelem], "\"", sep="", collapse=", "),
-          paste(
-            sapply(coln[blockelem], sprintf, fmt = "\"%s\" is not null"),
-            collapse = " and "
-          )
-        )
-      )$c)
-      1 - (sum(freq * (freq - 1) / 2) / nAll)
-    }
-    res <- nAll * (1-prod(sapply(blockfld, blockelemFun)))
-
-
-    round(res)
+    # With ff pairs, this function is actually not necessary. For compatibility,
+    # the actual number of record pairs is returned
+    nrow(object@pairs)
   }
 )
 
@@ -82,37 +58,15 @@ setMethod(
   signature = "RLBigDataLinkage",
   definition = function(object)
   {
-    blockfld <- object@blockFld
-    if(!is.list(blockfld)) blockfld <- list(blockfld)
-    nData1 <- nrow(object@data1)
-    nData2 <- nrow(object@data2)
-    nAll <- nData1 * nData2
-    if (length(blockfld)==0) return(nAll)
-    coln <- make.db.names(object@con, colnames(object@data1))
-
-    # ergibt Wahrscheinlichkeit, dass mit gegebenen Blockingfeldern
-    # ein Paar nicht gezogen wird
-    blockelemFun <- function(blockelem)
-    {
-      if(is.character(blockelem)) blockelem <- match(blockelem, colnames(object@data))
-      freq <- dbGetQuery(object@con,
-        sprintf("select count(*) as c from data1 t1, data2 t2 where %s",
-          paste(
-            sapply(coln[blockelem], sprintf, fmt = "t1.\"%1$s\"=t2.\"%1$s\""),
-            collapse = " and "
-          )
-        )
-      )$c
-      1 - (freq / nAll)
-    }
-    res <- nAll * (1-prod(sapply(blockfld, blockelemFun)))
-    round(res)
+    # With ff pairs, this function is actually not necessary. For compatibility,
+    # the actual number of record pairs is returned
+    nrow(object@pairs)
   }
 )
 
 
 
-# Subscript operator for RecLinkData and RecLinkResult objects
+# Subscript operator for Record Linkage objects
 "[.RecLinkData" <- function(x,i)
 {
   ret <- x
@@ -125,6 +79,16 @@ setMethod(
 {
   ret <- "[.RecLinkData"(x, i)
   ret$prediction <- x$prediction[i]
+  ret
+}
+
+"[.RLBigData" <- function(x,i)
+{
+  ret <- x
+  # this should be recoded more efficiently!
+  ret@pairs <- as.ffdf(x@pairs[i,])
+  ret@Wdata <- ff(x@Wdata[i])
+  ret@WdataInd <- ff(x@WdataInd[i])
   ret
 }
 
