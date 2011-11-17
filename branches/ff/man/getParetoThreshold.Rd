@@ -3,8 +3,8 @@
 \Rdversion{1.1}
 \alias{getParetoThreshold}
 \alias{getParetoThreshold-methods}
-\alias{getParetoThreshold-RecLinkData-method}
-\alias{getParetoThreshold-RLBigData-method}
+\alias{getParetoThreshold,RecLinkData-method}
+\alias{getParetoThreshold,RLBigData-method}
 
 \title{
   Estimate Threshold from Pareto Distribution

@@ -403,7 +403,9 @@ setMethod(
     # working copy of record pairs
     pairs <- object@data@pairs
     if (withWeight) pairs$W <- object@data@Wdata
-    if (withClass) pairs$prediction <- object@prediction
+    # need class if it is displayed or result is filtered by it
+    if (withClass || !all(c("nonlink", "possible", "link") %in% filter.link))
+      pairs$prediction <- object@prediction
 
     if(!all(c("match", "unknown", "nonmatch") %in% filter.match))
     {

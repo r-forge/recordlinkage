@@ -411,6 +411,16 @@ test.getPairs.RLResult <- function()
   checkEquals(nrow(testResult), 0, msg = "check false non-links")
 
 
+# additional tests (new found bugs etc.)
+
+
+  # check filtering by classification without classification result included
+  # in the output
+  testResult <- sort.result(getPairs(result, single.rows = TRUE, filter.link = "link",
+    withClass = FALSE))
+  checkEquals(asMatrix(testResult),
+    asMatrix(reqResult[reqResult$Class=="L",-match("Class", names(reqResult))]),
+    msg = "check filter.link and withClass = FALSE")
 }
 
 

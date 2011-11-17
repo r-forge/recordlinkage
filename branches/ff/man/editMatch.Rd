@@ -1,6 +1,10 @@
 \name{editMatch}
 \Rdversion{1.1}
 \alias{editMatch}
+\alias{editMatch-methods}
+\alias{editMatch,RecLinkData-method}
+\alias{editMatch,RLBigData-method}
+
 
 \title{
   Edit Matching Status

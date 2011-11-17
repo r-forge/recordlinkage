@@ -19,13 +19,12 @@
 
 \S4method{getPairs}{RLBigData}(object, max.weight = Inf, min.weight = -Inf,
     filter.match = c("match", "unknown", "nonmatch"),
-    withWeight = dbExistsTable(object@con, "Wdata"), withMatch = TRUE,
-    single.rows = FALSE,
-    sort = TRUE)
+    withWeight = hasWeights(object), withMatch = TRUE, single.rows = FALSE,
+    sort = withWeight)
 
 \S4method{getPairs}{RLResult}(object, filter.match = c("match", "unknown", "nonmatch"),
     filter.link = c("nonlink", "possible", "link"), max.weight = Inf, min.weight = -Inf,
-    withMatch = TRUE, withClass = TRUE, withWeight = dbExistsTable(object@data@con, "Wdata"),
+    withMatch = TRUE, withClass = TRUE, withWeight = hasWeights(object@data),
     single.rows = FALSE, sort = withWeight)
 
 getFalsePos(object, single.rows = FALSE)

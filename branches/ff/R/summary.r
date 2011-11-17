@@ -146,12 +146,12 @@ setMethod(
 #  f = "summary",
 #  signature = "RLBigDataDedup",
 #  definition = function(object)
-summary.RLBigDataDedup <- function(object)  {
+summary.RLBigDataDedup <- function(object, ...)  {
     val <- list()
     val[["nData"]] <- nrow(object@data)
-    val[["attributes"]] <- if (length(rpairs@excludeFld) == 0)
-        names(rpairs@data) else names(rpairs@data)[-rpairs@excludeFld]
-    val[["blockFld"]] <- lapply(object@blockFld, function(x) names(rpairs@data)[x])
+    val[["attributes"]] <- if (length(object@excludeFld) == 0)
+        names(object@data) else names(object@data)[-object@excludeFld]
+    val[["blockFld"]] <- lapply(object@blockFld, function(x) names(object@data)[x])
     val$nPairs <- nrow(object@pairs)
     val$nMatches <- getMatchCount(object)
     val$nNonMatches <- getNonMatchCount(object)
@@ -197,13 +197,13 @@ print.summaryRLBigDataDedup <- function(x, ...)
 #  f = "summary",
 #  signature = "RLBigDataLinkage",
 #  definition = function(object)
-summary.RLBigDataLinkage <- function(object)  {
+summary.RLBigDataLinkage <- function(object, ...)  {
     val <- list()
     val[["nData1"]] <- as.vector(dbGetQuery(object@con, "select count(*) from data1")$count)
     val[["nData2"]] <- as.vector(dbGetQuery(object@con, "select count(*) from data2")$count)
-    val[["attributes"]] <- if (length(rpairs@excludeFld) == 0)
-        names(rpairs@data1) else names(rpairs@data)[-rpairs@excludeFld]
-    val[["blockFld"]] <- lapply(object@blockFld, function(x) names(rpairs@data1)[x])
+    val[["attributes"]] <- if (length(object@excludeFld) == 0)
+        names(object@data1) else names(object@data)[-object@excludeFld]
+    val[["blockFld"]] <- lapply(object@blockFld, function(x) names(object@data1)[x])
     val$expectedSize <- getExpectedSize(object)
     val$nMatches <- getMatchCount(object)
     val$nNonMatches <- getNonMatchCount(object)
@@ -229,7 +229,6 @@ print.summaryRLBigDataLinkage <- function(x, ...)
 {
   cat("RLBigDataLinkage, Linkage object\n")
   cat("\n")
-  print.summaryRLBig
   cat("Number of records in dataset 1:", x$nData1, "\n")
   cat("Number of records in dataset 2:", x$nData2, "\n")
   cat("Attributes:", paste(x$attributes, collapse=", "), "\n")
@@ -251,7 +250,7 @@ print.summaryRLBigDataLinkage <- function(x, ...)
 #  f = "summary",
 #  signature = "RLResult",
 #  definition = function(object)
-summary.RLResult <- function(object)
+summary.RLResult <- function(object, ...)
   {
     val <- summary(object@data)
     val[["nLinks"]] <- sum(chunkify(function(x) sum(x=="L"))(object@prediction))

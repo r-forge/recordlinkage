@@ -18,8 +18,8 @@
 }
 \usage{
   clone(object, ...)
-  saveRLObject(object, file = getDbFile(object), ...)
-  loadRLObject(file, inPlace = FALSE)
+  saveRLObject(object, file, ...)
+  loadRLObject(file)
 }
 \arguments{
   \item{object}{Object of class \code{"\linkS4class{RLBigData}"}. The object to save.}
@@ -29,6 +29,9 @@
   \item{\dots}{Optional arguments for possible additions, currently not used.}
 }
 \details{
+
+  (Outdated information!)
+
   As the classes for record linkage of large data sets have a SQLite database
   attached which holds data and generates comparison patterns, a deep copy
   of an instance is not possible by the standard R mechanisms. Also, saving
