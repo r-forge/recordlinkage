@@ -15,7 +15,7 @@ setGeneric(
 setMethod(
   f = "optimalThreshold",
   signature = "RecLinkData",
-  definition <- function (rpairs, my=NaN, ny=NaN)
+  definition = function (rpairs, my=NaN, ny=NaN)
   {
     if (!("RecLinkData" %in% class(rpairs) || "RecLinkResult" %in% class(rpairs)))
       stop(sprintf("Wrong class for rpairs: %s", class(rpairs)))
@@ -101,7 +101,7 @@ setMethod(
 setMethod(
   f = "optimalThreshold",
   signature = "RLBigData",
-  definition <- function (rpairs, my=NaN, ny=NaN)
+  definition = function (rpairs, my=NaN, ny=NaN)
   {
     if (nrow(rpairs@pairs) == 0)
       stop("No record pairs!")

@@ -24,8 +24,6 @@
 \arguments{
   \item{object}{Object of class \code{"\linkS4class{RLBigData}"}. The object to save.}
   \item{file}{The name of the file to save to or load from.}
-  \item{inPlace}{Logical. Wether to use the exisiting file as working copy.
-    See details.}
   \item{\dots}{Optional arguments for possible additions, currently not used.}
 }
 \details{
