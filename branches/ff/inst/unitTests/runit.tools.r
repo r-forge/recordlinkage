@@ -103,6 +103,71 @@ test.subset <- function()
   checkEquals(result$Wdata[s], resultSamp$Wdata)
   checkEquals(result$prediction[s], resultSamp$prediction)
 
+  # For BigData objects
+  rpairs <- RLBigDataDedup(RLdata500, blockfld = list(1,3, 5:7),
+    identity = identity.RLdata500)
+  rpairs <- epiWeights(rpairs)
+  nPairs <- nrow(rpairs@pairs)
+
+  s <- sample(nPairs, nPairs / 2)
+  rpairsSamp <- rpairs[s]
+  for (slotN in slotNames("RLBigDataDedup"))
+  {
+    if (slotN %in% c("Wdata", "WdataInd"))
+    {
+      checkEquals(as.ram(slot(rpairsSamp, slotN)),
+        as.ram(slot(rpairs, slotN))[s],
+        check.attributes = FALSE,
+        msg = sprintf("check attribute %s", slotN))
+    } else if (identical(slotN, "pairs"))
+    {
+      checkEquals(as.data.frame(rpairsSamp@pairs),
+        as.data.frame(rpairs@pairs)[s,],
+        check.attributes = FALSE,
+        msg = sprintf("check attribute %s", slotN))
+    } else
+    {
+      checkEquals(as.ram(slot(rpairsSamp, slotN)),
+        as.ram(slot(rpairsSamp, slotN)),
+        check.attributes = FALSE,
+        msg = sprintf("check attribute %s", slotN))
+    }
+  }
+
+  # RLResult
+  result <- epiClassify(rpairs, optimalThreshold(rpairs))
+  resultSamp <- result[s]
+  checkEquals(as.ram(resultSamp@prediction),
+    as.ram(resultSamp@prediction),
+    check.attributes = FALSE,
+    msg = "check attribute prediction")
+
+
+  for (slotN in slotNames("RLBigDataDedup"))
+  {
+    if (identical(slotN, "data"))
+    {
+      next
+    } else if (slotN %in% c("Wdata", "WdataInd"))
+    {
+      checkEquals(as.ram(slot(resultSamp@data, slotN)),
+        as.ram(slot(result@data, slotN))[s],
+        check.attributes = FALSE,
+        msg = sprintf("check attribute %s", slotN))
+    } else if (identical(slotN, "pairs"))
+    {
+      checkEquals(as.data.frame(resultSamp@data@pairs),
+        as.data.frame(result@data@pairs)[s,],
+        check.attributes = FALSE,
+        msg = sprintf("check attribute %s", slotN))
+    } else
+    {
+      checkEquals(as.ram(slot(resultSamp@data, slotN)),
+        as.ram(slot(result@data, slotN)),
+        check.attributes = FALSE,
+        msg = sprintf("check attribute %s", slotN))
+    }
+  }
 }
 
 test.getExpectedSize.data.frame <- function()
