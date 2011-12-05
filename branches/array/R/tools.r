@@ -92,6 +92,14 @@ setMethod(
   ret
 }
 
+"[.RLResult" <- function(x,i)
+{
+  ret <- x
+  ret@data <- x@data[i]
+  ret@prediction <- ff(x@prediction[i])
+  ret
+}
+
 # append two data sets into one
 
 setGeneric(
