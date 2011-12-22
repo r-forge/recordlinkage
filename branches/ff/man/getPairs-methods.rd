@@ -102,16 +102,8 @@ getFalse(object, single.rows = FALSE)
 
 \note{
 
-  \itemize{
-    \item{For the \code{"RLBigData*"} methods:
-      Due to conversions in the SQLite database, the column classes of the result
-      may (and usually do) differ from the ones in the original data.
-    }
-    \item{
       When non-matches are included in the output and blocking is permissive,
       the result object can be very large, possibly leading to memory problems.
-    }
-  }
 }
 
 \author{Andreas Borg, Murat Sariyar}

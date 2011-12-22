@@ -18,8 +18,9 @@ editMatch(rpairs)
 
 \arguments{
   \item{rpairs}{
-    A \code{\link{RecLinkData}} object. The record pairs to edit.
-}
+    A \code{"\link{RecLinkData}"} or \code{"\linkS4class{RLBigData}"} object.
+      The record pairs to edit.
+  }
 }
 
 \details{

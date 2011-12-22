@@ -153,8 +153,7 @@ setMethod(
 setMethod(  
   f = "emWeights",
   signature = "RLBigData",
-  definition = function (rpairs, cutoff=0.95, store.weights = TRUE,
-    verbose = TRUE, ...)
+  definition = function (rpairs, cutoff=0.95, verbose = TRUE, ...)
   {
 
     u=getFrequencies(rpairs)

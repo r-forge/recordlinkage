@@ -19,12 +19,20 @@ options(width=50)
 As of version 0.3, the package RecordLinkage includes extensions to overcome
 the problem of high memory consumption that arises when processing a large
 number of records (i.e. building record pairs out of $\geq{}1000$ records
-without blocking). This is achieved by blockwise creation of comparison patterns
-instead of computing and storing the whole set of patterns at once, which
-was the only choice in the former version. In addition, an embedded SQLite database is used through
-package RSQLite to perform blocking, application of phonetic codes or string
-metrics and creation of comparison patterns. This allows to make use of the
-efficient data structures (e.g. indexing) implemented in the SQLite engine.
+without blocking). In versions 0.3_x, this was achieved by blockwise on-demand
+creation of comparison patterns in an embedded SQLite database (through
+package \textit{RSQLite}). Package version 0.4 replaces this mechanism by using file-based
+data structures from package \textit{ff}. This approach restricts the amount of
+data pairs to the available disk space but speeds up execution and facilitates
+the implementation of methods that need to process the whole set of record pairs
+(e.g. calculation of optimal classification thresholds).
+
+The interface to the \lqq{}big data\rqq methods has is compatible to code written
+for version 0.3_x, so users familiar with these can stick to their existing
+workflow (unless access to internal structures like object slots is involved).
+Therefore, the following text sticks to the vignette already included in versions
+before 0.4 and only technical details are changed to reflect the different
+implementation.
 
 In order to facilitate a tidier design, S4 classes and methods were used to
 implement the extensions. In favor of backward compatibility and development
@@ -36,6 +44,7 @@ still works, second, the new classes and methods offer (nearly) the same
 interface, i.e. the necessary function calls for a linkage task differ only
 slightly. An exception is \texttt{getPairs}, whose arguments differ from the
 exisiting version (see man page).
+
 
 \section{Defining data and comparison parameters}
 
@@ -55,9 +64,7 @@ showClass("RLBigDataLinkage")
 For the two non-virtual classes, the constructor-like function \texttt{RLBigDataDedup}
 and \texttt{RLBigDataLinkage} exist, which correspond
 to \texttt{compare.dedup} and \texttt{compare.linkage} for the S3 classes and
-share most of their arguments. In contrast to the latter, these functions do
-not create the whole set of comparison patterns but only instantiate an object
-that holds all the information necessary to construct these pairs on demand.
+share most of their arguments.
 
 The following example shows the basic usage of the constructors, for details
 consult their documentation.
@@ -77,25 +84,6 @@ rpairs2 <- RLBigDataLinkage(RLdata500, dataset, identity1 = identity.RLdata500,
   identity2 = identity2, phonetic = 1:4, exclude = "lname_c2")
 @
 
-In order to create comparison patterns, the following backend functions exist,
-which are usually not directly executed by the user:
-\begin{description}
-  \item[begin] Constructs an SQL statement to execute blocking, phonetic code,
-    string comparison and building comparison patterns and sends this query to
-    the underlying SQLite database. Takes as argument the object to process.
-  \item[nextPairs] Fetches a block of patterns after the query has been send.
-    Takes as arguments the object from which to fetch and the maximum number of
-    comparison patterns to return.
-  \item[clear] Clears the result set after comparison patterns have been fetched.
-    Takes as argument the object to process.
-\end{description}
-
-<<>>=
-rpairs1 <- begin(rpairs1)
-nextPairs(rpairs1, 10)
-clear(rpairs1)
-@
-
 
 \section{Supervised classification}
 
@@ -112,8 +100,8 @@ classif <- trainSupv(train, "rpart", minsplit=2)
 result <- classifySupv(classif, rpairs1)
 @
 
-The result is an object of class \texttt{"RLResult"} which contains the indices
-of links and optionally possible links.
+The result is an object of class \texttt{"RLResult"} which contains the
+classification result along with the data object.
 <<>>=
 showClass("RLResult")
 @
@@ -137,21 +125,6 @@ rpairs1 <- epiWeights(rpairs1)
 result <- epiClassify(rpairs1, 0.5)
 getTable(result)
 @
-
-
- By default, the weights for each individual record pair are
-stored in the associated database, which speeds up subsequent classification
-significantly. If the resulting disk usage is an issue, this behaviuor can be
-changed as follows:
-\begin{itemize}
-  \item In the case of weight calculation with an EM algorithm by calling
-    \texttt{emWeights} with argument \texttt{save.weights = FALSE}.
-      This results in only $2^{\textrm{\#attributes}}$
-      per-pattern weights being stored.
-  \item In the case of Epilink weights, \texttt{epiWeights} can be called
-    directly. In this case, weights are calculated during classification
-    but are not saved in memory.
-\end{itemize}
 
 
 
