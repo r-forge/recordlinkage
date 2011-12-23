@@ -19,7 +19,7 @@ options(width=50)
 As of version 0.3, the package RecordLinkage includes extensions to overcome
 the problem of high memory consumption that arises when processing a large
 number of records (i.e. building record pairs out of $\geq{}1000$ records
-without blocking). In versions 0.3_x, this was achieved by blockwise on-demand
+without blocking). In versions 0.3\_x, this was achieved by blockwise on-demand
 creation of comparison patterns in an embedded SQLite database (through
 package \textit{RSQLite}). Package version 0.4 replaces this mechanism by using file-based
 data structures from package \textit{ff}. This approach restricts the amount of
@@ -27,8 +27,8 @@ data pairs to the available disk space but speeds up execution and facilitates
 the implementation of methods that need to process the whole set of record pairs
 (e.g. calculation of optimal classification thresholds).
 
-The interface to the \lqq{}big data\rqq methods has is compatible to code written
-for version 0.3_x, so users familiar with these can stick to their existing
+The interface to the ``big data'' methods has is compatible to code written
+for version 0.3\_x, so users familiar with these can stick to their existing
 workflow (unless access to internal structures like object slots is involved).
 Therefore, the following text sticks to the vignette already included in versions
 before 0.4 and only technical details are changed to reflect the different
