@@ -225,7 +225,7 @@ setMethod(
     p[is.na(p)] <- 0
     p=data.table(ID = 1:nrow(p), p)
     keyCol <- names(rpairs$pairs)[-c(1,2,ncol(rpairs$pairs))]
-    key(p) <- keyCol
+    setkeyv(p, keyCol)
     sampleFun <- function(x) (x[sample(1:length(x),
         min(length(x),nEx))])
     trainind <- p[,sampleFun(ID), by=keyCol, nomatch=0]$V1

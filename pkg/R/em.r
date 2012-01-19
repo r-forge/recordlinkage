@@ -142,7 +142,7 @@ setMethod(
           nAll=sum(!is.na(is_match))), by=W]
       }, X = wMatch, RETURN = TRUE, CFUN = "rbind")
     close(pgb)
-    key(summaryTable) <- "W"
+    setkeyv(summaryTable, "W")
     summaryTable <- summaryTable[,list(nMatch=sum(nMatch), nAll=sum(nAll)), by=W]
     summaryTable$nNonMatch <- summaryTable[,nAll - nMatch]
 #browser()
