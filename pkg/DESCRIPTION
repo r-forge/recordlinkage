@@ -8,7 +8,7 @@ Description: Provides functions for linking and deduplicating data sets.
   classification algorithms from the machine learning domain. 
 License: GPL (>=2)
 Depends: R (>= 2.10.0), e1071, rpart, ada, ipred, stats, evd, RSQLite, methods, 
-  data.table (>= 1.6.1), ff, ffbase
+  data.table (>= 1.7.8), ff, ffbase
 Suggests: xtable, RUnit
 LinkingTo: RSQLite
 URL:https://r-forge.r-project.org/projects/recordlinkage/, http://journal.r-project.org/archive/2010-2/RJournal_2010-2_Sariyar+Borg.pdf
