@@ -145,7 +145,7 @@ setMethod(
         message("No data in selected range! Choose a larger interval.")
         flush.console()
       }
-      bringToTop(-1)
+      if (existsFunction("bringToTop")) bringToTop(-1)
       if (length(indices)==0)
         stop("At least the left endpoint of the interval must be chosen!")
     }
@@ -188,7 +188,7 @@ setMethod(
       {
         plotMRL(NULL,l=l)
   #      title(main=rpairs$description)
-        bringToTop()
+        if (existsFunction("bringToTop")) bringToTop()
         indices=sort(identify(l$x,l$y,n=2,labels=signif(l$x,4)))
         interval=l$x[indices]
         if (length(indices)==0)
@@ -211,7 +211,7 @@ setMethod(
         message("No data in selected range! Choose a larger interval.")
         flush.console()
       }
-      bringToTop(-1)
+      if (existsFunction("bringToTop")) bringToTop(-1)
       if (length(indices)==0)
         stop("At least the left endpoint of the interval must be chosen!")
     }
