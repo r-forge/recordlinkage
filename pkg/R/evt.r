@@ -134,7 +134,7 @@ setMethod(
       {
         plotMRL(NULL,l=l)
   #      title(main=rpairs$description)
-        bringToTop()
+        if (existsFunction("bringToTop")) bringToTop()
         indices=sort(identify(l$x,l$y,n=2,labels=signif(l$x,4)))
         interval=l$x[indices]
         if (length(indices)==0)
