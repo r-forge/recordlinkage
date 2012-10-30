@@ -339,7 +339,7 @@ countpattern <- function (x, matching = FALSE)
     xpat <- numeric(nrow(x))
     for (i in 1:nvar) xpat <- 2 * xpat + x[, i]
     xpat <- xpat + 1
-    pat <- tabulate(xpat, nb = 2^nvar)
+    pat <- tabulate(xpat, nbins = 2^nvar)
     names(pat) <- namespat
     if (matching)
         return(list(pat = pat, matching = xpat))

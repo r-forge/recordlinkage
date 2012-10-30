@@ -1,5 +1,7 @@
 Changes in version 0.4-3
 	-added check if bringToTop() is availabe in getParetoThreshold
+  -avoid warning in countpattern
+  
 Changes in version 0.4-2
 	-changed the way keys for data tables are set in order to be compatible to data.table 1.7.8
 
