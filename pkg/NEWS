@@ -1,3 +1,6 @@
+Changes in version 0.4-4
+  -fixed memory access problem in C code
+
 Changes in version 0.4-3
 	-added check if bringToTop() is availabe in getParetoThreshold
   -avoid warning in countpattern

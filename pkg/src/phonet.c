@@ -788,7 +788,11 @@ int phonet (char src[], char dest[], int len, int mode)
                   }
                 if (k0 < k)
                   {
-                   strcpy (src+i+k0, src+i+k);
+                   int len_src = strlen(src+i+k);
+                   for (int copypos = 0; copypos <= len_src; copypos++) {
+                      src[i+k0+copypos] = src[i+k+copypos];
+                   }
+                   //strcpy (src+i+k0, src+i+k);
                   }
                 if ((run_mode & CHECK_RULES)
                 &&  (*s != '\0'  ||  k0 > k))
