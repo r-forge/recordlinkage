@@ -39,7 +39,7 @@ compare.linkage (dataset1, dataset2, blockfld = FALSE,
                and \code{dataset[j,]} are a true match if and only if 
               \code{identity[i,]==identity[j,]}. In a linkage process, two 
               records \code{dataset1[i,]} and \code{dataset2[j,]} are a true 
-              match if and only if \code{identity1[i,]==identity2[j,]}.}
+              match if and only if \cr \code{identity1[i,]==identity2[j,]}.}
   \item{n_match, n_non_match}{Number of desired matches and non-matches in
       the result.}
 }
