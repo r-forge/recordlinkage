@@ -1,3 +1,6 @@
+Changes in version 0.4-6
+  -fixed notes "no visible binding" in R >= 2.15.1
+
 Changes in version 0.4-5
   -fixed truncated lines in PDF manual
 

@@ -6,6 +6,8 @@
 #                        threshold.lower=threshold.upper,my=Inf, ny=Inf)
 
 
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("is_match", "W",
+  "nMatch", "nAll", "nNonMatch", "Wdata"))
 
 setGeneric(
   name = "optimalThreshold",

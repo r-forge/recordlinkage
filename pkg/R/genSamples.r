@@ -204,6 +204,8 @@ setGeneric(
   def = function(rpairs, nEx = 1) standardGeneric("getMinimalTrain")
 )
 
+if(getRversion() >= "2.15.1")  utils::globalVariables("ID")
+
 setMethod(
   f = "getMinimalTrain",
   signature = "RecLinkData",

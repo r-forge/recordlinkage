@@ -41,7 +41,7 @@ gpdEst <- function(Wdata, thresh=-Inf, quantil=0.95)
 #
 # Args:
 #   W: sorted vector of weights
-
+if(getRversion() >= "2.15.1")  utils::globalVariables(".N")
 .computeMRL <- function(W)
 {
   # convert weights so that a data.table key can be set on them
