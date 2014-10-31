@@ -171,7 +171,7 @@ init_sqlite_extensions <- function(db)
 .allows_extensions <- function(db)
 {
     v <- dbGetInfo(db)[["loadableExtensions"]]
-    isTRUE(v) || (v == "on")
+    !is.null(v) && !is.na(v) && (isTRUE(v) || (v == "on"))
 }
 
 
