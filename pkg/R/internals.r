@@ -170,8 +170,8 @@ init_sqlite_extensions <- function(db)
 # taken from RSQLite.extfuns
 .allows_extensions <- function(db)
 {
-    v <- dbGetInfo(db)[["loadableExtensions"]]
-    !is.null(v) && !is.na(v) && (isTRUE(v) || (v == "on"))
+    v <- db@loadable.extensions
+    isTRUE(v)
 }
 
 
