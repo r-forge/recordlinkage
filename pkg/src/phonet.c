@@ -1191,8 +1191,8 @@ int check_rules (int language, int trace_only)
 
           if (strchr (phonet_rules[i-n],'^') != NULL)
             {
-             sprintf (orig, orig+1);
-             sprintf (orig2,orig2+1);
+             strcpy (orig, orig+1);
+             strcpy (orig2,orig2+1);
             }
           if (strchr (phonet_rules[i-n],'-') != NULL
           ||  strchr (phonet_rules[i-n],'$') == NULL)
