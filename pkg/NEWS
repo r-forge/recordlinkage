@@ -1,4 +1,5 @@
 Changes in version 0.4-6
+  -updated maintainer, author and contact information
   -fixed notes "no visible binding" in R >= 2.15.1
   -moved packages in "Depends" to "Imports" where appropriate and added 
    import statement in NAMESPACE
