@@ -1,5 +1,6 @@
 Chankges in version 0.4-7
   -added unit tests (inst/unitTests) to .Rbuildignore
+  -accelerated example for epiWeights and epiClassify
 
 Changes in version 0.4-6
   -updated maintainer, author and contact information
